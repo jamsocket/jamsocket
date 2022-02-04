@@ -16,7 +16,7 @@ export default class Login extends Command {
     // prompt for username
     // prompt for password
     // use docker login and check response status code
-    // if status code is good, save username, and username:password base64-encoded
+    // if status code is good, save username, and username:password base64-encoded in $HOME/.jamsocket/config.json
     // if status code is not good, tell the user it failed and to try again
   }
 }

@@ -13,6 +13,6 @@ export default class Logout extends Command {
   public async run(): Promise<void> {
     this.log('not implemented')
     // docker logout jamcr.io
-    // remove locally-stored credentials
+    // remove locally-stored credentials from $HOME/.jamsocket/config.json
   }
 }
