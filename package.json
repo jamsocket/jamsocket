@@ -1,0 +1,16 @@
+{
+  "name": "jamsocket",
+  "version": "0.0.1",
+  "description": "A CLI for the Jamsocket platform",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/drifting-in-space/jamsocket-cli.git"
+  },
+  "author": "Taylor Baldwin <taylor@driftingin.space>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/drifting-in-space/jamsocket-cli/issues"
+  },
+  "homepage": "https://github.com/drifting-in-space/jamsocket-cli#readme"
+}
