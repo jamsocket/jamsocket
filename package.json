@@ -1,8 +1,10 @@
 {
   "name": "jamsocket",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A CLI for the Jamsocket platform",
-  "main": "index.js",
+  "bin": {
+    "jamsocket": "./bin/run"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/drifting-in-space/jamsocket-cli.git"
