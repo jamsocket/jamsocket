@@ -7,17 +7,18 @@ A CLI for the Jamsocket platform
 [![License](https://img.shields.io/npm/l/oclif-hello-world.svg)](https://github.com/oclif/hello-world/blob/main/package.json)
 
 <!-- toc -->
+* [jamsocket](#jamsocket)
 * [Usage](#usage)
 * [Commands](#commands)
 <!-- tocstop -->
 # Usage
 <!-- usage -->
 ```sh-session
-$ npm install -g jamsocket-cli
+$ npm install -g jamsocket
 $ jamsocket COMMAND
 running command...
 $ jamsocket (--version)
-jamsocket-cli/0.0.3 darwin-arm64 node-v16.13.2
+jamsocket/0.0.4 darwin-arm64 node-v16.13.2
 $ jamsocket --help [COMMAND]
 USAGE
   $ jamsocket COMMAND
@@ -27,7 +28,7 @@ USAGE
 # Commands
 <!-- commands -->
 * [`jamsocket hello PERSON`](#jamsocket-hello-person)
-* [`jamsocket hello world`](#jamsocket-hello-world)
+* [`jamsocket hello:world`](#jamsocket-helloworld)
 * [`jamsocket help [COMMAND]`](#jamsocket-help-command)
 
 ## `jamsocket hello PERSON`
@@ -52,15 +53,15 @@ EXAMPLES
   hello friend from oclif! (./src/commands/hello/index.ts)
 ```
 
-_See code: [dist/commands/hello/index.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.0.0/dist/commands/hello/index.ts)_
+_See code: [dist/commands/hello/index.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.0.4/dist/commands/hello/index.ts)_
 
-## `jamsocket hello world`
+## `jamsocket hello:world`
 
 Say hello world
 
 ```
 USAGE
-  $ jamsocket hello world
+  $ jamsocket hello:world
 
 DESCRIPTION
   Say hello world
@@ -69,6 +70,8 @@ EXAMPLES
   $ oex hello world
   hello world! (./src/commands/hello/world.ts)
 ```
+
+_See code: [dist/commands/hello/world.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.0.4/dist/commands/hello/world.ts)_
 
 ## `jamsocket help [COMMAND]`
 
@@ -88,6 +91,5 @@ DESCRIPTION
   Display help for jamsocket.
 ```
 
-_See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v5.1.10/src/commands/help.ts)_
-
+_See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v5.1.11/src/commands/help.ts)_
 <!-- commandsstop -->

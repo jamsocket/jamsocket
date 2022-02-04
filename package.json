@@ -1,6 +1,6 @@
 {
   "name": "jamsocket",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "A CLI for the Jamsocket platform",
   "author": "Taylor Baldwin <taylor@driftingin.space>",
   "bin": {
@@ -53,7 +53,10 @@
   },
   "bugs": "https://github.com/drifting-in-space/jamsocket-cli/issues",
   "keywords": [
-    "jamsocket", "spawner", "session-lived backends", "docker"
+    "jamsocket",
+    "spawner",
+    "session-lived backends",
+    "docker"
   ],
   "types": "dist/index.d.ts"
 }
