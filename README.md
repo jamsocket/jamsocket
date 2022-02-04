@@ -1,4 +1,4 @@
-# jamsocket-cli
+# jamsocket
 A CLI for the Jamsocket platform
 
 ## Commands
