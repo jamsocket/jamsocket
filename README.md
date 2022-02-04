@@ -18,7 +18,7 @@ $ npm install -g jamsocket
 $ jamsocket COMMAND
 running command...
 $ jamsocket (--version)
-jamsocket/0.0.4 darwin-arm64 node-v16.13.2
+jamsocket/0.0.5 darwin-arm64 node-v16.13.2
 $ jamsocket --help [COMMAND]
 USAGE
   $ jamsocket COMMAND
@@ -53,7 +53,7 @@ EXAMPLES
   hello friend from oclif! (./src/commands/hello/index.ts)
 ```
 
-_See code: [dist/commands/hello/index.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.0.4/dist/commands/hello/index.ts)_
+_See code: [dist/commands/hello/index.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.0.5/dist/commands/hello/index.ts)_
 
 ## `jamsocket hello:world`
 
@@ -71,7 +71,7 @@ EXAMPLES
   hello world! (./src/commands/hello/world.ts)
 ```
 
-_See code: [dist/commands/hello/world.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.0.4/dist/commands/hello/world.ts)_
+_See code: [dist/commands/hello/world.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.0.5/dist/commands/hello/world.ts)_
 
 ## `jamsocket help [COMMAND]`
 
