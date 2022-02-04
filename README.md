@@ -27,51 +27,11 @@ USAGE
 <!-- usagestop -->
 # Commands
 <!-- commands -->
-* [`jamsocket hello PERSON`](#jamsocket-hello-person)
-* [`jamsocket hello:world`](#jamsocket-helloworld)
 * [`jamsocket help [COMMAND]`](#jamsocket-help-command)
-
-## `jamsocket hello PERSON`
-
-Say hello
-
-```
-USAGE
-  $ jamsocket hello [PERSON] -f <value>
-
-ARGUMENTS
-  PERSON  Person to say hello to
-
-FLAGS
-  -f, --from=<value>  (required) Whom is saying hello
-
-DESCRIPTION
-  Say hello
-
-EXAMPLES
-  $ oex hello friend --from oclif
-  hello friend from oclif! (./src/commands/hello/index.ts)
-```
-
-_See code: [dist/commands/hello/index.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.0.6/dist/commands/hello/index.ts)_
-
-## `jamsocket hello:world`
-
-Say hello world
-
-```
-USAGE
-  $ jamsocket hello:world
-
-DESCRIPTION
-  Say hello world
-
-EXAMPLES
-  $ oex hello world
-  hello world! (./src/commands/hello/world.ts)
-```
-
-_See code: [dist/commands/hello/world.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.0.6/dist/commands/hello/world.ts)_
+* [`jamsocket login`](#jamsocket-login)
+* [`jamsocket logout`](#jamsocket-logout)
+* [`jamsocket push IMAGE`](#jamsocket-push-image)
+* [`jamsocket spawn [IMAGE]`](#jamsocket-spawn-image)
 
 ## `jamsocket help [COMMAND]`
 
@@ -92,4 +52,81 @@ DESCRIPTION
 ```
 
 _See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v5.1.11/src/commands/help.ts)_
+
+## `jamsocket login`
+
+Authenticates user with jamcr.io container registery
+
+```
+USAGE
+  $ jamsocket login
+
+DESCRIPTION
+  Authenticates user with jamcr.io container registery
+
+EXAMPLES
+  $ jamsocket login
+```
+
+_See code: [dist/commands/login.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.0.6/dist/commands/login.ts)_
+
+## `jamsocket logout`
+
+Logs out of jamcr.io container registry and removes locally-stored credentials.
+
+```
+USAGE
+  $ jamsocket logout
+
+DESCRIPTION
+  Logs out of jamcr.io container registry and removes locally-stored credentials.
+
+EXAMPLES
+  $ jamsocket logout
+```
+
+_See code: [dist/commands/logout.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.0.6/dist/commands/logout.ts)_
+
+## `jamsocket push IMAGE`
+
+Pushes a docker image to the jamcr.io container registry under your logged in user's name
+
+```
+USAGE
+  $ jamsocket push [IMAGE] [-t <value>]
+
+ARGUMENTS
+  IMAGE  Docker image to push to jamcr.io
+
+FLAGS
+  -t, --tag=<value>  optional tag to apply to the docker image
+
+DESCRIPTION
+  Pushes a docker image to the jamcr.io container registry under your logged in user's name
+
+EXAMPLES
+  $ jamsocket push
+```
+
+_See code: [dist/commands/push.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.0.6/dist/commands/push.ts)_
+
+## `jamsocket spawn [IMAGE]`
+
+Spawns a session-lived application backend from the provided docker image
+
+```
+USAGE
+  $ jamsocket spawn [IMAGE] [-e <value>]
+
+FLAGS
+  -e, --env=<value>  optional JSON object of environment variables to pass to the container
+
+DESCRIPTION
+  Spawns a session-lived application backend from the provided docker image
+
+EXAMPLES
+  $ jamsocket spawn
+```
+
+_See code: [dist/commands/spawn.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.0.6/dist/commands/spawn.ts)_
 <!-- commandsstop -->
