@@ -5,7 +5,7 @@ import { existsSync, readFileSync, mkdirSync, writeFileSync, unlinkSync } from '
 
 export const REGISTRY = 'jamcr.io'
 export const API = 'https://jamsocket.dev'
-export const SPAWN_INIT_ENDPOINT = '/spawn/init'
+export const SPAWN_INIT_ENDPOINT = '/api/init'
 export const JAMSOCKET_CONFIG = resolve(homedir(), '.jamsocket', 'config.json')
 
 export type JamsocketConfig = {
