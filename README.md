@@ -1,10 +1,8 @@
 # jamsocket
 A CLI for the Jamsocket platform
 
-[![Version](https://img.shields.io/npm/v/oclif-hello-world.svg)](https://npmjs.org/package/oclif-hello-world)
-[![CircleCI](https://circleci.com/gh/oclif/hello-world/tree/main.svg?style=shield)](https://circleci.com/gh/oclif/hello-world/tree/main)
-[![Downloads/week](https://img.shields.io/npm/dw/oclif-hello-world.svg)](https://npmjs.org/package/oclif-hello-world)
-[![License](https://img.shields.io/npm/l/oclif-hello-world.svg)](https://github.com/oclif/hello-world/blob/main/package.json)
+[![Version](https://img.shields.io/npm/v/jamsocket.svg)](https://npmjs.org/package/jamsocket)
+[![Downloads/week](https://img.shields.io/npm/dw/jamsocket.svg)](https://npmjs.org/package/jamsocket)
 
 <!-- toc -->
 * [jamsocket](#jamsocket)
