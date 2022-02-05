@@ -1,4 +1,4 @@
-import { exec } from 'child_process'
+import { execSync } from 'child_process'
 import { Command, CliUx } from '@oclif/core'
 import { readJamsocketConfig, writeJamsocketConfig, REGISTRY } from '../common'
 
@@ -25,13 +25,13 @@ export default class Login extends Command {
     const username = await CliUx.ux.prompt('username')
     const password = await CliUx.ux.prompt('password', { type: 'hide' })
 
-    const { stderr } = exec(`docker login ${REGISTRY} -u="${username}" -p="${password}"`, err => {
-      if (err) throw err
-      // TODO: check response status code, if status code is not good, tell the user it failed and to try again
-      const buff = Buffer.from(`${username}:${password}`, 'utf-8')
-      const auth = buff.toString('base64')
-      writeJamsocketConfig({ username: username, auth: auth })
-    })
-    stderr?.on('data', chunk => process.stderr.write(chunk))
+    // TODO: sanitize user input before passing to this command
+    // TODO: wrap in try/catch and check response status code,
+    execSync(`docker login ${REGISTRY} -u="${username}" --password-stdin`, { input: password })
+    // TODO: if status code is not good, tell the user it failed and to try again
+    const buff = Buffer.from(`${username}:${password}`, 'utf-8')
+    const auth = buff.toString('base64')
+    writeJamsocketConfig({ username: username, auth: auth })
+    this.log('Login Succeeded')
   }
 }

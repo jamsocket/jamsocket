@@ -1,4 +1,4 @@
-import { exec } from 'child_process'
+import { execSync } from 'child_process'
 import { Command } from '@oclif/core'
 import { deleteJamsocketConfig, REGISTRY } from '../common'
 
@@ -13,12 +13,9 @@ export default class Logout extends Command {
   static args = []
 
   public async run(): Promise<void> {
-    const { stderr } = exec(`docker logout ${REGISTRY}`, err => {
-      if (err) throw err
-      // TODO: check response status code
-      // remove locally-stored credentials
-      deleteJamsocketConfig()
-    })
-    stderr?.on('data', chunk => process.stderr.write(chunk))
+    // TODO: wrap in try/catch to handle errors
+    execSync(`docker logout ${REGISTRY}`)
+    deleteJamsocketConfig()
+    this.log('Removing login credentials')
   }
 }

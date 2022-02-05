@@ -105,7 +105,7 @@ DESCRIPTION
   Pushes a docker image to the jamcr.io container registry under your logged in user's name
 
 EXAMPLES
-  $ jamsocket push
+  $ jamsocket push 33fe99c5649e -t my-image
 ```
 
 _See code: [dist/commands/push.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.0.6/dist/commands/push.ts)_
@@ -125,7 +125,7 @@ DESCRIPTION
   Spawns a session-lived application backend from the provided docker image
 
 EXAMPLES
-  $ jamsocket spawn
+  $ jamsocket spawn my-image -e='{"PORT":8080}'
 ```
 
 _See code: [dist/commands/spawn.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.0.6/dist/commands/spawn.ts)_

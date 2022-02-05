@@ -6,6 +6,7 @@
   "rules": {
     "unicorn/prefer-node-protocol": "off",
     "unicorn/import-style": "off",
-    "object-curly-spacing": [1, "always"]
+    "object-curly-spacing": ["warn", "always"],
+    "quote-props": "off"
   }
 }

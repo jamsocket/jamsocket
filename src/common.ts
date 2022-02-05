@@ -1,20 +1,24 @@
-import * as os from 'os'
-import * as path from 'path'
-import * as fs from 'fs'
+import { homedir } from 'os'
+import { resolve, dirname } from 'path'
+import * as https from 'https'
+import { existsSync, readFileSync, mkdirSync, writeFileSync, unlinkSync } from 'fs'
 
 export const REGISTRY = 'jamcr.io'
 export const API = 'https://jamsocket.dev'
 export const SPAWN_INIT_ENDPOINT = '/spawn/init'
-export const JAMSOCKET_CONFIG = path.resolve(os.homedir(), '.jamsocket', 'config.json')
+export const JAMSOCKET_CONFIG = resolve(homedir(), '.jamsocket', 'config.json')
 
 export type JamsocketConfig = {
   username: string;
   auth: string;
 }
 
+const NEWLINE = `
+`
+
 export function readJamsocketConfig(): JamsocketConfig | null {
-  if (!fs.existsSync(JAMSOCKET_CONFIG)) return null
-  const contents = fs.readFileSync(JAMSOCKET_CONFIG, 'utf-8')
+  if (!existsSync(JAMSOCKET_CONFIG)) return null
+  const contents = readFileSync(JAMSOCKET_CONFIG, 'utf-8')
   // TODO: wrap this in try/catch and throw error and instructions if invalid JSON
   const config = JSON.parse(contents)
   // TODO: complain if config username/auth are not valid
@@ -25,11 +29,40 @@ export function readJamsocketConfig(): JamsocketConfig | null {
 }
 
 export function writeJamsocketConfig(config: JamsocketConfig): void {
-  const dir = path.dirname(JAMSOCKET_CONFIG)
-  fs.mkdirSync(dir, { recursive: true })
-  fs.writeFileSync(JAMSOCKET_CONFIG, JSON.stringify(config, null, 2))
+  const dir = dirname(JAMSOCKET_CONFIG)
+  mkdirSync(dir, { recursive: true })
+  writeFileSync(JAMSOCKET_CONFIG, `${JSON.stringify(config, null, 2)}${NEWLINE}`)
 }
 
 export function deleteJamsocketConfig(): void {
-  fs.unlinkSync(JAMSOCKET_CONFIG)
+  unlinkSync(JAMSOCKET_CONFIG)
+}
+
+export function request(url: string, body: Record<any, any>, options: Record<string, any>): Promise<any> {
+  return new Promise((resolve, reject) => {
+    const wrappedURL = new URL(url)
+    const jsonBody = JSON.stringify(body)
+    let result = ''
+    const req = https.request({
+      ...options,
+      hostname: wrappedURL.hostname,
+      path: wrappedURL.pathname,
+      headers: {
+        ...options.headers,
+        'Content-Length': jsonBody.length,
+      },
+    }, res => {
+      res.on('data', chunk => {
+        result += chunk
+      })
+      res.on('end', () => {
+        resolve(result)
+      })
+    })
+    req.on('error', err => {
+      reject(err)
+    })
+    req.write(jsonBody)
+    req.end()
+  })
 }
