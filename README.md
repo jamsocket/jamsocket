@@ -1,30 +1,12 @@
-# jamsocket
+jamsocket
+=========
+
 A CLI for the Jamsocket platform
 
-[![Version](https://img.shields.io/npm/v/oclif-hello-world.svg)](https://npmjs.org/package/oclif-hello-world)
-[![CircleCI](https://circleci.com/gh/oclif/hello-world/tree/main.svg?style=shield)](https://circleci.com/gh/oclif/hello-world/tree/main)
-[![Downloads/week](https://img.shields.io/npm/dw/oclif-hello-world.svg)](https://npmjs.org/package/oclif-hello-world)
-[![License](https://img.shields.io/npm/l/oclif-hello-world.svg)](https://github.com/oclif/hello-world/blob/main/package.json)
+[![Version](https://img.shields.io/npm/v/jamsocket)](https://npmjs.org/package/jamsocket)
+[![Downloads/week](https://img.shields.io/npm/dw/jamsocket)](https://npmjs.org/package/jamsocket)
+[![License](https://img.shields.io/npm/l/jamsocket)](https://github.com/drifting-in-space/jamsocket-cli/blob/main/LICENSE)
 
-<!-- toc -->
-* [jamsocket](#jamsocket)
-* [Usage](#usage)
-* [Commands](#commands)
-<!-- tocstop -->
-# Usage
-<!-- usage -->
-```sh-session
-$ npm install -g jamsocket
-$ jamsocket COMMAND
-running command...
-$ jamsocket (--version)
-jamsocket/0.0.6 darwin-arm64 node-v16.13.2
-$ jamsocket --help [COMMAND]
-USAGE
-  $ jamsocket COMMAND
-...
-```
-<!-- usagestop -->
 # Commands
 <!-- commands -->
 * [`jamsocket help [COMMAND]`](#jamsocket-help-command)
