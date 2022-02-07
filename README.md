@@ -50,7 +50,7 @@ EXAMPLES
   $ jamsocket login
 ```
 
-_See code: [dist/commands/login.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.0.6/dist/commands/login.ts)_
+_See code: [dist/commands/login.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.0.7/dist/commands/login.ts)_
 
 ## `jamsocket logout`
 
@@ -67,7 +67,7 @@ EXAMPLES
   $ jamsocket logout
 ```
 
-_See code: [dist/commands/logout.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.0.6/dist/commands/logout.ts)_
+_See code: [dist/commands/logout.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.0.7/dist/commands/logout.ts)_
 
 ## `jamsocket push IMAGE`
 
@@ -90,7 +90,7 @@ EXAMPLES
   $ jamsocket push 33fe99c5649e -t my-image
 ```
 
-_See code: [dist/commands/push.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.0.6/dist/commands/push.ts)_
+_See code: [dist/commands/push.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.0.7/dist/commands/push.ts)_
 
 ## `jamsocket spawn [IMAGE]`
 
@@ -110,5 +110,5 @@ EXAMPLES
   $ jamsocket spawn my-image -e='{"PORT":8080}'
 ```
 
-_See code: [dist/commands/spawn.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.0.6/dist/commands/spawn.ts)_
+_See code: [dist/commands/spawn.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.0.7/dist/commands/spawn.ts)_
 <!-- commandsstop -->
