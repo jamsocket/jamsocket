@@ -23,25 +23,24 @@ export default class Spawn extends Command {
     const { args, flags } = await this.parse(Spawn)
     const config = readJamsocketConfig()
     if (config === null) {
-      // TODO: throw an error here about not being logged in
-      return
+      this.error('No user credentials found. Log in with jamsocket login')
     }
 
     const { username, auth } = config
     const body: SpawnRequestBody = { image: `${REGISTRY}/${username}/${args.image}` }
     if (flags.env) {
-      // decode env and throw if not JSON
-      const env = JSON.parse(flags.env)
+      let env
+      try {
+        env = JSON.parse(flags.env)
+      } catch (error) {
+        this.error(`Error parsing env. Must be valid JSON. ${error}`)
+      }
+
       body.env = env
     }
 
-    // curl -d \
-    // -H "Authorization: Bearer ${auth}" \
-    // -H "Content-Type: application/json" \
-    // '{"image": "jamcr.io/acmecorp/hello-app"}' \
-    // -X POST https://jamsocket.dev/spawn/init
     const endpoint = `${API}${SPAWN_INIT_ENDPOINT}`
-    const response = await request(endpoint, body, {
+    const responseBody = await request(endpoint, body, {
       method: 'POST',
       headers: {
         'Authorization': `Basic ${auth}`,
@@ -49,7 +48,9 @@ export default class Spawn extends Command {
       },
     })
 
-    // TODO: get back 3 URLs (status URL, loading page URL, direct-to-container URL) and print out instructions for using them
-    this.log(`response from ${endpoint}: ${response}`)
+    // TODO: Give better instructions on how to use the values returned in the response
+    const response = JSON.parse(responseBody)
+    this.log(`response from ${endpoint}:`)
+    this.log(JSON.stringify(response, null, 2))
   }
 }

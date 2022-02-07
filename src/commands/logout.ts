@@ -13,9 +13,8 @@ export default class Logout extends Command {
   static args = []
 
   public async run(): Promise<void> {
-    // TODO: wrap in try/catch to handle errors
-    execSync(`docker logout ${REGISTRY}`)
     deleteJamsocketConfig()
+    execSync(`docker logout ${REGISTRY}`)
     this.log('Removing login credentials')
   }
 }

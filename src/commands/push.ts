@@ -1,4 +1,4 @@
-import { execSync } from 'child_process'
+import { spawn, spawnSync } from 'child_process'
 import { Command, Flags } from '@oclif/core'
 import { readJamsocketConfig, REGISTRY } from '../common'
 
@@ -18,8 +18,7 @@ export default class Push extends Command {
   public async run(): Promise<void> {
     const config = readJamsocketConfig()
     if (config === null) {
-      // TODO: throw an error here about not being logged in
-      return
+      this.error('No user credentials found. Log in with jamsocket login')
     }
 
     const { args, flags } = await this.parse(Push)
@@ -27,17 +26,25 @@ export default class Push extends Command {
     const { username } = config
     const prefixedImage = `${REGISTRY}/${username}/${flags.tag ?? args.image}`
 
-    if (flags.tag) {
-      // TODO: sanitize user input before passing to this command
-      // TODO: wrap in try/catch to handle errors
-      execSync(`docker tag ${args.image} ${prefixedImage}`)
+    const tagOutput = spawnSync('docker', ['tag', args.image, prefixedImage], { encoding: 'utf-8' })
+    process.stderr.write(tagOutput.stderr)
+    if (tagOutput.status !== 0) {
+      this.error(tagOutput.error ?? 'Error tagging image')
     }
 
-    // TODO: wrap in try/catch to handle errors
-    // TODO: sanitize user input before using username or image in command
-    // TODO: don't use execSync, so we can show docker's upload progress
-    const output = execSync(`docker push ${prefixedImage}`, { encoding: 'utf-8' })
-    console.log('docker push response:', output)
-    this.log('Image Successfully Pushed')
+    const pushProcess = spawn('docker', ['push', prefixedImage])
+    pushProcess.stdout.on('data', chunk => {
+      process.stdout.write(chunk)
+    })
+    pushProcess.stderr.on('data', chunk => {
+      process.stderr.write(chunk)
+    })
+    pushProcess.on('close', code => {
+      if (code === 0) {
+        this.log('Image Successfully Pushed')
+      } else {
+        this.error('There was an error pushing the image')
+      }
+    })
   }
 }

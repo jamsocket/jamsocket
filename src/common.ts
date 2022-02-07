@@ -19,8 +19,15 @@ const NEWLINE = `
 export function readJamsocketConfig(): JamsocketConfig | null {
   if (!existsSync(JAMSOCKET_CONFIG)) return null
   const contents = readFileSync(JAMSOCKET_CONFIG, 'utf-8')
-  // TODO: wrap this in try/catch and throw error and instructions if invalid JSON
-  const config = JSON.parse(contents)
+
+  let config
+  try {
+    config = JSON.parse(contents)
+  } catch {
+    deleteJamsocketConfig()
+    return null
+  }
+
   // TODO: complain if config username/auth are not valid
   return {
     username: config.username ?? '',
@@ -35,6 +42,7 @@ export function writeJamsocketConfig(config: JamsocketConfig): void {
 }
 
 export function deleteJamsocketConfig(): void {
+  if (!existsSync(JAMSOCKET_CONFIG)) return
   unlinkSync(JAMSOCKET_CONFIG)
 }
 
