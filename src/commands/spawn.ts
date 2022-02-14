@@ -4,7 +4,10 @@ import { request, readJamsocketConfig, API, SPAWN_INIT_ENDPOINT, REGISTRY } from
 type SpawnRequestBody = {
   image: string;
   env?: Record<string, string>; // env vars always map strings to strings
+  port?: number;
 }
+
+const MAX_PORT = (2 ** 16) - 1
 
 export default class Spawn extends Command {
   static description = 'Spawns a session-lived application backend from the provided docker image'
@@ -15,6 +18,7 @@ export default class Spawn extends Command {
 
   static flags = {
     env: Flags.string({ char: 'e', description: 'optional JSON object of environment variables to pass to the container' }),
+    port: Flags.integer({ char: 'p', description: 'port for jamsocket to send requests to (default is 8080)' }),
   }
 
   static args = [{ name: 'image' }]
@@ -37,6 +41,14 @@ export default class Spawn extends Command {
       }
 
       body.env = env
+    }
+
+    if (flags.port !== undefined) {
+      if (flags.port < 1 || flags.port > MAX_PORT) {
+        this.error(`Error parsing port. Must be an integer >= 1 and <= ${MAX_PORT}. Received for --port: ${flags.port}`)
+      }
+
+      body.port = flags.port
     }
 
     const endpoint = `${API}${SPAWN_INIT_ENDPOINT}`

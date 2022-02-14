@@ -98,10 +98,11 @@ Spawns a session-lived application backend from the provided docker image
 
 ```
 USAGE
-  $ jamsocket spawn [IMAGE] [-e <value>]
+  $ jamsocket spawn [IMAGE] [-e <value>] [-p <value>]
 
 FLAGS
-  -e, --env=<value>  optional JSON object of environment variables to pass to the container
+  -e, --env=<value>   optional JSON object of environment variables to pass to the container
+  -p, --port=<value>  port for jamsocket to send requests to (default is 8080)
 
 DESCRIPTION
   Spawns a session-lived application backend from the provided docker image
