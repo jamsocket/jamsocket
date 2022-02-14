@@ -1,6 +1,6 @@
 {
   "name": "jamsocket",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "A CLI for the Jamsocket platform",
   "author": "Taylor Baldwin <taylor@driftingin.space>",
   "bin": {
