@@ -18,7 +18,7 @@ export default class Spawn extends Command {
 
   static flags = {
     env: Flags.string({ char: 'e', description: 'optional JSON object of environment variables to pass to the container' }),
-    port: Flags.string({ char: 'p', description: 'port for jamsocket to send requests to (default is 8080)' }),
+    port: Flags.integer({ char: 'p', description: 'port for jamsocket to send requests to (default is 8080)' }),
   }
 
   static args = [{ name: 'image' }]
@@ -43,13 +43,12 @@ export default class Spawn extends Command {
       body.env = env
     }
 
-    if (flags.port) {
-      const port = Number(flags.port)
-      if (!Number.isInteger(port) || port < 1 || port > MAX_PORT) {
-        this.error(`Error parsing port. Must be an integer >= 1 and <= ${MAX_PORT}. Received for --port: ${port}`)
+    if (flags.port !== undefined) {
+      if (flags.port < 1 || flags.port > MAX_PORT) {
+        this.error(`Error parsing port. Must be an integer >= 1 and <= ${MAX_PORT}. Received for --port: ${flags.port}`)
       }
 
-      body.port = port
+      body.port = flags.port
     }
 
     const endpoint = `${API}${SPAWN_INIT_ENDPOINT}`
