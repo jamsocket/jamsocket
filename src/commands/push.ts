@@ -32,13 +32,7 @@ export default class Push extends Command {
       this.error(tagOutput.error ?? 'Error tagging image')
     }
 
-    const pushProcess = spawn('docker', ['push', prefixedImage])
-    pushProcess.stdout.on('data', chunk => {
-      process.stdout.write(chunk)
-    })
-    pushProcess.stderr.on('data', chunk => {
-      process.stderr.write(chunk)
-    })
+    const pushProcess = spawn('docker', ['push', prefixedImage], { stdio: 'inherit' })
     pushProcess.on('close', code => {
       if (code === 0) {
         this.log('Image Successfully Pushed')
