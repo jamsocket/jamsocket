@@ -5,7 +5,7 @@ export default class Create extends Command {
   static description = 'Creates a service'
 
   static examples = [
-    '<%= config.bin %> <%= command.id %>',
+    '<%= config.bin %> <%= command.id %> my-service',
   ]
 
   static args = [{ name: 'name', required: true }]
@@ -21,17 +21,15 @@ export default class Create extends Command {
     const body = { name: args.name }
 
     const endpoint = `${API}${SERVICE_CREATE_ENDPOINT}`
-    const responseBody = await request(endpoint, body, {
+    const response = await request(endpoint, body, {
       method: 'POST',
-      headers: {
-        'Authorization': `Basic ${auth}`,
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Authorization': `Basic ${auth}` },
     })
 
     // TODO: Handle creation errors & authentication errors
-    // const response = JSON.parse(responseBody)
+    // console.log(response.statusCode)
+    // console.log(response.statusMessage)
     this.log(`response from ${endpoint}:`)
-    this.log(responseBody)
+    this.log(response.body)
   }
 }

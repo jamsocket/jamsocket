@@ -7,7 +7,7 @@ export const REGISTRY = 'jamcr.io'
 export const API = 'https://jamsocket.dev'
 export const SPAWN_INIT_ENDPOINT = '/api/init'
 export const SERVICE_CREATE_ENDPOINT = '/reg/service'
-export const getServiceListEndpoint = (username: string): string => `/reg/${username}/service`
+export const getServiceListEndpoint = (username: string): string => `/reg/${username}/services`
 
 export const JAMSOCKET_CONFIG = resolve(homedir(), '.jamsocket', 'config.json')
 
@@ -49,13 +49,25 @@ export function deleteJamsocketConfig(): void {
   unlinkSync(JAMSOCKET_CONFIG)
 }
 
-export function request(url: string, body: Record<any, any> | null, options: Record<string, any>): Promise<any> {
+type Header = string | string[] | undefined
+type RequestReturn = {
+  body: string;
+  statusCode: number | undefined;
+  statusMessage: string | undefined;
+  headers: Record<string, Header>;
+}
+export function request(
+  url: string,
+  body: Record<string, unknown> | null,
+  options: Record<string, any>,
+): Promise<RequestReturn> {
   return new Promise((resolve, reject) => {
     const wrappedURL = new URL(url)
-    const jsonBody = JSON.stringify(body)
     const headers = { ...options.headers }
-    if (body === null) {
+    const jsonBody = body && JSON.stringify(body)
+    if (jsonBody !== null) {
       headers['Content-Length'] = jsonBody.length
+      headers['Content-Type'] = 'application/json'
     }
 
     let result = ''
@@ -69,13 +81,18 @@ export function request(url: string, body: Record<any, any> | null, options: Rec
         result += chunk
       })
       res.on('end', () => {
-        resolve(result)
+        resolve({
+          body: result,
+          statusCode: res.statusCode,
+          statusMessage: res.statusMessage,
+          headers: res.headers,
+        })
       })
     })
     req.on('error', err => {
       reject(err)
     })
-    req.write(jsonBody)
+    if (jsonBody !== null) req.write(jsonBody)
     req.end()
   })
 }

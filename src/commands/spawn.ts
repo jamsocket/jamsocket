@@ -52,17 +52,13 @@ export default class Spawn extends Command {
     }
 
     const endpoint = `${API}${SPAWN_INIT_ENDPOINT}`
-    const responseBody = await request(endpoint, body, {
+    const response = await request(endpoint, body, {
       method: 'POST',
-      headers: {
-        'Authorization': `Basic ${auth}`,
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Authorization': `Basic ${auth}` },
     })
 
     // TODO: Give better instructions on how to use the values returned in the response
-    const response = JSON.parse(responseBody)
     this.log(`response from ${endpoint}:`)
-    this.log(JSON.stringify(response, null, 2))
+    this.log(JSON.stringify(JSON.parse(response.body), null, 2))
   }
 }

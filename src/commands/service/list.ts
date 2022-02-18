@@ -17,12 +17,14 @@ export default class List extends Command {
     const { username, auth } = config
 
     const endpoint = `${API}${getServiceListEndpoint(username)}`
-    const responseBody = await request(endpoint, null, {
+    const response = await request(endpoint, null, {
       headers: { 'Authorization': `Basic ${auth}` },
     })
 
     // TODO: Handle creation errors & authentication errors
+    // console.log(response.statusCode)
+    // console.log(response.statusMessage)
     this.log(`response from ${endpoint}:`)
-    this.log(responseBody)
+    this.log(response.body)
   }
 }
