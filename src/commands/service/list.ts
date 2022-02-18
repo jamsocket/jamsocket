@@ -24,7 +24,12 @@ export default class List extends Command {
     // TODO: Handle creation errors & authentication errors
     // console.log(response.statusCode)
     // console.log(response.statusMessage)
-    this.log(`response from ${endpoint}:`)
-    this.log(response.body)
+
+    // TODO: handle malformed response
+    const services = JSON.parse(response.body).services
+    for (const service of services) {
+      // TODO: print a table that gives information about each service
+      this.log(service)
+    }
   }
 }

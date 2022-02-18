@@ -5,9 +5,13 @@ import { existsSync, readFileSync, mkdirSync, writeFileSync, unlinkSync } from '
 
 export const REGISTRY = 'jamcr.io'
 export const API = 'https://jamsocket.dev'
-export const SPAWN_INIT_ENDPOINT = '/api/init'
 export const SERVICE_CREATE_ENDPOINT = '/reg/service'
 export const getServiceListEndpoint = (username: string): string => `/reg/${username}/services`
+export const getSpawnEndpoint = (username: string, serviceName: string, tag: string | null): string => {
+  let endpoint = `/reg/${username}/service/${serviceName}`
+  if (tag) endpoint += `/tag/${tag}`
+  return endpoint
+}
 
 export const JAMSOCKET_CONFIG = resolve(homedir(), '.jamsocket', 'config.json')
 
