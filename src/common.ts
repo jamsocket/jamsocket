@@ -6,6 +6,9 @@ import { existsSync, readFileSync, mkdirSync, writeFileSync, unlinkSync } from '
 export const REGISTRY = 'jamcr.io'
 export const API = 'https://jamsocket.dev'
 export const SPAWN_INIT_ENDPOINT = '/api/init'
+export const SERVICE_CREATE_ENDPOINT = '/reg/service'
+export const getServiceListEndpoint = (username: string): string => `/reg/${username}/service`
+
 export const JAMSOCKET_CONFIG = resolve(homedir(), '.jamsocket', 'config.json')
 
 export type JamsocketConfig = {
@@ -46,19 +49,21 @@ export function deleteJamsocketConfig(): void {
   unlinkSync(JAMSOCKET_CONFIG)
 }
 
-export function request(url: string, body: Record<any, any>, options: Record<string, any>): Promise<any> {
+export function request(url: string, body: Record<any, any> | null, options: Record<string, any>): Promise<any> {
   return new Promise((resolve, reject) => {
     const wrappedURL = new URL(url)
     const jsonBody = JSON.stringify(body)
+    const headers = { ...options.headers }
+    if (body === null) {
+      headers['Content-Length'] = jsonBody.length
+    }
+
     let result = ''
     const req = https.request({
       ...options,
       hostname: wrappedURL.hostname,
       path: wrappedURL.pathname,
-      headers: {
-        ...options.headers,
-        'Content-Length': jsonBody.length,
-      },
+      headers: headers,
     }, res => {
       res.on('data', chunk => {
         result += chunk

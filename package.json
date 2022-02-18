@@ -35,6 +35,10 @@
   "oclif": {
     "bin": "jamsocket",
     "dirname": "jamsocket",
+    "topicSeparator": " ",
+    "topics": {
+      "service": { "description": "manage jamsocket services" }
+    },
     "commands": "./dist/commands",
     "plugins": [
       "@oclif/plugin-help"
