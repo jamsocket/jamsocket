@@ -18,7 +18,9 @@
   ],
   "dependencies": {
     "@oclif/core": "^1",
-    "@oclif/plugin-help": "^5"
+    "@oclif/plugin-help": "^5",
+    "@oclif/plugin-not-found": "^2.3.1",
+    "@oclif/plugin-warn-if-update-available": "^2.0.4"
   },
   "devDependencies": {
     "@types/node": "^16.9.4",
@@ -37,11 +39,15 @@
     "dirname": "jamsocket",
     "topicSeparator": " ",
     "topics": {
-      "service": { "description": "manage jamsocket services" }
+      "service": {
+        "description": "manage jamsocket services"
+      }
     },
     "commands": "./dist/commands",
     "plugins": [
-      "@oclif/plugin-help"
+      "@oclif/plugin-help",
+      "@oclif/plugin-not-found",
+      "@oclif/plugin-warn-if-update-available"
     ]
   },
   "scripts": {
