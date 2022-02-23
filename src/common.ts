@@ -3,8 +3,9 @@ import { resolve, dirname } from 'path'
 import * as https from 'https'
 import { existsSync, readFileSync, mkdirSync, writeFileSync, unlinkSync } from 'fs'
 
+// TODO: hit endpoint that returns the jamcr.io-formatted image name so that this doesn't need to be defined here
 export const REGISTRY = 'jamcr.io'
-export const API = 'https://jamsocket.dev'
+export const API = process.env.JAMSOCKET_SERVER_API ?? 'https://jamsocket.dev'
 export const SERVICE_CREATE_ENDPOINT = '/reg/service'
 export const getServiceListEndpoint = (username: string): string => `/reg/${username}/services`
 export const getSpawnEndpoint = (username: string, serviceName: string, tag: string | null): string => {
