@@ -61,8 +61,19 @@ export default class Spawn extends Command {
       headers: { 'Authorization': `Basic ${auth}` },
     })
 
-    // TODO: Give better instructions on how to use the values returned in the response
-    this.log(`response from ${endpoint}:`)
-    this.log(JSON.stringify(JSON.parse(response.body), null, 2))
+    let responseBody
+    try {
+      responseBody = JSON.parse(response.body)
+    } catch (error) {
+      this.error(`jamsocket: error parsing JSON response: ${error}`)
+    }
+
+    if (response.statusCode && response.statusCode >= 400) {
+      const { message, status, code, id } = responseBody.error
+      this.error(`jamsocket: ${status} - ${code}: ${message} (id: ${id})`)
+    } else {
+      // TODO: Give better instructions on how to use the values returned in the response
+      this.log(JSON.stringify(responseBody, null, 2))
+    }
   }
 }

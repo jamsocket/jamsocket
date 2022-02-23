@@ -21,15 +21,22 @@ export default class List extends Command {
       headers: { 'Authorization': `Basic ${auth}` },
     })
 
-    // TODO: Handle creation errors & authentication errors
-    // console.log(response.statusCode)
-    // console.log(response.statusMessage)
+    let responseBody
+    try {
+      responseBody = JSON.parse(response.body)
+    } catch (error) {
+      this.error(`jamsocket: error parsing JSON response: ${error}`)
+    }
 
-    // TODO: handle malformed response
-    const services = JSON.parse(response.body).services
-    for (const service of services) {
+    if (response.statusCode && response.statusCode >= 400) {
+      const { message, status, code, id } = responseBody.error
+      this.error(`jamsocket: ${status} - ${code}: ${message} (id: ${id})`)
+    } else {
       // TODO: print a table that gives information about each service
-      this.log(service)
+      const services = responseBody.services
+      for (const service of services) {
+        this.log(service)
+      }
     }
   }
 }

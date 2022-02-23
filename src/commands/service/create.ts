@@ -26,10 +26,18 @@ export default class Create extends Command {
       headers: { 'Authorization': `Basic ${auth}` },
     })
 
-    // TODO: Handle creation errors & authentication errors
-    // console.log(response.statusCode)
-    // console.log(response.statusMessage)
-    this.log(`response from ${endpoint}:`)
-    this.log(response.body)
+    let responseBody
+    try {
+      responseBody = JSON.parse(response.body)
+    } catch (error) {
+      this.error(`jamsocket: error parsing JSON response: ${error}`)
+    }
+
+    if (response.statusCode && response.statusCode >= 400) {
+      const { message, status, code, id } = responseBody.error
+      this.error(`jamsocket: ${status} - ${code}: ${message} (id: ${id})`)
+    } else {
+      this.log(`Created service: ${body.name}`)
+    }
   }
 }
