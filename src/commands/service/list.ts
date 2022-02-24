@@ -25,7 +25,7 @@ export default class List extends Command {
     try {
       responseBody = JSON.parse(response.body)
     } catch (error) {
-      this.error(`jamsocket: error parsing JSON response: ${error}`)
+      this.error(`jamsocket: error parsing JSON response - ${error}: ${response.body}`)
     }
 
     if (response.statusCode && response.statusCode >= 400) {

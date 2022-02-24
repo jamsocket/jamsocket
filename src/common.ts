@@ -6,13 +6,9 @@ import { existsSync, readFileSync, mkdirSync, writeFileSync, unlinkSync } from '
 // TODO: hit endpoint that returns the jamcr.io-formatted image name so that this doesn't need to be defined here
 export const REGISTRY = 'jamcr.io'
 export const API = process.env.JAMSOCKET_SERVER_API ?? 'https://jamsocket.dev'
-export const SERVICE_CREATE_ENDPOINT = '/reg/service'
-export const getServiceListEndpoint = (username: string): string => `/reg/${username}/services`
-export const getSpawnEndpoint = (username: string, serviceName: string, tag: string | null): string => {
-  let endpoint = `/reg/${username}/service/${serviceName}`
-  if (tag) endpoint += `/tag/${tag}`
-  return endpoint
-}
+export const getServiceCreateEndpoint = (username: string): string => `/reg/user/${username}/service`
+export const getServiceListEndpoint = (username: string): string => `/reg/user/${username}/services`
+export const getSpawnEndpoint = (username: string, serviceName: string): string => `/reg/user/${username}/service/${serviceName}/spawn`
 
 export const JAMSOCKET_CONFIG = resolve(homedir(), '.jamsocket', 'config.json')
 

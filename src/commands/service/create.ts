@@ -1,5 +1,5 @@
 import { Command } from '@oclif/core'
-import { request, readJamsocketConfig, API, SERVICE_CREATE_ENDPOINT } from '../../common'
+import { request, readJamsocketConfig, API, getServiceCreateEndpoint } from '../../common'
 
 export default class Create extends Command {
   static description = 'Creates a service'
@@ -17,10 +17,10 @@ export default class Create extends Command {
       this.error('No user credentials found. Log in with jamsocket login')
     }
 
-    const { auth } = config
+    const { username, auth } = config
     const body = { name: args.name }
 
-    const endpoint = `${API}${SERVICE_CREATE_ENDPOINT}`
+    const endpoint = `${API}${getServiceCreateEndpoint(username)}`
     const response = await request(endpoint, body, {
       method: 'POST',
       headers: { 'Authorization': `Basic ${auth}` },
@@ -30,7 +30,7 @@ export default class Create extends Command {
     try {
       responseBody = JSON.parse(response.body)
     } catch (error) {
-      this.error(`jamsocket: error parsing JSON response: ${error}`)
+      this.error(`jamsocket: error parsing JSON response - ${error}: ${response.body}`)
     }
 
     if (response.statusCode && response.statusCode >= 400) {

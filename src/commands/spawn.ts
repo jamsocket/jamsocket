@@ -4,6 +4,7 @@ import { request, readJamsocketConfig, API, getSpawnEndpoint } from '../common'
 type SpawnRequestBody = {
   env?: Record<string, string>; // env vars always map strings to strings
   port?: number;
+  tag?: string;
 }
 
 const MAX_PORT = (2 ** 16) - 1
@@ -54,8 +55,12 @@ export default class Spawn extends Command {
       body.port = flags.port
     }
 
-    const tag = flags.tag || null
-    const endpoint = `${API}${getSpawnEndpoint(username, args.service, tag)}`
+    if (flags.tag) {
+      body.tag = flags.tag
+    }
+
+    const endpoint = `${API}${getSpawnEndpoint(username, args.service)}`
+
     const response = await request(endpoint, body, {
       method: 'POST',
       headers: { 'Authorization': `Basic ${auth}` },
@@ -65,7 +70,7 @@ export default class Spawn extends Command {
     try {
       responseBody = JSON.parse(response.body)
     } catch (error) {
-      this.error(`jamsocket: error parsing JSON response: ${error}`)
+      this.error(`jamsocket: error parsing JSON response - ${error}: ${response.body}`)
     }
 
     if (response.statusCode && response.statusCode >= 400) {
