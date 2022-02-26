@@ -1,4 +1,4 @@
-import { homedir } from 'os'
+import { homedir, EOL } from 'os'
 import { resolve, dirname } from 'path'
 import * as https from 'https'
 import { existsSync, readFileSync, mkdirSync, writeFileSync, unlinkSync } from 'fs'
@@ -32,7 +32,7 @@ export function readJamsocketConfig(): JamsocketConfig | null {
 export function writeJamsocketConfig(config: JamsocketConfig): void {
   const dir = dirname(JAMSOCKET_CONFIG)
   mkdirSync(dir, { recursive: true })
-  writeFileSync(JAMSOCKET_CONFIG, `${JSON.stringify(config, null, 2)}\n`)
+  writeFileSync(JAMSOCKET_CONFIG, `${JSON.stringify(config, null, 2)}${EOL}`)
 }
 
 export function deleteJamsocketConfig(): void {
