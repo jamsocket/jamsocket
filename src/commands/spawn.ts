@@ -56,7 +56,7 @@ export default class Spawn extends Command {
 
     const api = new JamsocketApi(auth);
     let responseBody = await api.spawn(username, args.service, body);
-    
+
     this.log(JSON.stringify(responseBody, null, 2))
   }
 }

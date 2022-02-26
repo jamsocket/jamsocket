@@ -1,6 +1,6 @@
 import { Command } from '@oclif/core'
 import { JamsocketApi } from '../../api'
-import { request, readJamsocketConfig } from '../../common'
+import { readJamsocketConfig } from '../../common'
 
 export default class List extends Command {
   static description = 'List services for the logged-in user'
@@ -16,10 +16,10 @@ export default class List extends Command {
     }
 
     const { username, auth } = config
-    let api = new JamsocketApi(auth);
-
-    let responseBody = await api.serviceList(username);
+    const api = new JamsocketApi(auth);
+    const responseBody = await api.serviceList(username);
     const services = responseBody.services;
+
     for (const service of services) {
       this.log(service)
     }

@@ -28,7 +28,7 @@ export default class Login extends Command {
 
     const api = new JamsocketApi(auth);
     await api.checkAuth();
-    
+
     writeJamsocketConfig({ username: username, auth: auth })
     this.log('Login Succeeded')
   }

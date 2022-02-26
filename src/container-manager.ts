@@ -18,10 +18,10 @@ export class ContainerManager {
                     }
                 }
             }
-    
+
             const configPath = path.join(tempdir, "config.json");
             writeFileSync(configPath, JSON.stringify(config));
-    
+
             await new Promise<void>((resolve, reject) => {
                 const pushProcess = spawn('docker', ['--config', tempdir, 'push', imageName], { stdio: 'inherit' });
                 pushProcess.on('close', code => {
@@ -31,7 +31,7 @@ export class ContainerManager {
                         reject(new Error('Error pushing image'));
                     }
                 })
-            });    
+            });
         } catch (e) {
             throw e;
         } finally {

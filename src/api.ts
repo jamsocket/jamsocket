@@ -1,12 +1,35 @@
 import { request } from "./common"
 
+enum HttpMethod {
+    Get = "GET",
+    Post = "POST",
+}
+
 export type SpawnRequestBody = {
     env?: Record<string, string>; // env vars always map strings to strings
     port?: number;
     tag?: string;
 }
 
-// TODO(paul): formalize the API return types and create a public API spec (OpenAPI?)
+interface ServiceImageResult {
+    status: string,
+    imageName: string,
+}
+
+interface ServiceListResult {
+    services: Array<string>,
+}
+
+interface ServiceCreateResult {
+    status: string,
+}
+
+interface SpawnResult {
+    url: string,
+    name: string,
+    readyUrl?: string,
+    statusUrl?: string,
+}
 
 export class JamsocketApi {
     apiBase: string
@@ -15,10 +38,10 @@ export class JamsocketApi {
         this.apiBase = process.env.JAMSOCKET_SERVER_API ?? 'https://jamsocket.dev'
     }
 
-    private async makeAuthenticatedRequest(endpoint: string, body?: any): Promise<any> {
+    private async makeAuthenticatedRequest(endpoint: string, method: HttpMethod, body?: any): Promise<any> {
         const url = `${this.apiBase}${endpoint}`;
         const response = await request(url, body || null, {
-            method: body ? 'POST' : 'GET',
+            method,
             headers: { 'Authorization': `Basic ${this.auth}` },
         });
 
@@ -37,34 +60,30 @@ export class JamsocketApi {
         return responseBody
     }
 
-    public async checkAuth(): Promise<void> {
+    public checkAuth(): Promise<any> {
         const url = `/api/auth`;
-        await this.makeAuthenticatedRequest(url);
+        return this.makeAuthenticatedRequest(url, HttpMethod.Get);
     }
 
-    public async serviceImage(username: string, serviceName: string): Promise<string> {
+    public serviceImage(username: string, serviceName: string): Promise<ServiceImageResult> {
         const url = `/api/user/${username}/service/${serviceName}/image`;
-        const result = await this.makeAuthenticatedRequest(url);
-        return result['imageName']
+        return this.makeAuthenticatedRequest(url, HttpMethod.Get);
     }
 
-    public async serviceCreate(username: string, name: string) {
+    public serviceCreate(username: string, name: string): Promise<ServiceCreateResult> {
         const url = `/api/user/${username}/service`;
-        const result = await this.makeAuthenticatedRequest(url, {
+        return this.makeAuthenticatedRequest(url, HttpMethod.Post, {
             name
         });
-        return result;
     }
 
-    public async serviceList(username: string) {
+    public serviceList(username: string): Promise<ServiceListResult> {
         const url = `/user/${username}/services`;
-        const result = await this.makeAuthenticatedRequest(url);
-        return result;
+        return this.makeAuthenticatedRequest(url, HttpMethod.Get);
     }
 
-    public async spawn(username: string, serviceName: string, body: SpawnRequestBody): Promise<any> {
+    public spawn(username: string, serviceName: string, body: SpawnRequestBody): Promise<SpawnResult> {
         const url = `/api/user/${username}/service/${serviceName}/spawn`
-        const result = await this.makeAuthenticatedRequest(url, body);
-        return result
+        return this.makeAuthenticatedRequest(url, HttpMethod.Post, body);
     }
 }
