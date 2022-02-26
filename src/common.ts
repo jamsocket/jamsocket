@@ -3,22 +3,12 @@ import { resolve, dirname } from 'path'
 import * as https from 'https'
 import { existsSync, readFileSync, mkdirSync, writeFileSync, unlinkSync } from 'fs'
 
-// TODO: hit endpoint that returns the jamcr.io-formatted image name so that this doesn't need to be defined here
-export const REGISTRY = 'jamcr.io'
-export const API = process.env.JAMSOCKET_SERVER_API ?? 'https://jamsocket.dev'
-export const getServiceCreateEndpoint = (username: string): string => `/reg/user/${username}/service`
-export const getServiceListEndpoint = (username: string): string => `/reg/user/${username}/services`
-export const getSpawnEndpoint = (username: string, serviceName: string): string => `/reg/user/${username}/service/${serviceName}/spawn`
-
 export const JAMSOCKET_CONFIG = resolve(homedir(), '.jamsocket', 'config.json')
 
 export type JamsocketConfig = {
   username: string;
   auth: string;
 }
-
-const NEWLINE = `
-`
 
 export function readJamsocketConfig(): JamsocketConfig | null {
   if (!existsSync(JAMSOCKET_CONFIG)) return null
@@ -42,7 +32,7 @@ export function readJamsocketConfig(): JamsocketConfig | null {
 export function writeJamsocketConfig(config: JamsocketConfig): void {
   const dir = dirname(JAMSOCKET_CONFIG)
   mkdirSync(dir, { recursive: true })
-  writeFileSync(JAMSOCKET_CONFIG, `${JSON.stringify(config, null, 2)}${NEWLINE}`)
+  writeFileSync(JAMSOCKET_CONFIG, `${JSON.stringify(config, null, 2)}\n`)
 }
 
 export function deleteJamsocketConfig(): void {
