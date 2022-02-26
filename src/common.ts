@@ -3,9 +3,13 @@ import { resolve, dirname } from 'path'
 import * as https from 'https'
 import { existsSync, readFileSync, mkdirSync, writeFileSync, unlinkSync } from 'fs'
 
+// TODO: hit endpoint that returns the jamcr.io-formatted image name so that this doesn't need to be defined here
 export const REGISTRY = 'jamcr.io'
-export const API = 'https://jamsocket.dev'
-export const SPAWN_INIT_ENDPOINT = '/api/init'
+export const API = process.env.JAMSOCKET_SERVER_API ?? 'https://jamsocket.dev'
+export const getServiceCreateEndpoint = (username: string): string => `/reg/user/${username}/service`
+export const getServiceListEndpoint = (username: string): string => `/reg/user/${username}/services`
+export const getSpawnEndpoint = (username: string, serviceName: string): string => `/reg/user/${username}/service/${serviceName}/spawn`
+
 export const JAMSOCKET_CONFIG = resolve(homedir(), '.jamsocket', 'config.json')
 
 export type JamsocketConfig = {
@@ -46,31 +50,50 @@ export function deleteJamsocketConfig(): void {
   unlinkSync(JAMSOCKET_CONFIG)
 }
 
-export function request(url: string, body: Record<any, any>, options: Record<string, any>): Promise<any> {
+type Header = string | string[] | undefined
+type RequestReturn = {
+  body: string;
+  statusCode: number | undefined;
+  statusMessage: string | undefined;
+  headers: Record<string, Header>;
+}
+export function request(
+  url: string,
+  body: Record<string, unknown> | null,
+  options: Record<string, any>,
+): Promise<RequestReturn> {
   return new Promise((resolve, reject) => {
     const wrappedURL = new URL(url)
-    const jsonBody = JSON.stringify(body)
+    const headers = { ...options.headers }
+    const jsonBody = body && JSON.stringify(body)
+    if (jsonBody !== null) {
+      headers['Content-Length'] = jsonBody.length
+      headers['Content-Type'] = 'application/json'
+    }
+
     let result = ''
     const req = https.request({
       ...options,
       hostname: wrappedURL.hostname,
       path: wrappedURL.pathname,
-      headers: {
-        ...options.headers,
-        'Content-Length': jsonBody.length,
-      },
+      headers: headers,
     }, res => {
       res.on('data', chunk => {
         result += chunk
       })
       res.on('end', () => {
-        resolve(result)
+        resolve({
+          body: result,
+          statusCode: res.statusCode,
+          statusMessage: res.statusMessage,
+          headers: res.headers,
+        })
       })
     })
     req.on('error', err => {
       reject(err)
     })
-    req.write(jsonBody)
+    if (jsonBody !== null) req.write(jsonBody)
     req.end()
   })
 }

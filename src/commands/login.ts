@@ -18,7 +18,8 @@ export default class Login extends Command {
     if (config !== null) {
       // This may not be true if the user has run docker logout jamrc.io
       // Should we do this part? Or just write over whatever is there?
-      this.error(`User ${config.username} is already logged in. Run jamsocket logout first.`)
+      this.log(`User ${config.username} is already logged in. Run jamsocket logout first.`)
+      return
     }
 
     const username = await CliUx.ux.prompt('username')

@@ -6,14 +6,18 @@ export default class Push extends Command {
   static description = 'Pushes a docker image to the jamcr.io container registry under your logged in user\'s name'
 
   static examples = [
-    '<%= config.bin %> <%= command.id %> 33fe99c5649e -t my-image',
+    '<%= config.bin %> <%= command.id %> my-service my-image',
+    '<%= config.bin %> <%= command.id %> my-service my-image -t my-tag',
   ]
 
   static flags = {
-    tag: Flags.string({ char: 't', description: 'optional tag to apply to the docker image' }),
+    tag: Flags.string({ char: 't', description: 'optional tag to apply to the image in the jamsocket registry' }),
   }
 
-  static args = [{ name: 'image', description: 'Docker image to push to jamcr.io', required: true }]
+  static args = [
+    { name: 'service', description: 'Jamsocket service to push the image to', required: true },
+    { name: 'image', description: 'Docker image to push', required: true },
+  ]
 
   public async run(): Promise<void> {
     const config = readJamsocketConfig()
@@ -24,7 +28,8 @@ export default class Push extends Command {
     const { args, flags } = await this.parse(Push)
 
     const { username } = config
-    const prefixedImage = `${REGISTRY}/${username}/${flags.tag ?? args.image}`
+    let prefixedImage = `${REGISTRY}/${username}/${args.service}`
+    if (flags.tag) prefixedImage += `:${flags.tag}`
 
     const tagOutput = spawnSync('docker', ['tag', args.image, prefixedImage], { encoding: 'utf-8' })
     process.stderr.write(tagOutput.stderr)
