@@ -1,7 +1,7 @@
 import { spawn, spawnSync } from 'child_process'
 import { writeFileSync } from 'fs';
-import { mkdtemp, rm } from 'fs/promises';
-import path = require('path');
+import { mkdtemp, rmdir } from 'fs/promises';
+import { join } from 'path';
 
 export class ContainerManager {
     constructor(public command: string = "docker") { }
@@ -13,13 +13,11 @@ export class ContainerManager {
 
             const config = {
                 "auths": {
-                    [registry]: {
-                        "auth": auth
-                    }
+                    [registry]: { auth }
                 }
             }
 
-            const configPath = path.join(tempdir, "config.json");
+            const configPath = join(tempdir, "config.json");
             writeFileSync(configPath, JSON.stringify(config));
 
             await new Promise<void>((resolve, reject) => {
@@ -36,7 +34,7 @@ export class ContainerManager {
             throw e;
         } finally {
             // Clean up temp directory.
-            await rm(tempdir, { recursive: true, force: true })
+            await rmdir(tempdir, { recursive: true })
         }
     }
 
