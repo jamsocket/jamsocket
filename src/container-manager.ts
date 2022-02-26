@@ -1,6 +1,6 @@
 import { spawn, spawnSync } from 'child_process'
 import { writeFileSync } from 'fs';
-import { mkdtemp, rmdir } from 'fs/promises';
+import { mkdtemp, rm } from 'fs/promises';
 import { join } from 'path';
 
 export class ContainerManager {
@@ -34,7 +34,7 @@ export class ContainerManager {
             throw e;
         } finally {
             // Clean up temp directory.
-            await rmdir(tempdir, { recursive: true })
+            await rm(tempdir, { recursive: true })
         }
     }
 
