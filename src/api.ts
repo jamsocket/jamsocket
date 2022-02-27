@@ -1,4 +1,4 @@
-import { request } from "./common"
+import { eventStream, request } from "./request"
 
 enum HttpMethod {
     Get = "GET",
@@ -60,6 +60,15 @@ export class JamsocketApi {
         return responseBody
     }
 
+    private async makeAuthenticatedStreamRequest(endpoint: string, callback: (line: string) => void): Promise<void> {
+        const url = `${this.apiBase}${endpoint}`;
+        return eventStream(url, {
+            method: HttpMethod.Get,
+            headers: { 'Authorization': `Basic ${this.auth}` }
+        },
+            callback);
+    }
+
     public checkAuth(): Promise<any> {
         const url = `/api/auth`;
         return this.makeAuthenticatedRequest(url, HttpMethod.Get);
@@ -85,5 +94,10 @@ export class JamsocketApi {
     public spawn(username: string, serviceName: string, body: SpawnRequestBody): Promise<SpawnResult> {
         const url = `/api/user/${username}/service/${serviceName}/spawn`
         return this.makeAuthenticatedRequest(url, HttpMethod.Post, body);
+    }
+
+    public streamLogs(backend: string, callback: (line: string) => void): Promise<void> {
+        const url = `/api/backend/${backend}/logs`;
+        return this.makeAuthenticatedStreamRequest(url, callback);
     }
 }
