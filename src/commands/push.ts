@@ -1,6 +1,7 @@
-import { spawn, spawnSync } from 'child_process'
 import { Command, Flags } from '@oclif/core'
-import { readJamsocketConfig, REGISTRY } from '../common'
+import { readJamsocketConfig } from '../common'
+import { JamsocketApi } from '../api'
+import { ContainerManager } from '../container-manager'
 
 export default class Push extends Command {
   static description = 'Pushes a docker image to the jamcr.io container registry under your logged in user\'s name'
@@ -26,24 +27,19 @@ export default class Push extends Command {
     }
 
     const { args, flags } = await this.parse(Push)
+    const { username, auth } = config
+    const api = new JamsocketApi(auth);
+    const containerManager = new ContainerManager();
 
-    const { username } = config
-    let prefixedImage = `${REGISTRY}/${username}/${args.service}`
+    let prefixedImage = await (await api.serviceImage(username, args.service)).imageName;
     if (flags.tag) prefixedImage += `:${flags.tag}`
 
-    const tagOutput = spawnSync('docker', ['tag', args.image, prefixedImage], { encoding: 'utf-8' })
-    process.stderr.write(tagOutput.stderr)
-    if (tagOutput.status !== 0) {
-      this.error(tagOutput.error ?? 'Error tagging image')
-    }
+    this.log("Tagging.");
+    containerManager.tag(args.image, prefixedImage);
 
-    const pushProcess = spawn('docker', ['push', prefixedImage], { stdio: 'inherit' })
-    pushProcess.on('close', code => {
-      if (code === 0) {
-        this.log('Image Successfully Pushed')
-      } else {
-        this.error('There was an error pushing the image')
-      }
-    })
+    this.log("Pushing.");
+    await containerManager.push(prefixedImage, auth);
+
+    this.log("Done.");
   }
 }

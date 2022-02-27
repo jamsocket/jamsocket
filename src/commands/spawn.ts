@@ -1,11 +1,6 @@
 import { Command, Flags } from '@oclif/core'
-import { request, readJamsocketConfig, API, getSpawnEndpoint } from '../common'
-
-type SpawnRequestBody = {
-  env?: Record<string, string>; // env vars always map strings to strings
-  port?: number;
-  tag?: string;
-}
+import { JamsocketApi, SpawnRequestBody } from '../api'
+import { readJamsocketConfig } from '../common'
 
 const MAX_PORT = (2 ** 16) - 1
 
@@ -59,26 +54,9 @@ export default class Spawn extends Command {
       body.tag = flags.tag
     }
 
-    const endpoint = `${API}${getSpawnEndpoint(username, args.service)}`
+    const api = new JamsocketApi(auth);
+    let responseBody = await api.spawn(username, args.service, body);
 
-    const response = await request(endpoint, body, {
-      method: 'POST',
-      headers: { 'Authorization': `Basic ${auth}` },
-    })
-
-    let responseBody
-    try {
-      responseBody = JSON.parse(response.body)
-    } catch (error) {
-      this.error(`jamsocket: error parsing JSON response - ${error}: ${response.body}`)
-    }
-
-    if (response.statusCode && response.statusCode >= 400) {
-      const { message, status, code, id } = responseBody.error
-      this.error(`jamsocket: ${status} - ${code}: ${message} (id: ${id})`)
-    } else {
-      // TODO: Give better instructions on how to use the values returned in the response
-      this.log(JSON.stringify(responseBody, null, 2))
-    }
+    this.log(JSON.stringify(responseBody, null, 2))
   }
 }
