@@ -16,9 +16,9 @@ export default class List extends Command {
     }
 
     const { username, auth } = config
-    const api = new JamsocketApi(auth);
-    const responseBody = await api.serviceList(username);
-    const services = responseBody.services;
+    const api = new JamsocketApi(auth)
+    const responseBody = await api.serviceList(username)
+    const services = responseBody.services
 
     for (const service of services) {
       this.log(service)

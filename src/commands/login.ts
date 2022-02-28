@@ -1,5 +1,5 @@
 import { Command, CliUx } from '@oclif/core'
-import { JamsocketApi } from '../api'
+import { JamsocketApi, AuthenticationError } from '../api'
 import { readJamsocketConfig, writeJamsocketConfig } from '../common'
 
 export default class Login extends Command {
@@ -16,8 +16,16 @@ export default class Login extends Command {
   public async run(): Promise<void> {
     const config = readJamsocketConfig()
     if (config !== null) {
-      this.log(`User ${config.username} is already logged in. Run jamsocket logout first.`)
-      return
+      const { auth } = config
+      const api = new JamsocketApi(auth)
+      try {
+        await api.checkAuth()
+        this.log(`User ${config.username} is already logged in. To log in with a different user, run jamsocket logout first.`)
+        return
+      } catch (error) {
+        const isAuthError = error instanceof AuthenticationError
+        if (!isAuthError) throw error
+      }
     }
 
     const username = await CliUx.ux.prompt('username')
@@ -26,8 +34,8 @@ export default class Login extends Command {
     const buff = Buffer.from(`${username}:${password}`, 'utf-8')
     const auth = buff.toString('base64')
 
-    const api = new JamsocketApi(auth);
-    await api.checkAuth();
+    const api = new JamsocketApi(auth)
+    await api.checkAuth()
 
     writeJamsocketConfig({ username: username, auth: auth })
     this.log('Login Succeeded')

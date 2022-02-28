@@ -12,6 +12,7 @@ A CLI for the Jamsocket platform
 * [`jamsocket help [COMMAND]`](#jamsocket-help-command)
 * [`jamsocket login`](#jamsocket-login)
 * [`jamsocket logout`](#jamsocket-logout)
+* [`jamsocket logs BACKEND`](#jamsocket-logs-backend)
 * [`jamsocket push SERVICE IMAGE`](#jamsocket-push-service-image)
 * [`jamsocket service create NAME`](#jamsocket-service-create-name)
 * [`jamsocket service list`](#jamsocket-service-list)
@@ -70,6 +71,26 @@ EXAMPLES
 ```
 
 _See code: [dist/commands/logout.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.0.10/dist/commands/logout.ts)_
+
+## `jamsocket logs BACKEND`
+
+Stream logs from a running backend.
+
+```
+USAGE
+  $ jamsocket logs [BACKEND]
+
+ARGUMENTS
+  BACKEND  The name of the backend, a random string of letters and numbers returned by the spawn command.
+
+DESCRIPTION
+  Stream logs from a running backend.
+
+EXAMPLES
+  $ jamsocket logs f7em2
+```
+
+_See code: [dist/commands/logs.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.0.10/dist/commands/logs.ts)_
 
 ## `jamsocket push SERVICE IMAGE`
 

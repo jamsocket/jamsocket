@@ -20,8 +20,8 @@ export default class Create extends Command {
 
     const { username, auth } = config
 
-    const api = new JamsocketApi(auth);
-    await api.serviceCreate(username, args.name);
+    const api = new JamsocketApi(auth)
+    await api.serviceCreate(username, args.name)
 
     this.log(`Created service: ${args.name}`)
   }

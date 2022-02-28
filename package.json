@@ -59,13 +59,15 @@
     "version": "oclif readme && git add README.md"
   },
   "engines": {
-    "node": ">=12.0.0"
+    "node": ">=14.14.0"
   },
   "bugs": "https://github.com/drifting-in-space/jamsocket-cli/issues",
   "keywords": [
     "jamsocket",
     "spawner",
     "session-lived backends",
+    "session-lived application backends",
+    "drifting in space",
     "docker"
   ],
   "types": "dist/index.d.ts"
