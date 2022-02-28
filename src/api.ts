@@ -1,4 +1,4 @@
-import { eventStream, request } from './request'
+import { eventStream, request, Headers } from './request'
 
 enum HttpMethod {
     Get = 'GET',
@@ -42,9 +42,16 @@ interface TokenResult {
   token: string,
 }
 
-export class AuthenticationError extends Error {
-  constructor(message: string) {
+export class HTTPError extends Error {
+  constructor(public code: number, message: string) {
     super(message)
+    this.name = 'HTTPError'
+  }
+}
+
+export class AuthenticationError extends HTTPError {
+  constructor(public code: number, message: string) {
+    super(code, message)
     this.name = 'AuthenticationError'
   }
 }
@@ -52,16 +59,13 @@ export class AuthenticationError extends Error {
 export class JamsocketApi {
     apiBase: string
 
-    constructor(private auth: string) {
+    constructor(private auth?: string) {
       this.apiBase = process.env.JAMSOCKET_SERVER_API ?? 'https://jamsocket.dev'
     }
 
-    private async makeAuthenticatedRequest(endpoint: string, method: HttpMethod, body?: any): Promise<any> {
+    private async makeRequest(endpoint: string, method: HttpMethod, headers?: Headers, body?: any): Promise<any> {
       const url = `${this.apiBase}${endpoint}`
-      const response = await request(url, body || null, {
-        method,
-        headers: { 'Authorization': `Basic ${this.auth}` },
-      })
+      const response = await request(url, body || null, { method, headers })
 
       let responseBody
       try {
@@ -72,10 +76,19 @@ export class JamsocketApi {
 
       if (response.statusCode && response.statusCode >= 400) {
         const { message, status, code, id } = responseBody.error
-        throw new AuthenticationError(`jamsocket: ${status} - ${code}: ${message} (id: ${id})`)
+        throw new HTTPError(response.statusCode, `jamsocket: ${status} - ${code}: ${message} (id: ${id})`)
       }
 
       return responseBody
+    }
+
+    private async makeAuthenticatedRequest(endpoint: string, method: HttpMethod, body?: any): Promise<any> {
+      const additionalHeaders = { 'Authorization': `Basic ${this.auth}` }
+      try {
+        return this.makeRequest(endpoint, method, additionalHeaders, body)
+      } catch (error) {
+        if (error instanceof HTTPError && error.code < 500) throw new AuthenticationError(error.code, error.message)
+      }
     }
 
     private async makeAuthenticatedStreamRequest(endpoint: string, callback: (line: string) => void): Promise<void> {
