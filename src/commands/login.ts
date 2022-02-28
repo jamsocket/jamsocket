@@ -16,7 +16,7 @@ export default class Login extends Command {
   public async run(): Promise<void> {
     const config = readJamsocketConfig()
     if (config !== null) {
-      this.log(`User ${config.username} is already logged in. Run jamsocket logout first.`)
+      this.log(`User ${config.username} is already logged in. To log in with a different user, run jamsocket logout first.`)
       return
     }
 
