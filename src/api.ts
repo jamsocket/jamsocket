@@ -31,6 +31,13 @@ interface SpawnResult {
     statusUrl?: string,
 }
 
+export class AuthenticationError extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = 'AuthenticationError'
+  }
+}
+
 export class JamsocketApi {
     apiBase: string
 
@@ -54,7 +61,7 @@ export class JamsocketApi {
 
       if (response.statusCode && response.statusCode >= 400) {
         const { message, status, code, id } = responseBody.error
-        throw new Error(`jamsocket: ${status} - ${code}: ${message} (id: ${id})`)
+        throw new AuthenticationError(`jamsocket: ${status} - ${code}: ${message} (id: ${id})`)
       }
 
       return responseBody
