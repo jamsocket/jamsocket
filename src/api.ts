@@ -86,7 +86,7 @@ export class JamsocketApi {
     }
 
     public serviceList(username: string): Promise<ServiceListResult> {
-      const url = `/user/${username}/services`
+      const url = `/api/user/${username}/services`
       return this.makeAuthenticatedRequest(url, HttpMethod.Get)
     }
 
