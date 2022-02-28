@@ -11,6 +11,13 @@ export type SpawnRequestBody = {
     tag?: string;
 }
 
+export type TokenRequestBody = {
+  // eslint-disable-next-line camelcase
+  grace_period?: number;
+  port?: number;
+  tag?: string;
+}
+
 interface ServiceImageResult {
     status: string,
     imageName: string,
@@ -29,6 +36,10 @@ interface SpawnResult {
     name: string,
     readyUrl?: string,
     statusUrl?: string,
+}
+
+interface TokenResult {
+  token: string,
 }
 
 export class AuthenticationError extends Error {
@@ -105,5 +116,10 @@ export class JamsocketApi {
     public streamLogs(backend: string, callback: (line: string) => void): Promise<void> {
       const url = `/api/backend/${backend}/logs`
       return this.makeAuthenticatedStreamRequest(url, callback)
+    }
+
+    public async tokenCreate(username: string, serviceName: string, body: TokenRequestBody): Promise<TokenResult> {
+      const url = `/api/user/${username}/service/${serviceName}/token`
+      return this.makeAuthenticatedRequest(url, HttpMethod.Post, body)
     }
 }
