@@ -57,8 +57,10 @@ export function eventStream(
 ): Promise<void> {
   return new Promise((resolve, reject) => {
     const wrappedURL = new URL(url)
-    const headers = { ...options.headers }
-    headers['Accept'] = 'text/event-stream';
+    const headers = {
+      ...options.headers,
+      Accept: 'text/event-stream',
+    }
 
     const req = https.request({
       ...options,
@@ -67,28 +69,28 @@ export function eventStream(
       headers: headers,
     }, res => {
       res.on('data', (chunk: Buffer) => {
-        const lines = chunk.toString().trim().split(/\n\n/);
-        for (let line of lines) {
-          const match = line.match(/data: ?(.+)/);
+        const lines = chunk.toString().trim().split(/\n\n/)
+        for (const line of lines) {
+          const match = line.match(/data: ?(.+)/)
           if (match) {
             callback(match[1])
           } else {
             try {
-              const parsed = JSON.parse(line);
-              reject(new Error(parsed.error.message));
-            } catch (e) {
-              reject(new Error(`Expected line to start with data:, got ${line}`));
+              const parsed = JSON.parse(line)
+              reject(new Error(parsed.error.message))
+            } catch {
+              reject(new Error(`Expected line to start with data:, got ${line}`))
             }
           }
         }
       })
       res.on('end', () => {
-        resolve();
+        resolve()
       })
     })
     req.on('error', err => {
       reject(err)
     })
-    req.end();
+    req.end()
   })
 }

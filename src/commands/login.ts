@@ -26,8 +26,8 @@ export default class Login extends Command {
     const buff = Buffer.from(`${username}:${password}`, 'utf-8')
     const auth = buff.toString('base64')
 
-    const api = new JamsocketApi(auth);
-    await api.checkAuth();
+    const api = new JamsocketApi(auth)
+    await api.checkAuth()
 
     writeJamsocketConfig({ username: username, auth: auth })
     this.log('Login Succeeded')

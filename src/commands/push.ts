@@ -28,18 +28,18 @@ export default class Push extends Command {
 
     const { args, flags } = await this.parse(Push)
     const { username, auth } = config
-    const api = new JamsocketApi(auth);
-    const containerManager = new ContainerManager();
+    const api = new JamsocketApi(auth)
+    const containerManager = new ContainerManager()
 
-    let prefixedImage = await (await api.serviceImage(username, args.service)).imageName;
+    let prefixedImage = await (await api.serviceImage(username, args.service)).imageName
     if (flags.tag) prefixedImage += `:${flags.tag}`
 
-    this.log("Tagging.");
-    containerManager.tag(args.image, prefixedImage);
+    this.log('Tagging.')
+    containerManager.tag(args.image, prefixedImage)
 
-    this.log("Pushing.");
-    await containerManager.push(prefixedImage, auth);
+    this.log('Pushing.')
+    await containerManager.push(prefixedImage, auth)
 
-    this.log("Done.");
+    this.log('Done.')
   }
 }
