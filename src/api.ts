@@ -135,4 +135,9 @@ export class JamsocketApi {
       const url = `/api/user/${username}/service/${serviceName}/token`
       return this.makeAuthenticatedRequest(url, HttpMethod.Post, body)
     }
+
+    public async tokenSpawn(token: string): Promise<SpawnResult> {
+      const url = `/api/token/${token}/spawn`
+      return this.makeRequest(url, HttpMethod.Post)
+    }
 }

@@ -18,6 +18,7 @@ A CLI for the Jamsocket platform
 * [`jamsocket service list`](#jamsocket-service-list)
 * [`jamsocket spawn SERVICE`](#jamsocket-spawn-service)
 * [`jamsocket token create SERVICE`](#jamsocket-token-create-service)
+* [`jamsocket token spawn TOKEN`](#jamsocket-token-spawn-token)
 
 ## `jamsocket help [COMMAND]`
 
@@ -200,5 +201,20 @@ EXAMPLES
   $ jamsocket token create my-service --port 8080
 
   $ jamsocket token create my-service --tag latest --port 8080 --grace 300
+```
+
+## `jamsocket token spawn TOKEN`
+
+Spawn a backend using a token.
+
+```
+USAGE
+  $ jamsocket token spawn [TOKEN]
+
+DESCRIPTION
+  Spawn a backend using a token.
+
+EXAMPLES
+  $ jamsocket token spawn jNCuGvecEEk706SDm2xYRJc7mqplE2
 ```
 <!-- commandsstop -->
