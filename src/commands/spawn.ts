@@ -16,7 +16,7 @@ export default class Spawn extends Command {
 
   static flags = {
     env: Flags.string({ char: 'e', description: 'optional JSON object of environment variables to pass to the container' }),
-    port: Flags.integer({ char: 'p', description: 'port for jamsocket to send requests to (default is 8080)' }),
+    port: Flags.integer({ char: 'p', description: 'optional port for jamsocket to proxy requests to (default is 8080)' }),
     tag: Flags.string({ char: 't', description: 'optional tag for the service to spawn (default is latest)' }),
   }
 
