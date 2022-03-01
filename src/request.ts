@@ -1,12 +1,13 @@
 import * as https from 'https'
 
 type Header = string | string[] | undefined
+export type Headers = Record<string, Header>
 
 type RequestReturn = {
   body: string;
   statusCode: number | undefined;
   statusMessage: string | undefined;
-  headers: Record<string, Header>;
+  headers: Headers;
 }
 
 export function request(

@@ -17,6 +17,8 @@ A CLI for the Jamsocket platform
 * [`jamsocket service create NAME`](#jamsocket-service-create-name)
 * [`jamsocket service list`](#jamsocket-service-list)
 * [`jamsocket spawn SERVICE`](#jamsocket-spawn-service)
+* [`jamsocket token create SERVICE`](#jamsocket-token-create-service)
+* [`jamsocket token spawn TOKEN`](#jamsocket-token-spawn-token)
 
 ## `jamsocket help [COMMAND]`
 
@@ -158,7 +160,7 @@ USAGE
 
 FLAGS
   -e, --env=<value>   optional JSON object of environment variables to pass to the container
-  -p, --port=<value>  port for jamsocket to send requests to (default is 8080)
+  -p, --port=<value>  optional port for jamsocket to proxy requests to (default is 8080)
   -t, --tag=<value>   optional tag for the service to spawn (default is latest)
 
 DESCRIPTION
@@ -175,4 +177,44 @@ EXAMPLES
 ```
 
 _See code: [dist/commands/spawn.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.0.10/dist/commands/spawn.ts)_
+
+## `jamsocket token create SERVICE`
+
+Generate a token that can be used to spawn the given service.
+
+```
+USAGE
+  $ jamsocket token create [SERVICE] [-g <value>] [-p <value>] [-t <value>]
+
+FLAGS
+  -g, --grace=<value>  optional grace period (in seconds) to wait after last connection is closed before shutting down
+                       container
+  -p, --port=<value>   optional port for jamsocket to proxy requests to (default is 8080)
+  -t, --tag=<value>    optional tag for the service to spawn (default is latest)
+
+DESCRIPTION
+  Generate a token that can be used to spawn the given service.
+
+EXAMPLES
+  $ jamsocket token create my-service
+
+  $ jamsocket token create my-service --port 8080
+
+  $ jamsocket token create my-service --tag latest --port 8080 --grace 300
+```
+
+## `jamsocket token spawn TOKEN`
+
+Spawn a backend using a token.
+
+```
+USAGE
+  $ jamsocket token spawn [TOKEN]
+
+DESCRIPTION
+  Spawn a backend using a token.
+
+EXAMPLES
+  $ jamsocket token spawn jNCuGvecEEk706SDm2xYRJc7mqplE2
+```
 <!-- commandsstop -->
