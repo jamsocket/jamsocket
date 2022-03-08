@@ -13,7 +13,7 @@ export type SpawnRequestBody = {
 
 export type TokenRequestBody = {
   // eslint-disable-next-line camelcase
-  grace_period?: number;
+  grace_period_seconds?: number;
   port?: number;
   tag?: string;
 }

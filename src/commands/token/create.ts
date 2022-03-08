@@ -31,7 +31,7 @@ export default class Create extends Command {
     const body: TokenRequestBody = {}
     if (flags.grace) {
       // eslint-disable-next-line camelcase
-      body.grace_period = flags.grace
+      body.grace_period_seconds = flags.grace
     }
 
     if (flags.port !== undefined) {
