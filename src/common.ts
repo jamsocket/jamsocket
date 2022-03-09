@@ -2,7 +2,8 @@ import { homedir, EOL } from 'os'
 import { resolve, dirname } from 'path'
 import { existsSync, readFileSync, mkdirSync, writeFileSync, unlinkSync } from 'fs'
 
-export const JAMSOCKET_CONFIG = resolve(homedir(), '.jamsocket', 'config.json')
+export const JAMSOCKET_CONFIG_DIR = resolve(homedir(), '.jamsocket')
+const JAMSOCKET_CONFIG = resolve(JAMSOCKET_CONFIG_DIR, 'config.json')
 
 export type JamsocketConfig = {
   username: string;
