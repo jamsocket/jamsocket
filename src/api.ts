@@ -63,7 +63,7 @@ export class JamsocketApi {
       this.apiBase = process.env.JAMSOCKET_SERVER_API ?? 'https://jamsocket.dev'
     }
 
-    private async makeRequest(endpoint: string, method: HttpMethod, headers?: Headers, body?: any): Promise<any> {
+    private async makeRequest(endpoint: string, method: HttpMethod, body?: any, headers?: Headers): Promise<any> {
       const url = `${this.apiBase}${endpoint}`
       const response = await request(url, body || null, { method, headers })
 
@@ -85,7 +85,7 @@ export class JamsocketApi {
     private async makeAuthenticatedRequest(endpoint: string, method: HttpMethod, body?: any): Promise<any> {
       const additionalHeaders = { 'Authorization': `Basic ${this.auth}` }
       try {
-        return this.makeRequest(endpoint, method, additionalHeaders, body)
+        return this.makeRequest(endpoint, method, body, additionalHeaders)
       } catch (error) {
         if (error instanceof HTTPError && error.code < 500) throw new AuthenticationError(error.code, error.message)
       }
@@ -138,6 +138,6 @@ export class JamsocketApi {
 
     public async tokenSpawn(token: string): Promise<SpawnResult> {
       const url = `/api/token/${token}/spawn`
-      return this.makeRequest(url, HttpMethod.Post)
+      return this.makeRequest(url, HttpMethod.Post, {})
     }
 }
