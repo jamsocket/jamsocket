@@ -3,6 +3,7 @@ import { eventStream, request, Headers } from './request'
 enum HttpMethod {
     Get = 'GET',
     Post = 'POST',
+    Delete = 'DELETE'
 }
 
 export type SpawnRequestBody = {
@@ -40,8 +41,12 @@ interface SpawnResult {
     statusUrl?: string,
 }
 
-interface TokenResult {
+interface TokenCreateResult {
   token: string,
+}
+
+interface TokenRevokeResult {
+  status: string,
 }
 
 export class HTTPError extends Error {
@@ -133,9 +138,14 @@ export class JamsocketApi {
       return this.makeAuthenticatedStreamRequest(url, callback)
     }
 
-    public async tokenCreate(username: string, serviceName: string, body: TokenRequestBody): Promise<TokenResult> {
+    public async tokenCreate(username: string, serviceName: string, body: TokenRequestBody): Promise<TokenCreateResult> {
       const url = `/api/user/${username}/service/${serviceName}/token`
       return this.makeAuthenticatedRequest(url, HttpMethod.Post, body)
+    }
+
+    public async tokenRevoke(token: string): Promise<TokenRevokeResult> {
+      const url = `/api/token/${token}`
+      return this.makeAuthenticatedRequest(url, HttpMethod.Delete)
     }
 
     public async tokenSpawn(token: string): Promise<SpawnResult> {

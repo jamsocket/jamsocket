@@ -18,6 +18,7 @@ A CLI for the Jamsocket platform
 * [`jamsocket service list`](#jamsocket-service-list)
 * [`jamsocket spawn SERVICE`](#jamsocket-spawn-service)
 * [`jamsocket token create SERVICE`](#jamsocket-token-create-service)
+* [`jamsocket token revoke TOKEN`](#jamsocket-token-revoke-token)
 * [`jamsocket token spawn TOKEN`](#jamsocket-token-spawn-token)
 
 ## `jamsocket help [COMMAND]`
@@ -205,6 +206,21 @@ EXAMPLES
   $ jamsocket token create my-service --port 8080
 
   $ jamsocket token create my-service --tag latest --port 8080 --grace 300
+```
+
+## `jamsocket token revoke TOKEN`
+
+Revoke a token permanently.
+
+```
+USAGE
+  $ jamsocket token revoke [TOKEN]
+
+DESCRIPTION
+  Revoke a token permanently.
+
+EXAMPLES
+  $ jamsocket token revoke jNCuGvecEEk706SDm2xYRJc7mqplE2
 ```
 
 ## `jamsocket token spawn TOKEN`
