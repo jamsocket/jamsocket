@@ -11,11 +11,13 @@ export default class Spawn extends Command {
     '<%= config.bin %> <%= command.id %> my-service',
     '<%= config.bin %> <%= command.id %> my-service -p 8080',
     '<%= config.bin %> <%= command.id %> my-service -e=\'{"SOME_ENV_VAR": "foo"}\'',
+    '<%= config.bin %> <%= command.id %> my-service -g 60',
     '<%= config.bin %> <%= command.id %> my-service -t latest',
   ]
 
   static flags = {
     env: Flags.string({ char: 'e', description: 'optional JSON object of environment variables to pass to the container' }),
+    grace: Flags.integer({ char: 'g', description: 'optional grace period (in seconds) to wait after last connection is closed before shutting down container' }),
     port: Flags.integer({ char: 'p', description: 'optional port for jamsocket to proxy requests to (default is 8080)' }),
     tag: Flags.string({ char: 't', description: 'optional tag for the service to spawn (default is latest)' }),
   }
@@ -52,6 +54,11 @@ export default class Spawn extends Command {
 
     if (flags.tag) {
       body.tag = flags.tag
+    }
+
+    if (flags.grace) {
+      // eslint-disable-next-line camelcase
+      body.grace_period_seconds = flags.grace
     }
 
     const api = new JamsocketApi(auth)
