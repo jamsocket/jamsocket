@@ -7,6 +7,17 @@ A CLI for the Jamsocket platform
 [![Downloads/week](https://img.shields.io/npm/dw/jamsocket)](https://npmjs.org/package/jamsocket)
 [![License](https://img.shields.io/npm/l/jamsocket)](https://github.com/drifting-in-space/jamsocket-cli/blob/main/LICENSE)
 
+# Install
+
+You may run the Jamsocket CLI without explicitly installing it using `npx jamsocket`. However, this may lead to CLI-version-related issues as [NPX is not guaranteed to run the latest version](https://github.com/npm/cli/issues/4108) and will instead use whatever version was cached with the first usage. For this reason it is recommended that you install the Jamsocket CLI in your project with `npm install jamsocket` first and _then_ use `npx jamsocket`. (When run from your project, this will use the locally-installed `jamsocket`.) You may also install the Jamsocket CLI globally, but it is recommended you use a tool like [Node Version Manager](https://github.com/nvm-sh/nvm#installing-and-updating) to manage your NodeJS binaries. NVM makes sure these binaries are installed under your user so global npm installs do not require root privileges. Once NVM is set up, run `npm install jamsocket --global`.
+
+# Upgrading
+
+```sh
+npm install jamsocket@latest # to update the locally-installed Jamsocket
+npm install jamsocket@latest --global # to update the global installation of Jamsocket
+```
+
 # Commands
 <!-- commands -->
 * [`jamsocket help [COMMAND]`](#jamsocket-help-command)
@@ -39,7 +50,7 @@ DESCRIPTION
   Display help for jamsocket.
 ```
 
-_See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v5.1.11/src/commands/help.ts)_
+_See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v5.1.12/src/commands/help.ts)_
 
 ## `jamsocket login`
 

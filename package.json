@@ -17,7 +17,7 @@
     "/oclif.manifest.json"
   ],
   "dependencies": {
-    "@oclif/core": "^1",
+    "@oclif/core": "^1.6",
     "@oclif/plugin-help": "^5",
     "@oclif/plugin-not-found": "^2.3.1",
     "@oclif/plugin-warn-if-update-available": "^2.0.4"
@@ -28,7 +28,7 @@
     "eslint-config-oclif": "^4",
     "eslint-config-oclif-typescript": "^1.0.2",
     "globby": "^11",
-    "oclif": "^2",
+    "oclif": "^2.6",
     "shx": "^0.3.3",
     "ts-node": "^10.2.1",
     "tslib": "^2.3.1",
@@ -41,6 +41,9 @@
     "topics": {
       "service": {
         "description": "manage jamsocket services"
+      },
+      "token": {
+        "description": "manage spawn tokens"
       }
     },
     "commands": "./dist/commands",
@@ -48,7 +51,11 @@
       "@oclif/plugin-help",
       "@oclif/plugin-not-found",
       "@oclif/plugin-warn-if-update-available"
-    ]
+    ],
+    "warn-if-update-available": {
+      "timeoutInDays": 1,
+      "message": "<%= config.name %> update available from <%= chalk.greenBright(config.version) %> to <%= chalk.greenBright(latest) %>."
+    }
   },
   "scripts": {
     "build": "shx rm -rf dist && tsc -b",
@@ -59,7 +66,7 @@
     "version": "oclif readme && git add README.md"
   },
   "engines": {
-    "node": ">=14.14.0"
+    "node": ">=12.0.0"
   },
   "bugs": "https://github.com/drifting-in-space/jamsocket-cli/issues",
   "keywords": [
