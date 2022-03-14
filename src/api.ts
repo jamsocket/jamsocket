@@ -8,14 +8,12 @@ enum HttpMethod {
 
 export type SpawnRequestBody = {
     env?: Record<string, string>; // env vars always map strings to strings
-    // eslint-disable-next-line camelcase
     grace_period_seconds?: number;
     port?: number;
     tag?: string;
 }
 
 export type TokenRequestBody = {
-  // eslint-disable-next-line camelcase
   grace_period_seconds?: number;
   port?: number;
   tag?: string;
