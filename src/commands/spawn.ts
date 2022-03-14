@@ -57,7 +57,6 @@ export default class Spawn extends Command {
     }
 
     if (flags.grace) {
-      // eslint-disable-next-line camelcase
       body.grace_period_seconds = flags.grace
     }
 
