@@ -72,7 +72,7 @@ export function eventStream(
       res.on('data', (chunk: Buffer) => {
         const lines = chunk.toString().trim().split(/\n\n/)
         for (const line of lines) {
-          const match = line.match(/data: ?(.+)/)
+          const match = line.match(/data: ?(.*)/)
           if (match) {
             callback(match[1])
           } else {
