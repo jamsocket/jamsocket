@@ -1,4 +1,5 @@
 import * as https from 'https'
+import * as http from 'http'
 
 type Header = string | string[] | undefined
 export type Headers = Record<string, Header>
@@ -24,11 +25,17 @@ export function request(
       headers['Content-Type'] = 'application/json'
     }
 
+    let protocol = http;
+    if (wrappedURL.protocol === 'https') {
+      protocol = https as any;
+    }
+
     let result = ''
-    const req = https.request({
+    const req = protocol.request({
       ...options,
       hostname: wrappedURL.hostname,
       path: wrappedURL.pathname,
+      port: wrappedURL.port,
       headers: headers,
     }, res => {
       res.on('data', chunk => {

@@ -62,6 +62,7 @@
     "lint": "eslint . --ext .ts --config .eslintrc",
     "postpack": "shx rm -f oclif.manifest.json",
     "posttest": "npm run lint",
+    "prepare": "npm run build",
     "prepack": "npm run build && oclif manifest && oclif readme",
     "version": "oclif readme && git add README.md"
   },

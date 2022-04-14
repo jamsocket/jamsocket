@@ -65,7 +65,13 @@ export class JamsocketApi {
     apiBase: string
 
     constructor(private auth?: string) {
-      this.apiBase = process.env.JAMSOCKET_SERVER_API ?? 'https://jamsocket.dev'
+      let override = process.env.JAMSOCKET_SERVER_API;
+      if (override !== undefined) {
+        console.warn(`Using Jamsocket server override: ${override}`);
+        this.apiBase = override;
+      } else {
+        this.apiBase = 'https://jamsocket.dev';
+      }
     }
 
     private async makeRequest(endpoint: string, method: HttpMethod, body?: any, headers?: Headers): Promise<any> {

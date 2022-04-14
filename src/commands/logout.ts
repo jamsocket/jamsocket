@@ -2,7 +2,7 @@ import { Command } from '@oclif/core'
 import { deleteJamsocketConfig } from '../common'
 
 export default class Logout extends Command {
-  static description = 'Logs out of jamcr.io container registry and removes locally-stored credentials.'
+  static description = 'Logs out of Jamsocket and removes locally-stored credentials.'
 
   static examples = [
     '<%= config.bin %> <%= command.id %>',
