@@ -9,6 +9,10 @@
     "object-curly-spacing": ["warn", "always"],
     "quote-props": "off",
     "camelcase": "off",
-    "padding-line-between-statements": "off"
+    "padding-line-between-statements": "off",
+    // no-useless-constructor triggers false positives with typescript
+    // constructor assignment.
+    "no-useless-constructor": "off",
+    "max-params": ["warn", 6]
   }
 }

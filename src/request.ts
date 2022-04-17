@@ -25,9 +25,9 @@ export function request(
       headers['Content-Type'] = 'application/json'
     }
 
-    let protocol = http;
+    let protocol = http
     if (wrappedURL.protocol === 'https') {
-      protocol = https as any;
+      protocol = https as any
     }
 
     let result = ''

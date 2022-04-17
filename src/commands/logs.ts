@@ -1,6 +1,5 @@
 import { Command } from '@oclif/core'
-import { readJamsocketConfig } from '../common'
-import { JamsocketApi } from '../api'
+import { Jamsocket } from '../jamsocket'
 
 export default class Logs extends Command {
     static description = 'Stream logs from a running backend.'
@@ -14,16 +13,10 @@ export default class Logs extends Command {
     ]
 
     public async run(): Promise<void> {
-      const config = readJamsocketConfig()
-      if (config === null) {
-        this.error('No user credentials found. Log in with jamsocket login')
-      }
-
+      const jamsocket = await Jamsocket.fromEnvironment()
       const { args } = await this.parse(Logs)
-      const { auth } = config
-      const api = new JamsocketApi(auth)
 
-      await api.streamLogs(args.backend, line => {
+      await jamsocket.streamLogs(args.backend, line => {
         this.log(line)
       })
     }

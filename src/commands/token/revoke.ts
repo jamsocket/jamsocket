@@ -1,6 +1,5 @@
 import { Command } from '@oclif/core'
-import { JamsocketApi } from '../../api'
-import { readJamsocketConfig } from '../../common'
+import { Jamsocket } from '../../jamsocket'
 
 export default class Create extends Command {
   static description = 'Revoke a token permanently.'
@@ -13,14 +12,9 @@ export default class Create extends Command {
 
   public async run(): Promise<void> {
     const { args } = await this.parse(Create)
-    const config = readJamsocketConfig()
-    if (config === null) {
-      this.error('No user credentials found. Log in with jamsocket login')
-    }
+    const jamsocket = Jamsocket.fromEnvironment()
 
-    const { auth } = config
-    const api = new JamsocketApi(auth)
-    await api.tokenRevoke(args.token)
+    await jamsocket.tokenRevoke(args.token)
     this.log(`Revoked token: ${args.token}`)
   }
 }

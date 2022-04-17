@@ -14,12 +14,12 @@ export default class Login extends Command {
   static args = []
 
   public async run(): Promise<void> {
+    const api = JamsocketApi.fromEnvironment()
     const config = readJamsocketConfig()
     if (config !== null) {
       const { auth } = config
-      const api = new JamsocketApi(auth)
       try {
-        await api.checkAuth()
+        await api.checkAuth(auth)
         this.log(`User ${config.username} is already logged in. To log in with a different user, run jamsocket logout first.`)
         return
       } catch (error) {
@@ -34,8 +34,7 @@ export default class Login extends Command {
     const buff = Buffer.from(`${username}:${password}`, 'utf-8')
     const auth = buff.toString('base64')
 
-    const api = new JamsocketApi(auth)
-    await api.checkAuth()
+    await api.checkAuth(auth)
 
     writeJamsocketConfig({ username: username, auth: auth })
     this.log('Login Succeeded')

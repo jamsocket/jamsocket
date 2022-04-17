@@ -21,7 +21,7 @@ export class ContainerManager {
     writeFileSync(configPath, JSON.stringify(config))
 
     await new Promise<void>((resolve, reject) => {
-      const pushProcess = spawn('docker', ['--config', dockerConfigDir, 'push', imageName], { stdio: 'inherit' })
+      const pushProcess = spawn(this.command, ['--config', dockerConfigDir, 'push', imageName], { stdio: 'inherit' })
       pushProcess.on('close', code => {
         if (code === 0) {
           resolve()

@@ -1,6 +1,5 @@
 import { Command, Flags } from '@oclif/core'
-import { JamsocketApi, SpawnRequestBody } from '../api'
-import { readJamsocketConfig } from '../common'
+import { Jamsocket } from '../jamsocket'
 
 const MAX_PORT = (2 ** 16) - 1
 
@@ -26,42 +25,22 @@ export default class Spawn extends Command {
 
   public async run(): Promise<void> {
     const { args, flags } = await this.parse(Spawn)
-    const config = readJamsocketConfig()
-    if (config === null) {
-      this.error('No user credentials found. Log in with jamsocket login')
-    }
 
-    const { username, auth } = config
-    const body: SpawnRequestBody = {}
+    let env
     if (flags.env) {
-      let env
       try {
         env = JSON.parse(flags.env)
       } catch (error) {
         this.error(`Error parsing env. Must be valid JSON. ${error}`)
       }
-
-      body.env = env
     }
 
-    if (flags.port !== undefined) {
-      if (flags.port < 1 || flags.port > MAX_PORT) {
-        this.error(`Error parsing port. Must be an integer >= 1 and <= ${MAX_PORT}. Received for --port: ${flags.port}`)
-      }
-
-      body.port = flags.port
+    if (flags.port !== undefined && (flags.port < 1 || flags.port > MAX_PORT)) {
+      this.error(`Error parsing port. Must be an integer >= 1 and <= ${MAX_PORT}. Received for --port: ${flags.port}`)
     }
 
-    if (flags.tag) {
-      body.tag = flags.tag
-    }
-
-    if (flags.grace) {
-      body.grace_period_seconds = flags.grace
-    }
-
-    const api = new JamsocketApi(auth)
-    const responseBody = await api.spawn(username, args.service, body)
+    const jamsocket = await Jamsocket.fromEnvironment()
+    const responseBody = await jamsocket.spawn(args.service, env, flags.grace, flags.port, flags.tag)
 
     this.log(JSON.stringify(responseBody, null, 2))
   }
