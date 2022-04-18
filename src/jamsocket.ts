@@ -1,6 +1,6 @@
 import { JamsocketApi, ServiceCreateResult, ServiceListResult, SpawnRequestBody, SpawnResult, TokenCreateResult, TokenRequestBody, TokenRevokeResult } from './api'
 import { JamsocketConfig, readJamsocketConfig } from './common'
-import { ContainerManager } from './container-manager'
+import { ContainerManager, detectContainerManager } from './container-manager'
 
 export class Jamsocket {
   constructor(private config: JamsocketConfig | null, private api: JamsocketApi) {}
@@ -22,15 +22,15 @@ export class Jamsocket {
 
   public async serviceImage(service: string): Promise<string> {
     const config = this.expectAuthorized()
-    const result = await this.api.serviceImage(config.username, service, config.auth);
+    const result = await this.api.serviceImage(config.username, service, config.auth)
     return result.imageName
   }
 
   public async push(service: string, image: string, tag?: string): Promise<void> {
     const config = this.expectAuthorized()
-    const containerManager = new ContainerManager()
+    const containerManager: ContainerManager = detectContainerManager()
 
-    let prefixedImage = await this.serviceImage(service);
+    let prefixedImage = await this.serviceImage(service)
     if (tag) prefixedImage += `:${tag}`
 
     console.log('Tagging.')
