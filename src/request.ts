@@ -26,7 +26,7 @@ export function request(
     }
 
     let protocol = http
-    if (wrappedURL.protocol === 'https') {
+    if (wrappedURL.protocol === 'https:') {
       protocol = https as any
     }
 
