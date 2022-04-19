@@ -14,7 +14,7 @@ type RequestReturn = {
 export function request(
   url: string,
   body: Record<string, unknown> | null,
-  options: Record<string, any>,
+  options: https.RequestOptions,
 ): Promise<RequestReturn> {
   return new Promise((resolve, reject) => {
     const wrappedURL = new URL(url)
@@ -25,9 +25,9 @@ export function request(
       headers['Content-Type'] = 'application/json'
     }
 
-    let protocol = http
-    if (wrappedURL.protocol === 'https:') {
-      protocol = https as any
+    let protocol = https
+    if (wrappedURL.protocol === 'http:') {
+      protocol = http as any
     }
 
     let result = ''

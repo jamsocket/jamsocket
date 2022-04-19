@@ -1,4 +1,5 @@
 import { eventStream, request, Headers } from './request'
+import * as https from 'https'
 
 enum HttpMethod {
   Get = 'GET',
@@ -62,7 +63,7 @@ export class AuthenticationError extends HTTPError {
 }
 
 export class JamsocketApi {
-  constructor(private apiBase: string) {}
+  constructor(private apiBase: string, private options: https.RequestOptions = {}) {}
 
   public static fromEnvironment(): JamsocketApi {
     const override = process.env.JAMSOCKET_SERVER_API
@@ -74,12 +75,12 @@ export class JamsocketApi {
       apiBase = override
     }
 
-    return new JamsocketApi(apiBase)
+    return new JamsocketApi(apiBase, {})
   }
 
   private async makeRequest(endpoint: string, method: HttpMethod, body?: any, headers?: Headers): Promise<any> {
     const url = `${this.apiBase}${endpoint}`
-    const response = await request(url, body || null, { method, headers })
+    const response = await request(url, body || null, { method, headers, ...this.options })
 
     if (response.headers['content-type'] !== 'application/json') {
       throw new Error(`Unexpected code from server, HTTP ${response.statusCode}. Url was: ${url}.`)
