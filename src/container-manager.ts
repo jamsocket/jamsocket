@@ -10,14 +10,14 @@ export interface ContainerManager {
 }
 
 export function detectContainerManager(): ContainerManager {
-  const podmanResult = spawnSync('docker', ['-v'], { stdio: 'inherit' })
-  if (podmanResult.status === 0) {
+  const dockerResult = spawnSync('docker', ['-v'], { stdio: 'inherit' })
+  if (dockerResult.status === 0) {
     console.log('Using docker')
     return new DockerContainerManager('docker')  
   }
 
-  const dockerResult = spawnSync('podman', ['-v'], { stdio: 'inherit' })
-  if (dockerResult.status === 0) {
+  const podmanResult = spawnSync('podman', ['-v'], { stdio: 'inherit' })
+  if (podmanResult.status === 0) {
     console.log('Using podman')
     return new PodmanContainerManager('podman')
   }

@@ -80,7 +80,7 @@ export class JamsocketApi {
 
   private async makeRequest(endpoint: string, method: HttpMethod, body?: any, headers?: Headers): Promise<any> {
     const url = `${this.apiBase}${endpoint}`
-    const response = await request(url, body || null, { method, headers, ...this.options })
+    const response = await request(url, body || null, { ...this.options, method, headers })
 
     if (response.headers['content-type'] !== 'application/json') {
       throw new Error(`Unexpected code from server, HTTP ${response.statusCode}. Url was: ${url}.`)

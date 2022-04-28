@@ -42,7 +42,7 @@ export class Jamsocket {
     console.log('Done.')
   }
 
-  public spawn(service: string, env: Record<string, string>, grace?: number, port?: number, tag?: string): Promise<SpawnResult> {
+  public spawn(service: string, env?: Record<string, string>, grace?: number, port?: number, tag?: string): Promise<SpawnResult> {
     const config = this.expectAuthorized()
 
     const body: SpawnRequestBody = {
