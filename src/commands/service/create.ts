@@ -1,6 +1,5 @@
 import { Command } from '@oclif/core'
-import { JamsocketApi } from '../../api'
-import { readJamsocketConfig } from '../../common'
+import { Jamsocket } from '../../jamsocket'
 
 export default class Create extends Command {
   static description = 'Creates a service'
@@ -13,15 +12,9 @@ export default class Create extends Command {
 
   public async run(): Promise<void> {
     const { args } = await this.parse(Create)
-    const config = readJamsocketConfig()
-    if (config === null) {
-      this.error('No user credentials found. Log in with jamsocket login')
-    }
 
-    const { username, auth } = config
-
-    const api = new JamsocketApi(auth)
-    await api.serviceCreate(username, args.name)
+    const jamsocket = await Jamsocket.fromEnvironment()
+    await jamsocket.serviceCreate(args.name)
 
     this.log(`Created service: ${args.name}`)
   }

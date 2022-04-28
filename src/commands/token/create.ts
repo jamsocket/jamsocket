@@ -1,6 +1,5 @@
 import { Command, Flags } from '@oclif/core'
-import { JamsocketApi, TokenRequestBody } from '../../api'
-import { readJamsocketConfig } from '../../common'
+import { Jamsocket } from '../../jamsocket'
 
 const MAX_PORT = (2 ** 16) - 1
 
@@ -23,32 +22,14 @@ export default class Create extends Command {
 
   public async run(): Promise<void> {
     const { args, flags } = await this.parse(Create)
-    const config = readJamsocketConfig()
-    if (config === null) {
-      this.error('No user credentials found. Log in with jamsocket login')
+
+    if (flags.port !== undefined && (flags.port < 1 || flags.port > MAX_PORT)) {
+      this.error(`Error parsing port. Must be an integer >= 1 and <= ${MAX_PORT}. Received for --port: ${flags.port}`)
     }
 
-    const body: TokenRequestBody = {}
-    if (flags.grace) {
-      body.grace_period_seconds = flags.grace
-    }
+    const jamsocket = Jamsocket.fromEnvironment()
 
-    if (flags.port !== undefined) {
-      if (flags.port < 1 || flags.port > MAX_PORT) {
-        this.error(`Error parsing port. Must be an integer >= 1 and <= ${MAX_PORT}. Received for --port: ${flags.port}`)
-      }
-
-      body.port = flags.port
-    }
-
-    if (flags.tag) {
-      body.tag = flags.tag
-    }
-
-    const { username, auth } = config
-
-    const api = new JamsocketApi(auth)
-    const { token } = await api.tokenCreate(username, args.service, body)
+    const { token } = await jamsocket.tokenCreate(args.service, flags.grace, flags.port, flags.tag)
     this.log(token)
   }
 }

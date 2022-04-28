@@ -1,6 +1,5 @@
 import { Command } from '@oclif/core'
-import { JamsocketApi } from '../../api'
-import { readJamsocketConfig } from '../../common'
+import { Jamsocket } from '../../jamsocket'
 
 export default class List extends Command {
   static description = 'List services for the logged-in user'
@@ -10,17 +9,10 @@ export default class List extends Command {
   ]
 
   public async run(): Promise<void> {
-    const config = readJamsocketConfig()
-    if (config === null) {
-      this.error('No user credentials found. Log in with jamsocket login')
-    }
+    const jamsocket = Jamsocket.fromEnvironment()
+    const responseBody = await jamsocket.serviceList()
 
-    const { username, auth } = config
-    const api = new JamsocketApi(auth)
-    const responseBody = await api.serviceList(username)
-    const services = responseBody.services
-
-    for (const service of services) {
+    for (const service of responseBody.services) {
       this.log(service)
     }
   }

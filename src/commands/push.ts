@@ -1,7 +1,5 @@
 import { Command, Flags } from '@oclif/core'
-import { readJamsocketConfig } from '../common'
-import { JamsocketApi } from '../api'
-import { ContainerManager } from '../container-manager'
+import { Jamsocket } from '../jamsocket'
 
 export default class Push extends Command {
   static description = 'Pushes a docker image to the jamcr.io container registry under your logged in user\'s name'
@@ -21,25 +19,8 @@ export default class Push extends Command {
   ]
 
   public async run(): Promise<void> {
-    const config = readJamsocketConfig()
-    if (config === null) {
-      this.error('No user credentials found. Log in with jamsocket login')
-    }
-
+    const jamsocket = await Jamsocket.fromEnvironment()
     const { args, flags } = await this.parse(Push)
-    const { username, auth } = config
-    const api = new JamsocketApi(auth)
-    const containerManager = new ContainerManager()
-
-    let prefixedImage = await (await api.serviceImage(username, args.service)).imageName
-    if (flags.tag) prefixedImage += `:${flags.tag}`
-
-    this.log('Tagging.')
-    containerManager.tag(args.image, prefixedImage)
-
-    this.log('Pushing.')
-    await containerManager.push(prefixedImage, auth)
-
-    this.log('Done.')
+    await jamsocket.push(args.service, args.image, flags.tag)
   }
 }
