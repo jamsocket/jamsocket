@@ -13,7 +13,7 @@ export default class Create extends Command {
   public async run(): Promise<void> {
     const { args } = await this.parse(Create)
 
-    const jamsocket = await Jamsocket.fromEnvironment()
+    const jamsocket = Jamsocket.fromEnvironment()
     await jamsocket.serviceCreate(args.name)
 
     this.log(`Created service: ${args.name}`)

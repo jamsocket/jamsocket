@@ -70,7 +70,7 @@ export class Jamsocket {
     return this.api.streamLogs(backend, config.auth, callback)
   }
 
-  public async tokenCreate(service: string, grace?: number, port?: number, tag?: string): Promise<TokenCreateResult> {
+  public tokenCreate(service: string, grace?: number, port?: number, tag?: string): Promise<TokenCreateResult> {
     const config = this.expectAuthorized()
     const body: TokenRequestBody = {
       grace_period_seconds: grace,
