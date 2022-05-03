@@ -1,5 +1,5 @@
 import { JamsocketApi, ServiceCreateResult, ServiceListResult, SpawnRequestBody, SpawnResult, TokenCreateResult, TokenRequestBody, TokenRevokeResult } from './api'
-import { JamsocketConfig, readJamsocketConfig } from './common'
+import { JamsocketConfig, readJamsocketConfig } from './jamsocket-config'
 import { ContainerManager, detectContainerManager } from './container-manager'
 
 export class Jamsocket {

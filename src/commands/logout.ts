@@ -1,5 +1,5 @@
 import { Command } from '@oclif/core'
-import { deleteJamsocketConfig } from '../common'
+import { deleteJamsocketConfig } from '../jamsocket-config'
 
 export default class Logout extends Command {
   static description = 'Logs out of Jamsocket and removes locally-stored credentials.'

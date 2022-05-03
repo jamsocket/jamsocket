@@ -1,7 +1,7 @@
 import { spawn, spawnSync } from 'child_process'
 import { mkdirSync, writeFileSync } from 'fs'
 import { join } from 'path'
-import { JAMSOCKET_CONFIG_DIR } from './common'
+import { JAMSOCKET_CONFIG_DIR } from './jamsocket-config'
 
 export interface ContainerManager {
   push(imageName: string, auth: string): Promise<void>;
