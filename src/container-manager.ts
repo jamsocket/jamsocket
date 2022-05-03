@@ -13,7 +13,7 @@ export function detectContainerManager(): ContainerManager {
   const dockerResult = spawnSync('docker', ['-v'], { stdio: 'inherit' })
   if (dockerResult.status === 0) {
     console.log('Using docker')
-    return new DockerContainerManager('docker')  
+    return new DockerContainerManager('docker')
   }
 
   const podmanResult = spawnSync('podman', ['-v'], { stdio: 'inherit' })
@@ -21,7 +21,7 @@ export function detectContainerManager(): ContainerManager {
     console.log('Using podman')
     return new PodmanContainerManager('podman')
   }
-  
+
   throw new Error('No container manager found on path (tried docker and podman.)')
 }
 

@@ -13,7 +13,7 @@ export default class Logs extends Command {
     ]
 
     public async run(): Promise<void> {
-      const jamsocket = await Jamsocket.fromEnvironment()
+      const jamsocket = Jamsocket.fromEnvironment()
       const { args } = await this.parse(Logs)
 
       await jamsocket.streamLogs(args.backend, line => {

@@ -19,7 +19,7 @@ export default class Push extends Command {
   ]
 
   public async run(): Promise<void> {
-    const jamsocket = await Jamsocket.fromEnvironment()
+    const jamsocket = Jamsocket.fromEnvironment()
     const { args, flags } = await this.parse(Push)
     await jamsocket.push(args.service, args.image, flags.tag)
   }

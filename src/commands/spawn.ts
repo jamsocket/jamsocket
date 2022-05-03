@@ -39,7 +39,7 @@ export default class Spawn extends Command {
       this.error(`Error parsing port. Must be an integer >= 1 and <= ${MAX_PORT}. Received for --port: ${flags.port}`)
     }
 
-    const jamsocket = await Jamsocket.fromEnvironment()
+    const jamsocket = Jamsocket.fromEnvironment()
     const responseBody = await jamsocket.spawn(args.service, env, flags.grace, flags.port, flags.tag)
 
     this.log(JSON.stringify(responseBody, null, 2))
