@@ -71,14 +71,14 @@ _See code: [dist/commands/login.ts](https://github.com/drifting-in-space/jamsock
 
 ## `jamsocket logout`
 
-Logs out of jamcr.io container registry and removes locally-stored credentials.
+Logs out of Jamsocket and removes locally-stored credentials.
 
 ```
 USAGE
   $ jamsocket logout
 
 DESCRIPTION
-  Logs out of jamcr.io container registry and removes locally-stored credentials.
+  Logs out of Jamsocket and removes locally-stored credentials.
 
 EXAMPLES
   $ jamsocket logout
@@ -171,11 +171,11 @@ USAGE
   $ jamsocket spawn [SERVICE] [-e <value>] [-g <value>] [-p <value>] [-t <value>]
 
 FLAGS
-  -e, --env=<value>    optional JSON object of environment variables to pass to the container
-  -g, --grace=<value>  optional grace period (in seconds) to wait after last connection is closed before shutting down
-                       container
-  -p, --port=<value>   optional port for jamsocket to proxy requests to (default is 8080)
-  -t, --tag=<value>    optional tag for the service to spawn (default is latest)
+  -e, --env=<value>...  optional environment variables to pass to the container
+  -g, --grace=<value>   optional grace period (in seconds) to wait after last connection is closed before shutting down
+                        container
+  -p, --port=<value>    optional port for jamsocket to proxy requests to (default is 8080)
+  -t, --tag=<value>     optional tag for the service to spawn (default is latest)
 
 DESCRIPTION
   Spawns a session-lived application backend from the provided docker image
@@ -185,7 +185,7 @@ EXAMPLES
 
   $ jamsocket spawn my-service -p 8080
 
-  $ jamsocket spawn my-service -e='{"SOME_ENV_VAR": "foo"}'
+  $ jamsocket spawn my-service -e SOME_ENV_VAR=foo -e ANOTHER_ENV_VAR=bar
 
   $ jamsocket spawn my-service -g 60
 
