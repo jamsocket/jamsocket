@@ -1,7 +1,7 @@
 import { spawn, spawnSync } from 'child_process'
 import { mkdirSync, writeFileSync } from 'fs'
 import { join } from 'path'
-import { JAMSOCKET_CONFIG_DIR } from './common'
+import { JAMSOCKET_CONFIG_DIR } from './jamsocket-config'
 
 export interface ContainerManager {
   push(imageName: string, auth: string): Promise<void>;
@@ -13,7 +13,7 @@ export function detectContainerManager(): ContainerManager {
   const dockerResult = spawnSync('docker', ['-v'], { stdio: 'inherit' })
   if (dockerResult.status === 0) {
     console.log('Using docker')
-    return new DockerContainerManager('docker')  
+    return new DockerContainerManager('docker')
   }
 
   const podmanResult = spawnSync('podman', ['-v'], { stdio: 'inherit' })
@@ -21,7 +21,7 @@ export function detectContainerManager(): ContainerManager {
     console.log('Using podman')
     return new PodmanContainerManager('podman')
   }
-  
+
   throw new Error('No container manager found on path (tried docker and podman.)')
 }
 

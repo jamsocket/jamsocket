@@ -1,6 +1,6 @@
 import { Command, CliUx } from '@oclif/core'
 import { JamsocketApi, AuthenticationError } from '../api'
-import { readJamsocketConfig, writeJamsocketConfig } from '../common'
+import { readJamsocketConfig, writeJamsocketConfig } from '../jamsocket-config'
 
 export default class Login extends Command {
   static description = 'Authenticates user with jamcr.io container registery'

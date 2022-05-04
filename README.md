@@ -67,24 +67,24 @@ EXAMPLES
   $ jamsocket login
 ```
 
-_See code: [dist/commands/login.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.0.15/dist/commands/login.ts)_
+_See code: [dist/commands/login.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.1.0/dist/commands/login.ts)_
 
 ## `jamsocket logout`
 
-Logs out of jamcr.io container registry and removes locally-stored credentials.
+Logs out of Jamsocket and removes locally-stored credentials.
 
 ```
 USAGE
   $ jamsocket logout
 
 DESCRIPTION
-  Logs out of jamcr.io container registry and removes locally-stored credentials.
+  Logs out of Jamsocket and removes locally-stored credentials.
 
 EXAMPLES
   $ jamsocket logout
 ```
 
-_See code: [dist/commands/logout.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.0.15/dist/commands/logout.ts)_
+_See code: [dist/commands/logout.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.1.0/dist/commands/logout.ts)_
 
 ## `jamsocket logs BACKEND`
 
@@ -104,7 +104,7 @@ EXAMPLES
   $ jamsocket logs f7em2
 ```
 
-_See code: [dist/commands/logs.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.0.15/dist/commands/logs.ts)_
+_See code: [dist/commands/logs.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.1.0/dist/commands/logs.ts)_
 
 ## `jamsocket push SERVICE IMAGE`
 
@@ -130,7 +130,7 @@ EXAMPLES
   $ jamsocket push my-service my-image -t my-tag
 ```
 
-_See code: [dist/commands/push.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.0.15/dist/commands/push.ts)_
+_See code: [dist/commands/push.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.1.0/dist/commands/push.ts)_
 
 ## `jamsocket service create NAME`
 
@@ -171,11 +171,11 @@ USAGE
   $ jamsocket spawn [SERVICE] [-e <value>] [-g <value>] [-p <value>] [-t <value>]
 
 FLAGS
-  -e, --env=<value>    optional JSON object of environment variables to pass to the container
-  -g, --grace=<value>  optional grace period (in seconds) to wait after last connection is closed before shutting down
-                       container
-  -p, --port=<value>   optional port for jamsocket to proxy requests to (default is 8080)
-  -t, --tag=<value>    optional tag for the service to spawn (default is latest)
+  -e, --env=<value>...  optional environment variables to pass to the container
+  -g, --grace=<value>   optional grace period (in seconds) to wait after last connection is closed before shutting down
+                        container
+  -p, --port=<value>    optional port for jamsocket to proxy requests to (default is 8080)
+  -t, --tag=<value>     optional tag for the service to spawn (default is latest)
 
 DESCRIPTION
   Spawns a session-lived application backend from the provided docker image
@@ -185,14 +185,14 @@ EXAMPLES
 
   $ jamsocket spawn my-service -p 8080
 
-  $ jamsocket spawn my-service -e='{"SOME_ENV_VAR": "foo"}'
+  $ jamsocket spawn my-service -e SOME_ENV_VAR=foo -e ANOTHER_ENV_VAR=bar
 
   $ jamsocket spawn my-service -g 60
 
   $ jamsocket spawn my-service -t latest
 ```
 
-_See code: [dist/commands/spawn.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.0.15/dist/commands/spawn.ts)_
+_See code: [dist/commands/spawn.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.1.0/dist/commands/spawn.ts)_
 
 ## `jamsocket token create SERVICE`
 
