@@ -4,8 +4,6 @@ jamsocket
 A CLI for the Jamsocket platform
 
 [![Version](https://img.shields.io/npm/v/jamsocket)](https://npmjs.org/package/jamsocket)
-[![Downloads/week](https://img.shields.io/npm/dw/jamsocket)](https://npmjs.org/package/jamsocket)
-[![License](https://img.shields.io/npm/l/jamsocket)](https://github.com/drifting-in-space/jamsocket-cli/blob/main/LICENSE)
 
 # Install
 
