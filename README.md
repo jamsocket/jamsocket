@@ -1,5 +1,5 @@
-jamsocket
-=========
+Jamsocket CLI
+=============
 
 A CLI for the Jamsocket platform
 
