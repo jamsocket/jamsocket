@@ -88,7 +88,7 @@ export class JamsocketApi {
     const response = await request(url, body || null, { ...this.options, method, headers })
 
     if (response.headers['content-type'] !== 'application/json') {
-      throw new Error(`Unexpected code from server, HTTP ${response.statusCode}. Url was: ${url}.`)
+      throw new Error(`Unexpected content-type: ${response.headers['content-type']}. Url was: ${url}.`)
     }
 
     let responseBody
