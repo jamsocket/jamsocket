@@ -62,8 +62,13 @@ export class AuthenticationError extends HTTPError {
   }
 }
 
+export interface StatusMessage {
+  state: string,
+  time: Date,
+}
+
 export class JamsocketApi {
-  constructor(private apiBase: string, private options: https.RequestOptions = {}) {}
+  constructor(private apiBase: string, private options: https.RequestOptions = {}) { }
 
   public static fromEnvironment(): JamsocketApi {
     const override = process.env.JAMSOCKET_SERVER_API
@@ -113,6 +118,7 @@ export class JamsocketApi {
   private async makeAuthenticatedStreamRequest(endpoint: string, auth: string, callback: (line: string) => void): Promise<void> {
     const url = `${this.apiBase}${endpoint}`
     return eventStream(url, {
+      ...this.options,
       method: HttpMethod.Get,
       headers: { 'Authorization': `Basic ${auth}` },
     }, callback)
@@ -148,6 +154,18 @@ export class JamsocketApi {
   public streamLogs(backend: string, auth: string, callback: (line: string) => void): Promise<void> {
     const url = `/api/backend/${backend}/logs`
     return this.makeAuthenticatedStreamRequest(url, auth, callback)
+  }
+
+  public streamStatus(backend: string, auth: string, callback: (statusMessage: StatusMessage) => void): Promise<void> {
+    const url = `/api/backend/${backend}/status/stream`
+    const wrappedCallback = (line: string) => {
+      const val = JSON.parse(line)
+      callback({
+        state: val.state,
+        time: new Date(val.time),
+      })
+    }
+    return this.makeAuthenticatedStreamRequest(url, auth, wrappedCallback)
   }
 
   public async tokenCreate(username: string, serviceName: string, auth: string, body: TokenRequestBody): Promise<TokenCreateResult> {

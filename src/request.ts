@@ -60,7 +60,7 @@ export function request(
 
 export function eventStream(
   url: string,
-  options: Record<string, any>,
+  options: https.RequestOptions,
   callback: (line: string) => void,
 ): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -76,6 +76,10 @@ export function eventStream(
       path: wrappedURL.pathname,
       headers: headers,
     }, res => {
+      if (res.statusCode !== 200) {
+        reject(new Error("Non-200 status code from API on event stream."))
+      }
+
       res.on('data', (chunk: Buffer) => {
         const lines = chunk.toString().trim().split(/\n\n/)
         for (const line of lines) {

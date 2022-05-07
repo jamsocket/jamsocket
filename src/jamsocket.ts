@@ -1,4 +1,4 @@
-import { JamsocketApi, ServiceCreateResult, ServiceListResult, SpawnRequestBody, SpawnResult, TokenCreateResult, TokenRequestBody, TokenRevokeResult } from './api'
+import { JamsocketApi, ServiceCreateResult, ServiceListResult, SpawnRequestBody, SpawnResult, StatusMessage, TokenCreateResult, TokenRequestBody, TokenRevokeResult } from './api'
 import { JamsocketConfig, readJamsocketConfig } from './jamsocket-config'
 import { ContainerManager, detectContainerManager } from './container-manager'
 
@@ -68,6 +68,11 @@ export class Jamsocket {
   public streamLogs(backend: string, callback: (v: string) => void): Promise<void> {
     const config = this.expectAuthorized()
     return this.api.streamLogs(backend, config.auth, callback)
+  }
+
+  public streamStatus(backend: string, callback: (v: StatusMessage) => void): Promise<void> {
+    const config = this.expectAuthorized()
+    return this.api.streamStatus(backend, config.auth, callback)
   }
 
   public tokenCreate(service: string, grace?: number, port?: number, tag?: string): Promise<TokenCreateResult> {
