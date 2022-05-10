@@ -165,13 +165,12 @@ Spawns a session-lived application backend from the provided docker image
 
 ```
 USAGE
-  $ jamsocket spawn [SERVICE] [-e <value>] [-g <value>] [-p <value>] [-t <value>]
+  $ jamsocket spawn [SERVICE] [-e <value>] [-g <value>] [-t <value>]
 
 FLAGS
   -e, --env=<value>...  optional environment variables to pass to the container
   -g, --grace=<value>   optional grace period (in seconds) to wait after last connection is closed before shutting down
                         container
-  -p, --port=<value>    optional port for jamsocket to proxy requests to (default is 8080)
   -t, --tag=<value>     optional tag for the service to spawn (default is latest)
 
 DESCRIPTION
