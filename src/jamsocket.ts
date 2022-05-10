@@ -33,7 +33,7 @@ export class Jamsocket {
     let prefixedImage = await this.serviceImage(service)
     if (tag) prefixedImage += `:${tag}`
 
-    console.log('Tagging.')
+    console.log(`Tagging (${prefixedImage}).`)
     containerManager.tag(image, prefixedImage)
 
     console.log('Pushing.')
@@ -42,7 +42,7 @@ export class Jamsocket {
     console.log('Done.')
   }
 
-  public spawn(service: string, env?: Record<string, string>, grace?: number, port?: number, tag?: string): Promise<SpawnResult> {
+  public spawn(service: string, env?: Record<string, string>, grace?: number, port?: number, tag?: string, cluster?: string): Promise<SpawnResult> {
     const config = this.expectAuthorized()
 
     const body: SpawnRequestBody = {
@@ -50,6 +50,7 @@ export class Jamsocket {
       grace_period_seconds: grace,
       port,
       tag,
+      cluster,
     }
 
     return this.api.spawn(config.username, service, config.auth, body)
