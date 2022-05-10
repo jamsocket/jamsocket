@@ -21,6 +21,7 @@ export default class Spawn extends Command {
     grace: Flags.integer({ char: 'g', description: 'optional grace period (in seconds) to wait after last connection is closed before shutting down container' }),
     port: Flags.integer({ char: 'p', description: 'optional port for jamsocket to proxy requests to (default is 8080)' }),
     tag: Flags.string({ char: 't', description: 'optional tag for the service to spawn (default is latest)' }),
+    cluster: Flags.string({ char: 'c', description: 'optional cluster to spawn onto (default is jamsocket.run)'}),
   }
 
   static args = [{ name: 'service', required: true }]
@@ -35,7 +36,7 @@ export default class Spawn extends Command {
     }
 
     const jamsocket = Jamsocket.fromEnvironment()
-    const responseBody = await jamsocket.spawn(args.service, env, flags.grace, flags.port, flags.tag)
+    const responseBody = await jamsocket.spawn(args.service, env, flags.grace, flags.port, flags.tag, flags.cluster)
 
     this.log(JSON.stringify(responseBody, null, 2))
   }
