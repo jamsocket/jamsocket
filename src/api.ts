@@ -69,7 +69,7 @@ export interface StatusMessage {
 }
 
 export class JamsocketApi {
-  constructor(private apiBase: string, private options: https.RequestOptions = {}) { }
+  constructor(private apiBase: string, private options: https.RequestOptions = {}) {}
 
   public static fromEnvironment(): JamsocketApi {
     const override = process.env.JAMSOCKET_SERVER_API

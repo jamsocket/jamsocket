@@ -9,7 +9,6 @@ export default class Spawn extends Command {
 
   static examples = [
     '<%= config.bin %> <%= command.id %> my-service',
-    '<%= config.bin %> <%= command.id %> my-service -p 8080',
     '<%= config.bin %> <%= command.id %> my-service -e SOME_ENV_VAR=foo -e ANOTHER_ENV_VAR=bar',
     '<%= config.bin %> <%= command.id %> my-service -g 60',
     '<%= config.bin %> <%= command.id %> my-service -t latest',
@@ -21,7 +20,7 @@ export default class Spawn extends Command {
     grace: Flags.integer({ char: 'g', description: 'optional grace period (in seconds) to wait after last connection is closed before shutting down container' }),
     port: Flags.integer({ char: 'p', description: 'optional port for jamsocket to proxy requests to (default is 8080)', hidden: true }),
     tag: Flags.string({ char: 't', description: 'optional tag for the service to spawn (default is latest)' }),
-    cluster: Flags.string({ char: 'c', description: 'optional cluster to spawn onto (default is jamsocket.run)', hidden: true}),
+    cluster: Flags.string({ char: 'c', description: 'optional cluster to spawn onto (default is jamsocket.run)', hidden: true }),
   }
 
   static args = [{ name: 'service', required: true }]

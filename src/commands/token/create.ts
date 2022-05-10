@@ -8,13 +8,12 @@ export default class Create extends Command {
 
   static examples = [
     '<%= config.bin %> <%= command.id %> my-service',
-    '<%= config.bin %> <%= command.id %> my-service --port 8080',
-    '<%= config.bin %> <%= command.id %> my-service --tag latest --port 8080 --grace 300',
+    '<%= config.bin %> <%= command.id %> my-service --tag latest --grace 300',
   ]
 
   static flags = {
     grace: Flags.integer({ char: 'g', description: 'optional grace period (in seconds) to wait after last connection is closed before shutting down container' }),
-    port: Flags.integer({ char: 'p', description: 'optional port for jamsocket to proxy requests to (default is 8080)' }),
+    port: Flags.integer({ char: 'p', hidden: true, description: 'optional port for jamsocket to proxy requests to (default is 8080)' }),
     tag: Flags.string({ char: 't', description: 'optional tag for the service to spawn (default is latest)' }),
   }
 
