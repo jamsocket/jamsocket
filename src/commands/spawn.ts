@@ -19,9 +19,9 @@ export default class Spawn extends Command {
     // passing { multiple: true } here due to a bug: https://github.com/oclif/core/pull/414
     env: customFlags.env({ multiple: true }),
     grace: Flags.integer({ char: 'g', description: 'optional grace period (in seconds) to wait after last connection is closed before shutting down container' }),
-    port: Flags.integer({ char: 'p', description: 'optional port for jamsocket to proxy requests to (default is 8080)' }),
+    port: Flags.integer({ char: 'p', description: 'optional port for jamsocket to proxy requests to (default is 8080)', hidden: true }),
     tag: Flags.string({ char: 't', description: 'optional tag for the service to spawn (default is latest)' }),
-    cluster: Flags.string({ char: 'c', description: 'optional cluster to spawn onto (default is jamsocket.run)'}),
+    cluster: Flags.string({ char: 'c', description: 'optional cluster to spawn onto (default is jamsocket.run)', hidden: true}),
   }
 
   static args = [{ name: 'service', required: true }]
