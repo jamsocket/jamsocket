@@ -77,7 +77,7 @@ export function eventStream(
       headers: headers,
     }, res => {
       if (res.statusCode !== 200) {
-        reject(new Error("Non-200 status code from API on event stream."))
+        reject(new Error('Non-200 status code from API on event stream.'))
       }
 
       res.on('data', (chunk: Buffer) => {

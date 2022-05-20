@@ -81,7 +81,19 @@ export class JamsocketApi {
       apiBase = override
     }
 
-    return new JamsocketApi(apiBase, {})
+    const allowInsecure = process.env.ALLOW_INSECURE === 'true'
+    let rejectUnauthorized
+    if (allowInsecure) {
+      if (override === undefined) {
+        console.warn('Insecure connections are only allowed when overriding the Jamsocket server. (Ignoring env var ALLOW_INSECURE)')
+        rejectUnauthorized = true
+      } else {
+        console.warn('Allowing insecure connections. (Found env var ALLOW_INSECURE)')
+        rejectUnauthorized = false
+      }
+    }
+
+    return new JamsocketApi(apiBase, { rejectUnauthorized })
   }
 
   private async makeRequest(endpoint: string, method: HttpMethod, body?: any, headers?: Headers): Promise<any> {
