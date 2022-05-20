@@ -8,19 +8,19 @@
   },
   "homepage": "https://github.com/drifting-in-space/jamsocket-cli",
   "license": "MIT",
-  "main": "dist/index.js",
+  "main": "lib/index.js",
   "repository": "drifting-in-space/jamsocket-cli",
   "files": [
     "/bin",
-    "/dist",
+    "/lib",
     "/npm-shrinkwrap.json",
     "/oclif.manifest.json"
   ],
   "dependencies": {
-    "@oclif/core": "^1.6",
-    "@oclif/plugin-help": "^5",
-    "@oclif/plugin-not-found": "^2.3.1",
-    "@oclif/plugin-warn-if-update-available": "^2.0.4"
+    "@oclif/core": "1.9.0",
+    "@oclif/plugin-help": "5.1.12",
+    "@oclif/plugin-not-found": "2.3.1",
+    "@oclif/plugin-warn-if-update-available": "2.0.4"
   },
   "devDependencies": {
     "@types/node": "^16.9.4",
@@ -28,7 +28,7 @@
     "eslint-config-oclif": "^4",
     "eslint-config-oclif-typescript": "^1.0.2",
     "globby": "^11",
-    "oclif": "^2.6",
+    "oclif": "3.0.1",
     "shx": "^0.3.3",
     "ts-node": "^10.2.1",
     "tslib": "^2.3.1",
@@ -46,7 +46,7 @@
         "description": "manage spawn tokens"
       }
     },
-    "commands": "./dist/commands",
+    "commands": "./lib/commands",
     "plugins": [
       "@oclif/plugin-help",
       "@oclif/plugin-not-found",
@@ -58,7 +58,7 @@
     }
   },
   "scripts": {
-    "build": "shx rm -rf dist && tsc -b",
+    "build": "shx rm -rf lib && tsc -b",
     "lint": "eslint . --ext .ts --config .eslintrc",
     "postpack": "shx rm -f oclif.manifest.json",
     "posttest": "npm run lint",
@@ -78,5 +78,5 @@
     "drifting in space",
     "docker"
   ],
-  "types": "dist/index.d.ts"
+  "types": "lib/index.d.ts"
 }
