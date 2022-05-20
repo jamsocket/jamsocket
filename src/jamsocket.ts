@@ -76,6 +76,11 @@ export class Jamsocket {
     return this.api.streamStatus(backend, config.auth, callback)
   }
 
+  public status(backend: string): Promise<StatusMessage> {
+    const config = this.expectAuthorized()
+    return this.api.status(backend, config.auth)
+  }
+
   public tokenCreate(service: string, grace?: number, port?: number, tag?: string): Promise<TokenCreateResult> {
     const config = this.expectAuthorized()
     const body: TokenRequestBody = {

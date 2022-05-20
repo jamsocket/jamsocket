@@ -169,6 +169,11 @@ export class JamsocketApi {
     return this.makeAuthenticatedStreamRequest(url, auth, wrappedCallback)
   }
 
+  public async status(backend: string, auth: string): Promise<StatusMessage> {
+    const url = `/api/backend/${backend}/status`
+    return this.makeAuthenticatedRequest(url, HttpMethod.Get, auth)
+  }
+
   public async tokenCreate(username: string, serviceName: string, auth: string, body: TokenRequestBody): Promise<TokenCreateResult> {
     const url = `/api/user/${username}/service/${serviceName}/token`
     return this.makeAuthenticatedRequest(url, HttpMethod.Post, auth, body)
