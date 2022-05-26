@@ -81,12 +81,13 @@ export class Jamsocket {
     return this.api.status(backend, config.auth)
   }
 
-  public tokenCreate(service: string, grace?: number, port?: number, tag?: string): Promise<TokenCreateResult> {
+  public tokenCreate(service: string, grace?: number, port?: number, tag?: string, cluster?: string): Promise<TokenCreateResult> {
     const config = this.expectAuthorized()
     const body: TokenRequestBody = {
       grace_period_seconds: grace,
       port,
       tag,
+      cluster,
     }
 
     return this.api.tokenCreate(config.username, service, config.auth, body)
