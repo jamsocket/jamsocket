@@ -42,7 +42,7 @@ export class Jamsocket {
     console.log('Done.')
   }
 
-  public spawn(service: string, env?: Record<string, string>, grace?: number, port?: number, tag?: string, cluster?: string): Promise<SpawnResult> {
+  public spawn(service: string, env?: Record<string, string>, grace?: number, port?: number, tag?: string): Promise<SpawnResult> {
     const config = this.expectAuthorized()
 
     const body: SpawnRequestBody = {
@@ -50,7 +50,6 @@ export class Jamsocket {
       grace_period_seconds: grace,
       port,
       tag,
-      cluster,
     }
 
     return this.api.spawn(config.username, service, config.auth, body)
@@ -81,13 +80,12 @@ export class Jamsocket {
     return this.api.status(backend, config.auth)
   }
 
-  public tokenCreate(service: string, grace?: number, port?: number, tag?: string, cluster?: string): Promise<TokenCreateResult> {
+  public tokenCreate(service: string, grace?: number, port?: number, tag?: string): Promise<TokenCreateResult> {
     const config = this.expectAuthorized()
     const body: TokenRequestBody = {
       grace_period_seconds: grace,
       port,
       tag,
-      cluster,
     }
 
     return this.api.tokenCreate(config.username, service, config.auth, body)

@@ -12,14 +12,12 @@ export type SpawnRequestBody = {
   grace_period_seconds?: number;
   port?: number;
   tag?: string;
-  cluster?: string;
 }
 
 export type TokenRequestBody = {
   grace_period_seconds?: number;
   port?: number;
   tag?: string;
-  cluster?: string;
 }
 
 export interface ServiceImageResult {
