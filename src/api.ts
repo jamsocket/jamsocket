@@ -99,20 +99,27 @@ export class JamsocketApi {
     const url = `${this.apiBase}${endpoint}`
     const response = await request(url, body || null, { ...this.options, method, headers })
 
-    if (response.headers['content-type'] !== 'application/json') {
-      throw new Error(`Unexpected content-type: ${response.headers['content-type']}. Url was: ${url}.`)
-    }
-
+    const isJSONContentType = response.headers['content-type'] === 'application/json'
     let responseBody
     try {
       responseBody = JSON.parse(response.body)
-    } catch (error) {
-      throw new Error(`jamsocket: error parsing JSON response - ${error}: "${response.body}". Url was: ${url}. Status was: ${response.statusCode}`)
-    }
+    } catch {}
+    const isValidJSON = isJSONContentType && responseBody !== undefined
 
     if (response.statusCode && response.statusCode >= 400) {
-      const { message, status, code, id } = responseBody.error
-      throw new HTTPError(response.statusCode, `jamsocket: ${status} - ${code}: ${message} (id: ${id})`)
+      if (isJSONContentType && isValidJSON) {
+        const { message, status, code, id } = responseBody.error
+        throw new HTTPError(response.statusCode, `jamsocket: ${status} - ${code}: ${message} (id: ${id})`)
+      }
+      throw new HTTPError(response.statusCode, `jamsocket: ${response.statusCode}: ${response.body}`)
+    }
+
+    if (!isJSONContentType) {
+      throw new Error(`Unexpected content-type: ${response.headers['content-type']}. Url was: ${url}.`)
+    }
+
+    if (!isValidJSON) {
+      throw new Error(`jamsocket: error parsing JSON response: "${response.body}". Url was: ${url}. Status was: ${response.statusCode}`)
     }
 
     return responseBody
