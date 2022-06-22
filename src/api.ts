@@ -36,8 +36,8 @@ export interface ServiceCreateResult {
 export interface SpawnResult {
   url: string,
   name: string,
-  readyUrl?: string,
-  statusUrl?: string,
+  ready_url?: string,
+  status_url?: string,
 }
 
 export interface TokenCreateResult {
