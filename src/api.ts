@@ -74,7 +74,8 @@ export class JamsocketApi {
     const override = process.env.JAMSOCKET_SERVER_API
     let apiBase
     if (override === undefined) {
-      apiBase = 'https://jamsocket.dev'
+      // Will switch back to https://jamsocket.dev once we complete the migration to Jamsocket's version p2
+      apiBase = 'https://new.jamsocket.dev'
     } else {
       console.warn(`Using Jamsocket server override: ${override}`)
       apiBase = override
