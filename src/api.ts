@@ -96,6 +96,11 @@ export class JamsocketApi {
     return new JamsocketApi(apiBase, { rejectUnauthorized })
   }
 
+  public getLoginUrl(): string {
+    const hostname = new URL(this.apiBase).hostname
+    return `https://app.${hostname}/cli-login`
+  }
+
   private async makeRequest(endpoint: string, method: HttpMethod, body?: any, headers?: Headers): Promise<any> {
     const url = `${this.apiBase}${endpoint}`
     const response = await request(url, body || null, { ...this.options, method, headers })
