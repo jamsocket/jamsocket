@@ -195,7 +195,7 @@ _See code: [src/commands/spawn.ts](https://github.com/drifting-in-space/jamsocke
 
 ## `jamsocket spawn-token create SERVICE`
 
-Generate a spawn token that can be used to spawn the given service.
+Generate a token that can be used to spawn the given service.
 
 ```
 USAGE
@@ -207,7 +207,7 @@ FLAGS
   -t, --tag=<value>    optional tag for the service to spawn (default is latest)
 
 DESCRIPTION
-  Generate a spawn token that can be used to spawn the given service.
+  Generate a token that can be used to spawn the given service.
 
 EXAMPLES
   $ jamsocket spawn-token create my-service
