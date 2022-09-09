@@ -18,10 +18,10 @@ export default class Login extends Command {
     const api = JamsocketApi.fromEnvironment()
     const config = readJamsocketConfig()
     if (config !== null) {
-      const { auth } = config
+      const { username, auth } = config
       try {
         await api.checkAuth(auth)
-        this.log('You are already logged in. To log in with a different token, run jamsocket logout first.')
+        this.log(`You are already logged in with the API token "${username}.********". To log in with a different token, run jamsocket logout first.`)
         return
       } catch (error) {
         const isAuthError = error instanceof AuthenticationError
