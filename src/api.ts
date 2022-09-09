@@ -14,7 +14,7 @@ export type SpawnRequestBody = {
   tag?: string;
 }
 
-export type TokenRequestBody = {
+export type SpawnTokenRequestBody = {
   grace_period_seconds?: number;
   port?: number;
   tag?: string;
@@ -40,11 +40,11 @@ export interface SpawnResult {
   status_url?: string,
 }
 
-export interface TokenCreateResult {
+export interface SpawnTokenCreateResult {
   token: string,
 }
 
-export interface TokenRevokeResult {
+export interface SpawnTokenRevokeResult {
   status: string,
 }
 
@@ -198,17 +198,17 @@ export class JamsocketApi {
     return this.makeAuthenticatedRequest(url, HttpMethod.Get, auth)
   }
 
-  public async tokenCreate(username: string, serviceName: string, auth: string, body: TokenRequestBody): Promise<TokenCreateResult> {
+  public async spawnTokenCreate(username: string, serviceName: string, auth: string, body: SpawnTokenRequestBody): Promise<SpawnTokenCreateResult> {
     const url = `/api/user/${username}/service/${serviceName}/token`
     return this.makeAuthenticatedRequest(url, HttpMethod.Post, auth, body)
   }
 
-  public async tokenRevoke(token: string, auth: string): Promise<TokenRevokeResult> {
+  public async spawnTokenRevoke(token: string, auth: string): Promise<SpawnTokenRevokeResult> {
     const url = `/api/token/${token}`
     return this.makeAuthenticatedRequest(url, HttpMethod.Delete, auth)
   }
 
-  public async tokenSpawn(token: string): Promise<SpawnResult> {
+  public async spawnTokenSpawn(token: string): Promise<SpawnResult> {
     const url = `/api/token/${token}/spawn`
     return this.makeRequest(url, HttpMethod.Post, {})
   }

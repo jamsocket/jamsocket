@@ -28,7 +28,7 @@ export default class Create extends Command {
 
     const jamsocket = Jamsocket.fromEnvironment()
 
-    const { token } = await jamsocket.tokenCreate(args.service, flags.grace, flags.port, flags.tag)
+    const { token } = await jamsocket.spawnTokenCreate(args.service, flags.grace, flags.port, flags.tag)
     this.log(token)
   }
 }
