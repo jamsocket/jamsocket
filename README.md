@@ -18,16 +18,16 @@ npm install jamsocket@latest --global # to update the global installation of Jam
 # Commands
 <!-- commands -->
 * [`jamsocket help [COMMAND]`](#jamsocket-help-command)
-* [`jamsocket login`](#jamsocket-login)
+* [`jamsocket login [TOKEN]`](#jamsocket-login-token)
 * [`jamsocket logout`](#jamsocket-logout)
 * [`jamsocket logs BACKEND`](#jamsocket-logs-backend)
 * [`jamsocket push SERVICE IMAGE`](#jamsocket-push-service-image)
 * [`jamsocket service create NAME`](#jamsocket-service-create-name)
 * [`jamsocket service list`](#jamsocket-service-list)
 * [`jamsocket spawn SERVICE`](#jamsocket-spawn-service)
-* [`jamsocket token create SERVICE`](#jamsocket-token-create-service)
-* [`jamsocket token revoke TOKEN`](#jamsocket-token-revoke-token)
-* [`jamsocket token spawn TOKEN`](#jamsocket-token-spawn-token)
+* [`jamsocket spawn-token create SERVICE`](#jamsocket-spawn-token-create-service)
+* [`jamsocket spawn-token revoke TOKEN`](#jamsocket-spawn-token-revoke-token)
+* [`jamsocket spawn-token spawn TOKEN`](#jamsocket-spawn-token-spawn-token)
 
 ## `jamsocket help [COMMAND]`
 
@@ -49,22 +49,27 @@ DESCRIPTION
 
 _See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v5.1.12/src/commands/help.ts)_
 
-## `jamsocket login`
+## `jamsocket login [TOKEN]`
 
-Authenticates user with jamcr.io container registery
+Authenticates user to the Jamsocket API with a token.
 
 ```
 USAGE
-  $ jamsocket login
+  $ jamsocket login [TOKEN]
+
+ARGUMENTS
+  TOKEN  optional token to log into the CLI with
 
 DESCRIPTION
-  Authenticates user with jamcr.io container registery
+  Authenticates user to the Jamsocket API with a token.
 
 EXAMPLES
   $ jamsocket login
+
+  $ jamsocket login W3guqHFk0FJdtquC.iDxcHZr4rg1AIWPxpnk0SWHm95Vfdl
 ```
 
-_See code: [src/commands/login.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.2.0/src/commands/login.ts)_
+_See code: [src/commands/login.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.3.0/src/commands/login.ts)_
 
 ## `jamsocket logout`
 
@@ -81,7 +86,7 @@ EXAMPLES
   $ jamsocket logout
 ```
 
-_See code: [src/commands/logout.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.2.0/src/commands/logout.ts)_
+_See code: [src/commands/logout.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.3.0/src/commands/logout.ts)_
 
 ## `jamsocket logs BACKEND`
 
@@ -101,7 +106,7 @@ EXAMPLES
   $ jamsocket logs f7em2
 ```
 
-_See code: [src/commands/logs.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.2.0/src/commands/logs.ts)_
+_See code: [src/commands/logs.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.3.0/src/commands/logs.ts)_
 
 ## `jamsocket push SERVICE IMAGE`
 
@@ -127,7 +132,7 @@ EXAMPLES
   $ jamsocket push my-service my-image -t my-tag
 ```
 
-_See code: [src/commands/push.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.2.0/src/commands/push.ts)_
+_See code: [src/commands/push.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.3.0/src/commands/push.ts)_
 
 ## `jamsocket service create NAME`
 
@@ -186,15 +191,15 @@ EXAMPLES
   $ jamsocket spawn my-service -t latest
 ```
 
-_See code: [src/commands/spawn.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.2.0/src/commands/spawn.ts)_
+_See code: [src/commands/spawn.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.3.0/src/commands/spawn.ts)_
 
-## `jamsocket token create SERVICE`
+## `jamsocket spawn-token create SERVICE`
 
-Generate a token that can be used to spawn the given service.
+Generate a spawn token that can be used to spawn the given service.
 
 ```
 USAGE
-  $ jamsocket token create [SERVICE] [-g <value>] [-t <value>]
+  $ jamsocket spawn-token create [SERVICE] [-g <value>] [-t <value>]
 
 FLAGS
   -g, --grace=<value>  optional grace period (in seconds) to wait after last connection is closed before shutting down
@@ -202,41 +207,41 @@ FLAGS
   -t, --tag=<value>    optional tag for the service to spawn (default is latest)
 
 DESCRIPTION
-  Generate a token that can be used to spawn the given service.
+  Generate a spawn token that can be used to spawn the given service.
 
 EXAMPLES
-  $ jamsocket token create my-service
+  $ jamsocket spawn-token create my-service
 
-  $ jamsocket token create my-service --tag latest --grace 300
+  $ jamsocket spawn-token create my-service --tag latest --grace 300
 ```
 
-## `jamsocket token revoke TOKEN`
+## `jamsocket spawn-token revoke TOKEN`
 
-Revoke a token permanently.
+Revoke a spawn token permanently.
 
 ```
 USAGE
-  $ jamsocket token revoke [TOKEN]
+  $ jamsocket spawn-token revoke [TOKEN]
 
 DESCRIPTION
-  Revoke a token permanently.
+  Revoke a spawn token permanently.
 
 EXAMPLES
-  $ jamsocket token revoke jNCuGvecEEk706SDm2xYRJc7mqplE2
+  $ jamsocket spawn-token revoke jNCuGvecEEk706SDm2xYRJc7mqplE2
 ```
 
-## `jamsocket token spawn TOKEN`
+## `jamsocket spawn-token spawn TOKEN`
 
-Spawn a backend using a token.
+Spawn a backend using a spawn token.
 
 ```
 USAGE
-  $ jamsocket token spawn [TOKEN]
+  $ jamsocket spawn-token spawn [TOKEN]
 
 DESCRIPTION
-  Spawn a backend using a token.
+  Spawn a backend using a spawn token.
 
 EXAMPLES
-  $ jamsocket token spawn jNCuGvecEEk706SDm2xYRJc7mqplE2
+  $ jamsocket spawn-token spawn jNCuGvecEEk706SDm2xYRJc7mqplE2
 ```
 <!-- commandsstop -->
