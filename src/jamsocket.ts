@@ -1,4 +1,4 @@
-import { JamsocketApi, ServiceCreateResult, ServiceListResult, SpawnRequestBody, SpawnResult, StatusMessage, TokenCreateResult, TokenRequestBody, TokenRevokeResult } from './api'
+import { JamsocketApi, ServiceCreateResult, ServiceListResult, SpawnRequestBody, SpawnResult, StatusMessage, SpawnTokenCreateResult, SpawnTokenRequestBody, SpawnTokenRevokeResult } from './api'
 import { JamsocketConfig, readJamsocketConfig } from './jamsocket-config'
 import { ContainerManager, detectContainerManager } from './container-manager'
 
@@ -80,19 +80,19 @@ export class Jamsocket {
     return this.api.status(backend, config.auth)
   }
 
-  public tokenCreate(service: string, grace?: number, port?: number, tag?: string): Promise<TokenCreateResult> {
+  public spawnTokenCreate(service: string, grace?: number, port?: number, tag?: string): Promise<SpawnTokenCreateResult> {
     const config = this.expectAuthorized()
-    const body: TokenRequestBody = {
+    const body: SpawnTokenRequestBody = {
       grace_period_seconds: grace,
       port,
       tag,
     }
 
-    return this.api.tokenCreate(config.username, service, config.auth, body)
+    return this.api.spawnTokenCreate(config.username, service, config.auth, body)
   }
 
-  public tokenRevoke(token: string): Promise<TokenRevokeResult> {
+  public spawnTokenRevoke(token: string): Promise<SpawnTokenRevokeResult> {
     const config = this.expectAuthorized()
-    return this.api.tokenRevoke(token, config.auth)
+    return this.api.spawnTokenRevoke(token, config.auth)
   }
 }
