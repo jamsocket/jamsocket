@@ -6,8 +6,8 @@ export const JAMSOCKET_CONFIG_DIR = resolve(homedir(), '.jamsocket')
 const JAMSOCKET_CONFIG = resolve(JAMSOCKET_CONFIG_DIR, 'config.json')
 
 export type JamsocketConfig = {
-  username: string;
-  auth: string;
+  account: string;
+  token: string;
 }
 
 export function readJamsocketConfig(): JamsocketConfig | null {
@@ -22,10 +22,16 @@ export function readJamsocketConfig(): JamsocketConfig | null {
     return null
   }
 
-  // TODO: complain if config username/auth are not valid
+  const isInvalidConfig = !config.account || !config.token
+
+  if (isInvalidConfig) {
+    deleteJamsocketConfig()
+    return null
+  }
+
   return {
-    username: config.username ?? '',
-    auth: config.auth ?? '',
+    account: config.account,
+    token: config.token,
   }
 }
 
@@ -38,4 +44,15 @@ export function writeJamsocketConfig(config: JamsocketConfig): void {
 export function deleteJamsocketConfig(): void {
   if (!existsSync(JAMSOCKET_CONFIG)) return
   unlinkSync(JAMSOCKET_CONFIG)
+}
+
+// this version of the token is used for Basic Authorization, which is required for our Docker registry
+export function getRegistryAuth(token: string): string {
+  const [publicPortion, privatePortion] = token.split('.')
+  const buff = Buffer.from(`${publicPortion}:${privatePortion}`, 'utf-8')
+  return buff.toString('base64')
+}
+
+export function getTokenPublicPortion(token: string): string {
+  return token.split('.')[0]
 }
