@@ -140,9 +140,11 @@ export class JamsocketApi {
   private async makeAuthenticatedRequest<T>(endpoint: string, method: HttpMethod, apiToken: string, body?: any): Promise<T> {
     const additionalHeaders = { 'Authorization': `Bearer ${apiToken}` }
     try {
-      return this.makeRequest<T>(endpoint, method, body, additionalHeaders)
+      // NOTE: this await here is required so that all the Promise "callback" logic is wrapped in this try/catch
+      return await this.makeRequest<T>(endpoint, method, body, additionalHeaders)
     } catch (error) {
       if (error instanceof HTTPError && error.code < 500) throw new AuthenticationError(error.code, error.message)
+      throw error
     }
   }
 
