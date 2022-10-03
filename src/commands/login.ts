@@ -1,6 +1,6 @@
 import { Command, CliUx } from '@oclif/core'
 import { JamsocketApi, AuthenticationError } from '../api'
-import { readJamsocketConfig, writeJamsocketConfig } from '../jamsocket-config'
+import { deleteJamsocketConfig, readJamsocketConfig, writeJamsocketConfig, getTokenPublicPortion } from '../jamsocket-config'
 
 export default class Login extends Command {
   static description = 'Authenticates user to the Jamsocket API with a token.'
@@ -18,20 +18,22 @@ export default class Login extends Command {
     const api = JamsocketApi.fromEnvironment()
     const config = readJamsocketConfig()
     if (config !== null) {
-      const { username, auth } = config
+      const { account, token } = config
+      const publicPortion = getTokenPublicPortion(token)
       try {
-        await api.checkAuth(auth)
-        this.log(`You are already logged in with the API token "${username}.********". To log in with a different token, run jamsocket logout first.`)
+        await api.checkAuth(token)
+        this.log(`You are already logged into account "${account}" with the token "${publicPortion}.********". To log into a different account, run jamsocket logout first.`)
         return
       } catch (error) {
         const isAuthError = error instanceof AuthenticationError
         if (!isAuthError) throw error
+        deleteJamsocketConfig()
       }
     }
 
     const { args } = await this.parse(Login)
 
-    let token = args.token.trim()
+    let token = args.token?.trim()
     if (!token) {
       this.log('Generate an API token at the following URL and paste it into the prompt below:\n')
       this.log(`    ${api.getLoginUrl()}\n`)
@@ -46,15 +48,9 @@ export default class Login extends Command {
       throw new Error('Invalid token. Token must contain a period.')
     }
 
-    const [publicPortion, privatePortion] = token.split('.')
+    const { account } = await api.checkAuth(token)
 
-    const buff = Buffer.from(`${publicPortion}:${privatePortion}`, 'utf-8')
-    const auth = buff.toString('base64')
-
-    await api.checkAuth(auth)
-
-    // should tokens be stored like this? or should they explicitly be tokens - no username?
-    writeJamsocketConfig({ username: publicPortion, auth: auth })
-    this.log('Login Succeeded')
+    writeJamsocketConfig({ account, token })
+    this.log(`Logged in as "${account}"`)
   }
 }
