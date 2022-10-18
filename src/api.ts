@@ -74,8 +74,7 @@ export class JamsocketApi {
     const override = process.env.JAMSOCKET_SERVER_API
     let apiBase
     if (override === undefined) {
-      // Will switch back to https://jamsocket.dev once we complete the migration to Jamsocket's version p2
-      apiBase = 'https://new.jamsocket.dev'
+      apiBase = 'https://api.jamsocket.com'
     } else {
       console.warn(`Using Jamsocket server override: ${override}`)
       apiBase = override
@@ -145,39 +144,39 @@ export class JamsocketApi {
   }
 
   public checkAuth(auth: string): Promise<any> {
-    const url = '/api/auth'
+    const url = '/auth'
     return this.makeAuthenticatedRequest(url, HttpMethod.Get, auth)
   }
 
   public serviceImage(username: string, serviceName: string, auth: string): Promise<ServiceImageResult> {
-    const url = `/api/user/${username}/service/${serviceName}/image`
+    const url = `/user/${username}/service/${serviceName}/image`
     return this.makeAuthenticatedRequest(url, HttpMethod.Get, auth)
   }
 
   public serviceCreate(username: string, name: string, auth: string): Promise<ServiceCreateResult> {
-    const url = `/api/user/${username}/service`
+    const url = `/user/${username}/service`
     return this.makeAuthenticatedRequest(url, HttpMethod.Post, auth, {
       name,
     })
   }
 
   public serviceList(username: string, auth: string): Promise<ServiceListResult> {
-    const url = `/api/user/${username}/services`
+    const url = `/user/${username}/services`
     return this.makeAuthenticatedRequest(url, HttpMethod.Get, auth)
   }
 
   public spawn(username: string, serviceName: string, auth: string, body: SpawnRequestBody): Promise<SpawnResult> {
-    const url = `/api/user/${username}/service/${serviceName}/spawn`
+    const url = `/user/${username}/service/${serviceName}/spawn`
     return this.makeAuthenticatedRequest(url, HttpMethod.Post, auth, body)
   }
 
   public streamLogs(backend: string, auth: string, callback: (line: string) => void): Promise<void> {
-    const url = `/api/backend/${backend}/logs`
+    const url = `/backend/${backend}/logs`
     return this.makeAuthenticatedStreamRequest(url, auth, callback)
   }
 
   public streamStatus(backend: string, auth: string, callback: (statusMessage: StatusMessage) => void): Promise<void> {
-    const url = `/api/backend/${backend}/status/stream`
+    const url = `/backend/${backend}/status/stream`
     const wrappedCallback = (line: string) => {
       const val = JSON.parse(line)
       callback({
@@ -189,22 +188,22 @@ export class JamsocketApi {
   }
 
   public async status(backend: string, auth: string): Promise<StatusMessage> {
-    const url = `/api/backend/${backend}/status`
+    const url = `/backend/${backend}/status`
     return this.makeAuthenticatedRequest(url, HttpMethod.Get, auth)
   }
 
   public async tokenCreate(username: string, serviceName: string, auth: string, body: TokenRequestBody): Promise<TokenCreateResult> {
-    const url = `/api/user/${username}/service/${serviceName}/token`
+    const url = `/user/${username}/service/${serviceName}/token`
     return this.makeAuthenticatedRequest(url, HttpMethod.Post, auth, body)
   }
 
   public async tokenRevoke(token: string, auth: string): Promise<TokenRevokeResult> {
-    const url = `/api/token/${token}`
+    const url = `/token/${token}`
     return this.makeAuthenticatedRequest(url, HttpMethod.Delete, auth)
   }
 
   public async tokenSpawn(token: string): Promise<SpawnResult> {
-    const url = `/api/token/${token}/spawn`
+    const url = `/token/${token}/spawn`
     return this.makeRequest(url, HttpMethod.Post, {})
   }
 }
