@@ -1,6 +1,7 @@
 import { JamsocketApi, ServiceCreateResult, ServiceListResult, SpawnRequestBody, SpawnResult, StatusMessage, SpawnTokenCreateResult, SpawnTokenRequestBody, SpawnTokenRevokeResult } from './api'
 import { JamsocketConfig, readJamsocketConfig, getRegistryAuth } from './jamsocket-config'
 import { ContainerManager, detectContainerManager } from './container-manager'
+import type { ImagePlatformResult } from './container-manager'
 
 export class Jamsocket {
   constructor(private config: JamsocketConfig | null, private api: JamsocketApi) {}
@@ -24,6 +25,11 @@ export class Jamsocket {
     const config = this.expectAuthorized()
     const result = await this.api.serviceImage(config.account, service, config.token)
     return result.imageName
+  }
+
+  public getImagePlatform(image: string): ImagePlatformResult {
+    const containerManager = detectContainerManager()
+    return containerManager.getImagePlatform(image)
   }
 
   public async push(service: string, image: string, tag?: string): Promise<void> {

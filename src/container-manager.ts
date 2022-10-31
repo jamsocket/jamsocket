@@ -3,9 +3,14 @@ import { mkdirSync, writeFileSync } from 'fs'
 import { join } from 'path'
 import { JAMSOCKET_CONFIG_DIR } from './jamsocket-config'
 
-export interface ContainerManager {
-  push(imageName: string, auth: string): Promise<void>;
+export type ImagePlatformResult = {
+  os: string;
+  arch: string;
+}
 
+export interface ContainerManager {
+  getImagePlatform(image: string): ImagePlatformResult;
+  push(imageName: string, auth: string): Promise<void>;
   tag(existingImageName: string, newImageName: string): void;
 }
 
@@ -27,6 +32,13 @@ export function detectContainerManager(): ContainerManager {
 
 export class DockerContainerManager implements ContainerManager {
   constructor(private command: string) {}
+
+  getImagePlatform(imageName: string): ImagePlatformResult {
+    const getPlatform = spawnSync(this.command, ['image', 'inspect', '--format', '{{.Os}} {{.Architecture}}', imageName])
+    const stdout = getPlatform.stdout.toString()
+    const [os, arch] = stdout.split(' ').map(s => s.trim())
+    return { os, arch }
+  }
 
   async push(imageName: string, auth: string): Promise<void> {
     const dockerConfigDir = join(JAMSOCKET_CONFIG_DIR, 'docker-config')
@@ -64,6 +76,13 @@ export class DockerContainerManager implements ContainerManager {
 
 export class PodmanContainerManager implements ContainerManager {
   constructor(private command: string) {}
+
+  getImagePlatform(imageName: string): ImagePlatformResult {
+    const getPlatform = spawnSync(this.command, ['image', 'inspect', '--format', '{{.Os}} {{.Architecture}}', imageName])
+    const stdout = getPlatform.stdout.toString()
+    const [os, arch] = stdout.split(' ').map(s => s.trim())
+    return { os, arch }
+  }
 
   async push(imageName: string, auth: string): Promise<void> {
     const creds = Buffer.from(auth, 'base64')

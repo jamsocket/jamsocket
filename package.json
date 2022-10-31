@@ -20,9 +20,11 @@
     "@oclif/core": "1.9.0",
     "@oclif/plugin-help": "5.1.12",
     "@oclif/plugin-not-found": "2.3.1",
-    "@oclif/plugin-warn-if-update-available": "2.0.4"
+    "@oclif/plugin-warn-if-update-available": "2.0.4",
+    "inquirer": "^8.2.5"
   },
   "devDependencies": {
+    "@types/inquirer": "^8.2.4",
     "@types/node": "^16.9.4",
     "eslint": "^7.32.0",
     "eslint-config-oclif": "^4",
