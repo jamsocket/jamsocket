@@ -1,6 +1,7 @@
 import { Command, Flags } from '@oclif/core'
 import * as inquirer from 'inquirer'
 import { Jamsocket } from '../jamsocket'
+import { getImagePlatform } from '../docker'
 
 export default class Push extends Command {
   static description = 'Pushes a docker image to the jamcr.io container registry under your logged in user\'s name'
@@ -22,7 +23,7 @@ export default class Push extends Command {
   public async run(): Promise<void> {
     const jamsocket = Jamsocket.fromEnvironment()
     const { args, flags } = await this.parse(Push)
-    const { os, arch } = jamsocket.getImagePlatform(args.image)
+    const { os, arch } = getImagePlatform(args.image)
     if (os !== 'linux' || arch !== 'amd64') {
       this.log()
       this.warn(`The image ${args.image} may not be compatible with Jamsocket because its image os/arch is ${os}/${arch}.`)
