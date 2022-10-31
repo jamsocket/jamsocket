@@ -60,6 +60,7 @@ export class HTTPError extends Error {
   }
 }
 
+const AUTH_ERROR_HTTP_CODES = new Set([401, 403, 407])
 export class AuthenticationError extends HTTPError {
   constructor(public code: number, message: string) {
     super(code, message)
@@ -147,7 +148,7 @@ export class JamsocketApi {
       // NOTE: this await here is required so that all the Promise "callback" logic is wrapped in this try/catch
       return await this.makeRequest<T>(endpoint, method, body, additionalHeaders)
     } catch (error) {
-      if (error instanceof HTTPError && error.code < 500) throw new AuthenticationError(error.code, error.message)
+      if (error instanceof HTTPError && AUTH_ERROR_HTTP_CODES.has(error.code)) throw new AuthenticationError(error.code, error.message)
       throw error
     }
   }
