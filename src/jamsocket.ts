@@ -1,7 +1,6 @@
 import { JamsocketApi, ServiceCreateResult, ServiceListResult, SpawnRequestBody, SpawnResult, StatusMessage, SpawnTokenCreateResult, SpawnTokenRequestBody, SpawnTokenRevokeResult } from './api'
 import { JamsocketConfig, readJamsocketConfig, getRegistryAuth } from './jamsocket-config'
-import { ContainerManager, detectContainerManager } from './container-manager'
-import type { ImagePlatformResult } from './container-manager'
+import { tag as dockerTag, push as dockerPush } from './docker'
 
 export class Jamsocket {
   constructor(private config: JamsocketConfig | null, private api: JamsocketApi) {}
@@ -27,24 +26,18 @@ export class Jamsocket {
     return result.imageName
   }
 
-  public getImagePlatform(image: string): ImagePlatformResult {
-    const containerManager = detectContainerManager()
-    return containerManager.getImagePlatform(image)
-  }
-
   public async push(service: string, image: string, tag?: string): Promise<void> {
     const config = this.expectAuthorized()
-    const containerManager: ContainerManager = detectContainerManager()
 
     let prefixedImage = await this.serviceImage(service)
     if (tag) prefixedImage += `:${tag}`
 
     console.log(`Tagging (${prefixedImage}).`)
-    containerManager.tag(image, prefixedImage)
+    dockerTag(image, prefixedImage)
 
     console.log('Pushing.')
     const auth = getRegistryAuth(config.token)
-    await containerManager.push(prefixedImage, auth)
+    await dockerPush(prefixedImage, auth)
 
     console.log('Done.')
   }
