@@ -19,7 +19,6 @@
   "dependencies": {
     "@oclif/core": "1.9.0",
     "@oclif/plugin-help": "5.1.12",
-    "@oclif/plugin-not-found": "2.3.1",
     "@oclif/plugin-warn-if-update-available": "2.0.4",
     "inquirer": "^8.2.5"
   },
@@ -51,7 +50,6 @@
     "commands": "./lib/commands",
     "plugins": [
       "@oclif/plugin-help",
-      "@oclif/plugin-not-found",
       "@oclif/plugin-warn-if-update-available"
     ],
     "warn-if-update-available": {
