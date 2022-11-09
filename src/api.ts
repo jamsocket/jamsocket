@@ -194,8 +194,8 @@ export class JamsocketApi {
   }
 
   public serviceDelete(username: string, serviceName: string, apiToken: string): Promise<ServiceDeleteResult> {
-    const url = `/user/${username}/service/${serviceName}`
-    return this.makeAuthenticatedRequest<ServiceDeleteResult>(url, HttpMethod.Delete, apiToken)
+    const url = `/user/${username}/service/${serviceName}/delete`
+    return this.makeAuthenticatedRequest<ServiceDeleteResult>(url, HttpMethod.Post, apiToken)
   }
 
   public serviceInfo(username: string, serviceName: string, apiToken: string): Promise<ServiceInfoResult> {
