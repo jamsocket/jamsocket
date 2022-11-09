@@ -26,7 +26,7 @@ export type SpawnTokenRequestBody = {
 }
 
 export interface ServiceImageResult {
-  status: string,
+  status: 'ok',
   imageName: string,
 }
 
@@ -35,7 +35,7 @@ export interface ServiceListResult {
 }
 
 export interface ServiceCreateResult {
-  status: string,
+  status: 'ok',
 }
 
 export interface SpawnResult {
@@ -50,7 +50,7 @@ export interface SpawnTokenCreateResult {
 }
 
 export interface SpawnTokenRevokeResult {
-  status: string,
+  status: 'ok',
 }
 
 export class HTTPError extends Error {
