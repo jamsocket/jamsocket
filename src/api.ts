@@ -38,6 +38,20 @@ export interface ServiceCreateResult {
   status: 'ok',
 }
 
+export interface ServiceInfoResult {
+  name: string,
+  account_name: string,
+  created_at: string,
+  last_spawned_at: string | null,
+  last_image_upload_time: string | null,
+  last_image_tag: string | null,
+  spawn_tokens_count: number,
+}
+
+export interface ServiceDeleteResult {
+  status: 'ok'
+}
+
 export interface SpawnResult {
   url: string,
   name: string,
@@ -177,6 +191,16 @@ export class JamsocketApi {
     return this.makeAuthenticatedRequest<ServiceCreateResult>(url, HttpMethod.Post, apiToken, {
       name,
     })
+  }
+
+  public serviceDelete(username: string, serviceName: string, apiToken: string): Promise<ServiceDeleteResult> {
+    const url = `/user/${username}/service/${serviceName}`
+    return this.makeAuthenticatedRequest<ServiceDeleteResult>(url, HttpMethod.Delete, apiToken)
+  }
+
+  public serviceInfo(username: string, serviceName: string, apiToken: string): Promise<ServiceInfoResult> {
+    const url = `/user/${username}/service/${serviceName}`
+    return this.makeAuthenticatedRequest<ServiceInfoResult>(url, HttpMethod.Get, apiToken)
   }
 
   public serviceList(username: string, apiToken: string): Promise<ServiceListResult> {

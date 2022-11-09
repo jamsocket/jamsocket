@@ -1,4 +1,6 @@
-import { JamsocketApi, ServiceCreateResult, ServiceListResult, SpawnRequestBody, SpawnResult, StatusMessage, SpawnTokenCreateResult, SpawnTokenRequestBody, SpawnTokenRevokeResult } from './api'
+import { JamsocketApi, SpawnRequestBody, SpawnResult, StatusMessage } from './api'
+import type { SpawnTokenCreateResult, SpawnTokenRequestBody, SpawnTokenRevokeResult } from './api'
+import type { ServiceCreateResult, ServiceListResult, ServiceInfoResult, ServiceDeleteResult } from './api'
 import { JamsocketConfig, readJamsocketConfig, getRegistryAuth } from './jamsocket-config'
 import { tag as dockerTag, push as dockerPush } from './docker'
 
@@ -58,6 +60,16 @@ export class Jamsocket {
   public serviceCreate(service: string): Promise<ServiceCreateResult> {
     const config = this.expectAuthorized()
     return this.api.serviceCreate(config.account, service, config.token)
+  }
+
+  public serviceDelete(service: string): Promise<ServiceDeleteResult> {
+    const config = this.expectAuthorized()
+    return this.api.serviceDelete(config.account, service, config.token)
+  }
+
+  public serviceInfo(service: string): Promise<ServiceInfoResult> {
+    const config = this.expectAuthorized()
+    return this.api.serviceInfo(config.account, service, config.token)
   }
 
   public serviceList(): Promise<ServiceListResult> {
