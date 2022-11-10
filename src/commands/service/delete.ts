@@ -2,6 +2,7 @@ import { Command, CliUx } from '@oclif/core'
 import { Jamsocket } from '../../jamsocket'
 import * as inquirer from 'inquirer'
 import { formatDistanceToNow } from 'date-fns'
+import chalk from 'chalk'
 
 export default class Create extends Command {
   static description = 'Deletes a service'
@@ -23,10 +24,11 @@ export default class Create extends Command {
     const lastSpawn = serviceInfo.last_spawned_at ? formatDistanceToNow(new Date(serviceInfo.last_spawned_at)) : null
 
     const formattedInfo: string[] = [
-      `The service ${serviceInfo.name}`,
-      lastImgUpload === null ? 'has no images,' : `had an image pushed to it ${lastImgUpload} ago,`,
-      spawnTokenCount === 0 ? 'has no spawn tokens,' : `has ${spawnTokenCount} spawn tokens,`,
-      lastSpawn === null ? 'and has never been spawned.' : `and was last spawned ${lastSpawn} ago.`,
+      'The service',
+      chalk.bold.cyan(serviceInfo.name),
+      lastImgUpload === null ? ('has ' + chalk.bold.magentaBright`no container images` + ',') : ('had a ' + chalk.bold.magentaBright`container image pushed to it ${lastImgUpload} ago` + ','),
+      spawnTokenCount === 0 ? ('has ' + chalk.bold.magentaBright`no spawn tokens` + ',') : ('has ' + chalk.bold.magentaBright`${spawnTokenCount} spawn tokens` + ','),
+      lastSpawn === null ? ('and has ' + chalk.bold.magentaBright`never been spawned` + '.') : ('and was ' + chalk.bold.magentaBright`last spawned ${lastSpawn} ago` + '.'),
     ]
 
     this.log()
@@ -46,7 +48,9 @@ export default class Create extends Command {
     }
 
     this.log()
-    const userInput = await CliUx.ux.prompt(`Type the service name to delete it (${serviceInfo.name})`)
+    const userInput = await CliUx.ux.prompt(`Type the service name (${serviceInfo.name}) to delete it. (Anything else will abort.)`, {
+      required: false,
+    })
     if (userInput.trim() !== serviceInfo.name) {
       this.log('Input does not match service name. Service deletion canceled.')
       return
