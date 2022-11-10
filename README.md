@@ -6,7 +6,9 @@ A CLI for the Jamsocket platform
 
 # Install
 
-You may run the Jamsocket CLI without explicitly installing it using `npx jamsocket`. However, this may lead to CLI-version-related issues as [NPX is not guaranteed to run the latest version](https://github.com/npm/cli/issues/4108) and will instead use whatever version was cached with the first usage. For this reason it is recommended that you install the Jamsocket CLI in your project with `npm install jamsocket` first and _then_ use `npx jamsocket`. (When run from your project, this will use the locally-installed `jamsocket`.) You may also install the Jamsocket CLI globally, but it is recommended you use a tool like [Node Version Manager](https://github.com/nvm-sh/nvm#installing-and-updating) to manage your NodeJS binaries. NVM makes sure these binaries are installed under your user so global npm installs do not require root privileges. Once NVM is set up, run `npm install jamsocket --global`.
+You may run the Jamsocket CLI without explicitly installing it using `npx jamsocket`. However, this may lead to CLI-version-related issues as [NPX is not guaranteed to run the latest version](https://github.com/npm/cli/issues/4108) and will instead use whatever version was cached with the first usage.
+
+For this reason it is recommended that you first install the Jamsocket CLI either globally or in your project and _then_ use `npx jamsocket`. (When running `npx jamsocket` from your project, the locally-installed `jamsocket` will be used.) When installing the Jamsocket CLI globally, it is recommended you use a tool like [Node Version Manager](https://github.com/nvm-sh/nvm#installing-and-updating) to manage your NodeJS binaries. NVM makes sure these binaries are installed under your user so global npm installs do not require root privileges. Once NVM is set up, run `npm install jamsocket --global`.
 
 # Upgrading
 
@@ -14,6 +16,10 @@ You may run the Jamsocket CLI without explicitly installing it using `npx jamsoc
 npm install jamsocket@latest # to update the locally-installed Jamsocket
 npm install jamsocket@latest --global # to update the global installation of Jamsocket
 ```
+
+# Authentication
+
+Most of the Jamsocket CLI commands require you to be logged in. The CLI uses access tokens for authentication, and you can generate a token for the CLI at [app.jamsocket.com/cli-login](https://app.jamsocket.com/cli-login). Then run `jamsocket login` and paste your token into the prompt. You can manage all your access tokens from the [Jamsocket Settings page](https://app.jamsocket.com/settings).
 
 # Commands
 <!-- commands -->
