@@ -133,7 +133,6 @@ export class JamsocketApi {
     let responseBody
     try {
       responseBody = JSON.parse(response.body)
-      // TODO: if possible, add a runtime check here to make sure the response matches the type T?
     } catch {}
     const isValidJSON = isJSONContentType && responseBody !== undefined
 
