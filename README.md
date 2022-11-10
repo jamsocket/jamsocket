@@ -23,6 +23,8 @@ npm install jamsocket@latest --global # to update the global installation of Jam
 * [`jamsocket logs BACKEND`](#jamsocket-logs-backend)
 * [`jamsocket push SERVICE IMAGE`](#jamsocket-push-service-image)
 * [`jamsocket service create NAME`](#jamsocket-service-create-name)
+* [`jamsocket service delete NAME`](#jamsocket-service-delete-name)
+* [`jamsocket service info NAME`](#jamsocket-service-info-name)
 * [`jamsocket service list`](#jamsocket-service-list)
 * [`jamsocket spawn SERVICE`](#jamsocket-spawn-service)
 * [`jamsocket spawn-token create SERVICE`](#jamsocket-spawn-token-create-service)
@@ -69,7 +71,7 @@ EXAMPLES
   $ jamsocket login W3guqHFk0FJdtquC.iDxcHZr4rg1AIWPxpnk0SWHm95Vfdl
 ```
 
-_See code: [src/commands/login.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.4.3/src/commands/login.ts)_
+_See code: [src/commands/login.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.4.4/src/commands/login.ts)_
 
 ## `jamsocket logout`
 
@@ -86,7 +88,7 @@ EXAMPLES
   $ jamsocket logout
 ```
 
-_See code: [src/commands/logout.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.4.3/src/commands/logout.ts)_
+_See code: [src/commands/logout.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.4.4/src/commands/logout.ts)_
 
 ## `jamsocket logs BACKEND`
 
@@ -106,7 +108,7 @@ EXAMPLES
   $ jamsocket logs f7em2
 ```
 
-_See code: [src/commands/logs.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.4.3/src/commands/logs.ts)_
+_See code: [src/commands/logs.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.4.4/src/commands/logs.ts)_
 
 ## `jamsocket push SERVICE IMAGE`
 
@@ -132,7 +134,7 @@ EXAMPLES
   $ jamsocket push my-service my-image -t my-tag
 ```
 
-_See code: [src/commands/push.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.4.3/src/commands/push.ts)_
+_See code: [src/commands/push.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.4.4/src/commands/push.ts)_
 
 ## `jamsocket service create NAME`
 
@@ -147,6 +149,36 @@ DESCRIPTION
 
 EXAMPLES
   $ jamsocket service create my-service
+```
+
+## `jamsocket service delete NAME`
+
+Deletes a service
+
+```
+USAGE
+  $ jamsocket service delete [NAME]
+
+DESCRIPTION
+  Deletes a service
+
+EXAMPLES
+  $ jamsocket service delete my-service
+```
+
+## `jamsocket service info NAME`
+
+Gets some information about a service
+
+```
+USAGE
+  $ jamsocket service info [NAME]
+
+DESCRIPTION
+  Gets some information about a service
+
+EXAMPLES
+  $ jamsocket service info my-service
 ```
 
 ## `jamsocket service list`
@@ -191,7 +223,7 @@ EXAMPLES
   $ jamsocket spawn my-service -t latest
 ```
 
-_See code: [src/commands/spawn.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.4.3/src/commands/spawn.ts)_
+_See code: [src/commands/spawn.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.4.4/src/commands/spawn.ts)_
 
 ## `jamsocket spawn-token create SERVICE`
 
