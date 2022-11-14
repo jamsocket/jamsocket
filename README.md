@@ -77,7 +77,7 @@ EXAMPLES
   $ jamsocket login W3guqHFk0FJdtquC.iDxcHZr4rg1AIWPxpnk0SWHm95Vfdl
 ```
 
-_See code: [src/commands/login.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.4.4/src/commands/login.ts)_
+_See code: [src/commands/login.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.4.5/src/commands/login.ts)_
 
 ## `jamsocket logout`
 
@@ -94,7 +94,7 @@ EXAMPLES
   $ jamsocket logout
 ```
 
-_See code: [src/commands/logout.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.4.4/src/commands/logout.ts)_
+_See code: [src/commands/logout.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.4.5/src/commands/logout.ts)_
 
 ## `jamsocket logs BACKEND`
 
@@ -114,7 +114,7 @@ EXAMPLES
   $ jamsocket logs f7em2
 ```
 
-_See code: [src/commands/logs.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.4.4/src/commands/logs.ts)_
+_See code: [src/commands/logs.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.4.5/src/commands/logs.ts)_
 
 ## `jamsocket push SERVICE IMAGE`
 
@@ -140,7 +140,7 @@ EXAMPLES
   $ jamsocket push my-service my-image -t my-tag
 ```
 
-_See code: [src/commands/push.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.4.4/src/commands/push.ts)_
+_See code: [src/commands/push.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.4.5/src/commands/push.ts)_
 
 ## `jamsocket service create NAME`
 
@@ -229,7 +229,7 @@ EXAMPLES
   $ jamsocket spawn my-service -t latest
 ```
 
-_See code: [src/commands/spawn.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.4.4/src/commands/spawn.ts)_
+_See code: [src/commands/spawn.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.4.5/src/commands/spawn.ts)_
 
 ## `jamsocket spawn-token create SERVICE`
 
