@@ -67,6 +67,10 @@ export interface SpawnTokenRevokeResult {
   status: 'ok',
 }
 
+export interface TerminateResult {
+  status: 'ok',
+}
+
 export class HTTPError extends Error {
   constructor(public code: number, message: string) {
     super(message)
@@ -232,6 +236,11 @@ export class JamsocketApi {
   public async status(backend: string, apiToken: string): Promise<StatusMessage> {
     const url = `/backend/${backend}/status`
     return this.makeAuthenticatedRequest<StatusMessage>(url, HttpMethod.Get, apiToken)
+  }
+
+  public async terminate(backend: string, apiToken: string): Promise<TerminateResult> {
+    const url = `/backend/${backend}/terminate`
+    return this.makeAuthenticatedRequest<TerminateResult>(url, HttpMethod.Post, apiToken)
   }
 
   public async spawnTokenCreate(username: string, serviceName: string, apiToken: string, body: SpawnTokenRequestBody): Promise<SpawnTokenCreateResult> {
