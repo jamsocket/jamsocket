@@ -1,4 +1,4 @@
-import { JamsocketApi, SpawnRequestBody, SpawnResult, StatusMessage } from './api'
+import { JamsocketApi, SpawnRequestBody, SpawnResult, StatusMessage, TerminateResult } from './api'
 import type { SpawnTokenCreateResult, SpawnTokenRequestBody, SpawnTokenRevokeResult } from './api'
 import type { ServiceCreateResult, ServiceListResult, ServiceInfoResult, ServiceDeleteResult } from './api'
 import { JamsocketConfig, readJamsocketConfig, getRegistryAuth } from './jamsocket-config'
@@ -55,6 +55,12 @@ export class Jamsocket {
     }
 
     return this.api.spawn(config.account, service, config.token, body)
+  }
+
+  public terminate(backend: string): Promise<TerminateResult> {
+    const config = this.expectAuthorized()
+
+    return this.api.terminate(backend, config.token)
   }
 
   public serviceCreate(service: string): Promise<ServiceCreateResult> {
