@@ -67,7 +67,9 @@ export interface SpawnTokenRevokeResult {
   status: 'ok',
 }
 
-export interface TerminateResult {}
+export interface TerminateResult {
+  status: 'ok',
+}
 
 export class HTTPError extends Error {
   constructor(public code: number, message: string) {
