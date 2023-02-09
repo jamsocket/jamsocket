@@ -1,5 +1,7 @@
 import * as https from 'https'
 import * as http from 'http'
+import * as os from 'os'
+import WSL from 'is-wsl'
 
 type Header = string | string[] | undefined
 export type Headers = Record<string, Header>
@@ -11,6 +13,11 @@ type RequestReturn = {
   headers: Headers;
 }
 
+const version = require('../package.json').version
+const platform = WSL ? 'wsl' : os.platform()
+const arch = os.arch() === 'ia32' ? 'x86' : os.arch()
+const userAgent = `jamsocket-cli/${version} ${platform}-${arch} node-${process.version}`
+
 export function request(
   url: string,
   body: Record<string, unknown> | null,
@@ -18,10 +25,13 @@ export function request(
 ): Promise<RequestReturn> {
   return new Promise((resolve, reject) => {
     const wrappedURL = new URL(url)
-    const headers = { ...options.headers }
+    const headers: Record<string, string> = {
+      'User-Agent': userAgent,
+      ...options.headers,
+    }
     const jsonBody = body && JSON.stringify(body)
     if (jsonBody !== null) {
-      headers['Content-Length'] = jsonBody.length
+      headers['Content-Length'] = `${jsonBody.length}`
       headers['Content-Type'] = 'application/json'
     }
 
@@ -66,6 +76,7 @@ export function eventStream(
   return new Promise((resolve, reject) => {
     const wrappedURL = new URL(url)
     const headers = {
+      'User-Agent': userAgent,
       ...options.headers,
       Accept: 'text/event-stream',
     }

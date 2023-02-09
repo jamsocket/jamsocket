@@ -8,6 +8,7 @@
     "strict": true,
     "target": "es2019",
     "esModuleInterop": true,
+    "resolveJsonModule": true
   },
   "include": [
     "src/**/*"
