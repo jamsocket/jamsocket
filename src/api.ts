@@ -17,6 +17,7 @@ export type SpawnRequestBody = {
   grace_period_seconds?: number;
   port?: number;
   tag?: string;
+  require_bearer_token?: boolean;
 }
 
 export type SpawnTokenRequestBody = {
@@ -57,6 +58,7 @@ export interface SpawnResult {
   name: string,
   ready_url?: string,
   status_url?: string,
+  bearer_token?: string,
 }
 
 export interface SpawnTokenCreateResult {
