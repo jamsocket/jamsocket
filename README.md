@@ -78,7 +78,7 @@ EXAMPLES
   $ jamsocket login W3guqHFk0FJdtquC.iDxcHZr4rg1AIWPxpnk0SWHm95Vfdl
 ```
 
-_See code: [src/commands/login.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.4.8/src/commands/login.ts)_
+_See code: [src/commands/login.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.4.9/src/commands/login.ts)_
 
 ## `jamsocket logout`
 
@@ -95,7 +95,7 @@ EXAMPLES
   $ jamsocket logout
 ```
 
-_See code: [src/commands/logout.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.4.8/src/commands/logout.ts)_
+_See code: [src/commands/logout.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.4.9/src/commands/logout.ts)_
 
 ## `jamsocket logs BACKEND`
 
@@ -115,7 +115,7 @@ EXAMPLES
   $ jamsocket logs f7em2
 ```
 
-_See code: [src/commands/logs.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.4.8/src/commands/logs.ts)_
+_See code: [src/commands/logs.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.4.9/src/commands/logs.ts)_
 
 ## `jamsocket push SERVICE IMAGE`
 
@@ -141,7 +141,7 @@ EXAMPLES
   $ jamsocket push my-service my-image -t my-tag
 ```
 
-_See code: [src/commands/push.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.4.8/src/commands/push.ts)_
+_See code: [src/commands/push.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.4.9/src/commands/push.ts)_
 
 ## `jamsocket service create NAME`
 
@@ -209,13 +209,15 @@ Spawns a session-lived application backend from the provided docker image
 
 ```
 USAGE
-  $ jamsocket spawn [SERVICE] [-e <value>] [-g <value>] [-t <value>]
+  $ jamsocket spawn [SERVICE] [-e <value>] [-g <value>] [-t <value>] [-r]
 
 FLAGS
-  -e, --env=<value>...  optional environment variables to pass to the container
-  -g, --grace=<value>   optional grace period (in seconds) to wait after last connection is closed before shutting down
-                        container
-  -t, --tag=<value>     optional tag for the service to spawn (default is latest)
+  -e, --env=<value>...        optional environment variables to pass to the container
+  -g, --grace=<value>         optional grace period (in seconds) to wait after last connection is closed before shutting
+                              down container
+  -r, --require-bearer-token  require a bearer token to access the service. A random bearer token will be generated and
+                              returned in the result.
+  -t, --tag=<value>           optional tag for the service to spawn (default is latest)
 
 DESCRIPTION
   Spawns a session-lived application backend from the provided docker image
@@ -230,7 +232,7 @@ EXAMPLES
   $ jamsocket spawn my-service -t latest
 ```
 
-_See code: [src/commands/spawn.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.4.8/src/commands/spawn.ts)_
+_See code: [src/commands/spawn.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.4.9/src/commands/spawn.ts)_
 
 ## `jamsocket spawn-token create SERVICE`
 
@@ -299,5 +301,5 @@ EXAMPLES
   $ jamsocket terminate a8m32q
 ```
 
-_See code: [src/commands/terminate.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.4.8/src/commands/terminate.ts)_
+_See code: [src/commands/terminate.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.4.9/src/commands/terminate.ts)_
 <!-- commandsstop -->
