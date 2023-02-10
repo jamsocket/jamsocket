@@ -55,8 +55,6 @@ export class Jamsocket {
       require_bearer_token: requireBearerToken,
     }
 
-    console.log('body', body)
-
     return this.api.spawn(config.account, service, config.token, body)
   }
 

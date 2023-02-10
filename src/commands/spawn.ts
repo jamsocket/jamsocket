@@ -20,7 +20,7 @@ export default class Spawn extends Command {
     grace: Flags.integer({ char: 'g', description: 'optional grace period (in seconds) to wait after last connection is closed before shutting down container' }),
     port: Flags.integer({ char: 'p', description: 'optional port for jamsocket to proxy requests to (default is 8080)', hidden: true }),
     tag: Flags.string({ char: 't', description: 'optional tag for the service to spawn (default is latest)' }),
-    requireBearerToken: Flags.boolean({ char: 'r', description: 'require a bearer token to access the service' }),
+    'require-bearer-token': Flags.boolean({ char: 'r', description: 'require a bearer token to access the service. A random bearer token will be generated and returned in the result.' }),
   }
 
   static args = [{ name: 'service', required: true }]
@@ -35,7 +35,7 @@ export default class Spawn extends Command {
     }
 
     const jamsocket = Jamsocket.fromEnvironment()
-    const responseBody = await jamsocket.spawn(args.service, env, flags.grace, flags.port, flags.tag, flags.requireBearerToken)
+    const responseBody = await jamsocket.spawn(args.service, env, flags.grace, flags.port, flags.tag, flags['require-bearer-token'])
 
     this.log(JSON.stringify(responseBody, null, 2))
   }
