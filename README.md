@@ -78,7 +78,7 @@ EXAMPLES
   $ jamsocket login W3guqHFk0FJdtquC.iDxcHZr4rg1AIWPxpnk0SWHm95Vfdl
 ```
 
-_See code: [src/commands/login.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.4.6/src/commands/login.ts)_
+_See code: [src/commands/login.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.4.7/src/commands/login.ts)_
 
 ## `jamsocket logout`
 
@@ -95,7 +95,7 @@ EXAMPLES
   $ jamsocket logout
 ```
 
-_See code: [src/commands/logout.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.4.6/src/commands/logout.ts)_
+_See code: [src/commands/logout.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.4.7/src/commands/logout.ts)_
 
 ## `jamsocket logs BACKEND`
 
@@ -115,7 +115,7 @@ EXAMPLES
   $ jamsocket logs f7em2
 ```
 
-_See code: [src/commands/logs.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.4.6/src/commands/logs.ts)_
+_See code: [src/commands/logs.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.4.7/src/commands/logs.ts)_
 
 ## `jamsocket push SERVICE IMAGE`
 
@@ -141,7 +141,7 @@ EXAMPLES
   $ jamsocket push my-service my-image -t my-tag
 ```
 
-_See code: [src/commands/push.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.4.6/src/commands/push.ts)_
+_See code: [src/commands/push.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.4.7/src/commands/push.ts)_
 
 ## `jamsocket service create NAME`
 
@@ -230,7 +230,7 @@ EXAMPLES
   $ jamsocket spawn my-service -t latest
 ```
 
-_See code: [src/commands/spawn.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.4.6/src/commands/spawn.ts)_
+_See code: [src/commands/spawn.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.4.7/src/commands/spawn.ts)_
 
 ## `jamsocket spawn-token create SERVICE`
 
@@ -299,5 +299,5 @@ EXAMPLES
   $ jamsocket terminate a8m32q
 ```
 
-_See code: [src/commands/terminate.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.4.6/src/commands/terminate.ts)_
+_See code: [src/commands/terminate.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.4.7/src/commands/terminate.ts)_
 <!-- commandsstop -->
