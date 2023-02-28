@@ -9,7 +9,8 @@ enum HttpMethod {
 
 export type CheckAuthResult = {
   status: 'ok';
-  account: string;
+  account: string | null;
+  accounts: string[];
 }
 
 export type SpawnRequestBody = {
