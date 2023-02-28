@@ -13,10 +13,42 @@ type RequestReturn = {
   headers: Headers;
 }
 
-const version = require('../package.json').version
+const version = '0.0.10' // require('../package.json').version
 const platform = WSL ? 'wsl' : os.platform()
 const arch = os.arch() === 'ia32' ? 'x86' : os.arch()
 const userAgent = `jamsocket-cli/${version} ${platform}-${arch} node-${process.version}`
+
+const PACKAGE_META_URL = 'https://registry.npmjs.org/jamsocket'
+
+export async function checkVersion(): Promise<void> {
+  try {
+    const response = await request(PACKAGE_META_URL, null, {})
+    const latestVersion = JSON.parse(response.body)['dist-tags'].latest
+    const isVersionOld = isVersionLessThan(version, latestVersion)
+    if (isVersionOld) {
+      console.error(`    Your Jamsocket CLI version (${version}) is out of date. You can update to the latest version (${latestVersion}) with:`)
+      console.error('        npm install jamsocket@latest --global')
+      console.error()
+    }
+  } catch {}
+}
+
+function isVersionLessThan(version1: string, version2: string): boolean {
+  const version1Components = version1.split('.')
+  const version2Components = version2.split('.')
+  if (version1Components.length !== 3 || version2Components.length !== 3) {
+    throw new Error(`version comparison failed due to invalid versions. Received versions: ${version1} and ${version2}`)
+  }
+  const [major1, minor1, patch1] = version1Components.map(val => Number.parseInt(val, 10))
+  const [major2, minor2, patch2] = version2Components.map(val => Number.parseInt(val, 10))
+  if (major1 > major2) return false
+  if (major1 < major2) return true
+  if (minor1 > minor2) return false
+  if (minor1 < minor2) return true
+  if (patch1 > patch2) return false
+  if (patch1 < patch2) return true
+  return false
+}
 
 export function request(
   url: string,
