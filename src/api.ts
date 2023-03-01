@@ -122,14 +122,19 @@ export class JamsocketApi {
     return new JamsocketApi(apiBase, { rejectUnauthorized })
   }
 
-  public getLoginUrl(): string {
+  public getAppBaseUrl(): string {
     const hostname = new URL(this.apiBase).hostname
     const parts = hostname.split('.')
     if (parts[0] === 'api') {
       parts.shift()
     }
     const rootDomain = parts.join('.')
-    return `https://app.${rootDomain}/cli-login`
+    return `https://app.${rootDomain}`
+  }
+
+  public getLoginUrl(): string {
+    const baseUrl = this.getAppBaseUrl()
+    return `${baseUrl}/cli-login`
   }
 
   private async makeRequest<T>(endpoint: string, method: HttpMethod, body?: any, headers?: Headers): Promise<T> {

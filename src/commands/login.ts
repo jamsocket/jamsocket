@@ -22,7 +22,7 @@ export default class Login extends Command {
       const publicPortion = getTokenPublicPortion(token)
       try {
         const result = await api.checkAuth(token)
-        if (result.account === null) throw new Error('No account found for logged in user.')
+        if (result.account === null) throw new Error(`No account found for logged in user. You may need to log in to ${api.getAppBaseUrl()} to finish setting up your account.`)
         this.log(`You are already logged into account "${result.account}" with the token "${publicPortion}.********". To log into a different account, run jamsocket logout first.`)
         return
       } catch (error) {
@@ -50,7 +50,7 @@ export default class Login extends Command {
     }
 
     const { account } = await api.checkAuth(token)
-    if (account === null) throw new Error('No account found for user.')
+    if (account === null) throw new Error(`No account found for user. You may need to log in to ${api.getAppBaseUrl()} to finish setting up your account.`)
 
     writeJamsocketConfig({ account, token })
     this.log(`Logged in as "${account}"`)
