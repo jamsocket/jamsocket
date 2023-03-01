@@ -13,7 +13,7 @@ type RequestReturn = {
   headers: Headers;
 }
 
-const version = '0.0.10' // require('../package.json').version
+const version = require('../package.json').version
 const platform = WSL ? 'wsl' : os.platform()
 const arch = os.arch() === 'ia32' ? 'x86' : os.arch()
 const userAgent = `jamsocket-cli/${version} ${platform}-${arch} node-${process.version}`
