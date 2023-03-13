@@ -38,7 +38,7 @@ export class Jamsocket {
     dockerTag(image, prefixedImage)
 
     console.log('Pushing.')
-    const auth = getRegistryAuth(config.token)
+    const auth = getRegistryAuth(config.account, config.token)
     await dockerPush(prefixedImage, auth)
 
     console.log('Done.')

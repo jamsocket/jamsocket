@@ -47,9 +47,8 @@ export function deleteJamsocketConfig(): void {
 }
 
 // this version of the token is used for Basic Authorization, which is required for our Docker registry
-export function getRegistryAuth(token: string): string {
-  const [publicPortion, privatePortion] = token.split('.')
-  const buff = Buffer.from(`${publicPortion}:${privatePortion}`, 'utf-8')
+export function getRegistryAuth(account: string, token: string): string {
+  const buff = Buffer.from(`${account}:${token}`, 'utf-8')
   return buff.toString('base64')
 }
 
