@@ -1,14 +1,14 @@
 import { JamsocketApi, SpawnRequestBody, SpawnResult, StatusMessage, TerminateResult } from './api'
 import type { SpawnTokenCreateResult, SpawnTokenRequestBody, SpawnTokenRevokeResult } from './api'
 import type { ServiceCreateResult, ServiceListResult, ServiceInfoResult, ServiceDeleteResult } from './api'
-import { JamsocketConfig, readJamsocketConfig, getRegistryAuth } from './jamsocket-config'
+import { JamsocketConfig } from './jamsocket-config'
 import { tag as dockerTag, push as dockerPush } from './docker'
 
 export class Jamsocket {
   constructor(private config: JamsocketConfig | null, private api: JamsocketApi) {}
 
   public static fromEnvironment(): Jamsocket {
-    const config = readJamsocketConfig()
+    const config = JamsocketConfig.fromSaved()
     const api = JamsocketApi.fromEnvironment()
 
     return new Jamsocket(config, api)
@@ -24,7 +24,7 @@ export class Jamsocket {
 
   public async serviceImage(service: string): Promise<string> {
     const config = this.expectAuthorized()
-    const result = await this.api.serviceImage(config.account, service, config.token)
+    const result = await this.api.serviceImage(config.getAccount(), service, config.getAccessToken())
     return result.imageName
   }
 
@@ -38,7 +38,7 @@ export class Jamsocket {
     dockerTag(image, prefixedImage)
 
     console.log('Pushing.')
-    const auth = getRegistryAuth(config.account, config.token)
+    const auth = config.getRegistryAuth()
     await dockerPush(prefixedImage, auth)
 
     console.log('Done.')
@@ -55,48 +55,48 @@ export class Jamsocket {
       require_bearer_token: requireBearerToken,
     }
 
-    return this.api.spawn(config.account, service, config.token, body)
+    return this.api.spawn(config.getAccount(), service, config.getAccessToken(), body)
   }
 
   public terminate(backend: string): Promise<TerminateResult> {
     const config = this.expectAuthorized()
 
-    return this.api.terminate(backend, config.token)
+    return this.api.terminate(backend, config.getAccessToken())
   }
 
   public serviceCreate(service: string): Promise<ServiceCreateResult> {
     const config = this.expectAuthorized()
-    return this.api.serviceCreate(config.account, service, config.token)
+    return this.api.serviceCreate(config.getAccount(), service, config.getAccessToken())
   }
 
   public serviceDelete(service: string): Promise<ServiceDeleteResult> {
     const config = this.expectAuthorized()
-    return this.api.serviceDelete(config.account, service, config.token)
+    return this.api.serviceDelete(config.getAccount(), service, config.getAccessToken())
   }
 
   public serviceInfo(service: string): Promise<ServiceInfoResult> {
     const config = this.expectAuthorized()
-    return this.api.serviceInfo(config.account, service, config.token)
+    return this.api.serviceInfo(config.getAccount(), service, config.getAccessToken())
   }
 
   public serviceList(): Promise<ServiceListResult> {
     const config = this.expectAuthorized()
-    return this.api.serviceList(config.account, config.token)
+    return this.api.serviceList(config.getAccount(), config.getAccessToken())
   }
 
   public streamLogs(backend: string, callback: (v: string) => void): Promise<void> {
     const config = this.expectAuthorized()
-    return this.api.streamLogs(backend, config.token, callback)
+    return this.api.streamLogs(backend, config.getAccessToken(), callback)
   }
 
   public streamStatus(backend: string, callback: (v: StatusMessage) => void): Promise<void> {
     const config = this.expectAuthorized()
-    return this.api.streamStatus(backend, config.token, callback)
+    return this.api.streamStatus(backend, config.getAccessToken(), callback)
   }
 
   public status(backend: string): Promise<StatusMessage> {
     const config = this.expectAuthorized()
-    return this.api.status(backend, config.token)
+    return this.api.status(backend, config.getAccessToken())
   }
 
   public spawnTokenCreate(service: string, grace?: number, port?: number, tag?: string): Promise<SpawnTokenCreateResult> {
@@ -107,11 +107,11 @@ export class Jamsocket {
       tag,
     }
 
-    return this.api.spawnTokenCreate(config.account, service, config.token, body)
+    return this.api.spawnTokenCreate(config.getAccount(), service, config.getAccessToken(), body)
   }
 
   public spawnTokenRevoke(spawnToken: string): Promise<SpawnTokenRevokeResult> {
     const config = this.expectAuthorized()
-    return this.api.spawnTokenRevoke(spawnToken, config.token)
+    return this.api.spawnTokenRevoke(spawnToken, config.getAccessToken())
   }
 }
