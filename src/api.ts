@@ -167,8 +167,8 @@ export class JamsocketApi {
     return responseBody
   }
 
-  private async makeAuthenticatedRequest<T>(endpoint: string, method: HttpMethod, apiToken: string, body?: any): Promise<T> {
-    const additionalHeaders = { 'Authorization': `Bearer ${apiToken}` }
+  private async makeAuthenticatedRequest<T>(endpoint: string, method: HttpMethod, authToken: string, body?: any): Promise<T> {
+    const additionalHeaders = { 'Authorization': `Bearer ${authToken}` }
     try {
       // NOTE: this await here is required so that all the Promise "callback" logic is wrapped in this try/catch
       return await this.makeRequest<T>(endpoint, method, body, additionalHeaders)
@@ -178,58 +178,58 @@ export class JamsocketApi {
     }
   }
 
-  private async makeAuthenticatedStreamRequest(endpoint: string, apiToken: string, callback: (line: string) => void): Promise<void> {
+  private async makeAuthenticatedStreamRequest(endpoint: string, authToken: string, callback: (line: string) => void): Promise<void> {
     const url = `${this.apiBase}${endpoint}`
     return eventStream(url, {
       ...this.options,
       method: HttpMethod.Get,
-      headers: { 'Authorization': `Bearer ${apiToken}` },
+      headers: { 'Authorization': `Bearer ${authToken}` },
     }, callback)
   }
 
-  public checkAuth(apiToken: string): Promise<CheckAuthResult> {
+  public checkAuth(authToken: string): Promise<CheckAuthResult> {
     const url = '/auth'
-    return this.makeAuthenticatedRequest<CheckAuthResult>(url, HttpMethod.Get, apiToken)
+    return this.makeAuthenticatedRequest<CheckAuthResult>(url, HttpMethod.Get, authToken)
   }
 
-  public serviceImage(username: string, serviceName: string, apiToken: string): Promise<ServiceImageResult> {
+  public serviceImage(username: string, serviceName: string, authToken: string): Promise<ServiceImageResult> {
     const url = `/user/${username}/service/${serviceName}/image`
-    return this.makeAuthenticatedRequest<ServiceImageResult>(url, HttpMethod.Get, apiToken)
+    return this.makeAuthenticatedRequest<ServiceImageResult>(url, HttpMethod.Get, authToken)
   }
 
-  public serviceCreate(username: string, name: string, apiToken: string): Promise<ServiceCreateResult> {
+  public serviceCreate(username: string, name: string, authToken: string): Promise<ServiceCreateResult> {
     const url = `/user/${username}/service`
-    return this.makeAuthenticatedRequest<ServiceCreateResult>(url, HttpMethod.Post, apiToken, {
+    return this.makeAuthenticatedRequest<ServiceCreateResult>(url, HttpMethod.Post, authToken, {
       name,
     })
   }
 
-  public serviceDelete(username: string, serviceName: string, apiToken: string): Promise<ServiceDeleteResult> {
+  public serviceDelete(username: string, serviceName: string, authToken: string): Promise<ServiceDeleteResult> {
     const url = `/user/${username}/service/${serviceName}/delete`
-    return this.makeAuthenticatedRequest<ServiceDeleteResult>(url, HttpMethod.Post, apiToken)
+    return this.makeAuthenticatedRequest<ServiceDeleteResult>(url, HttpMethod.Post, authToken)
   }
 
-  public serviceInfo(username: string, serviceName: string, apiToken: string): Promise<ServiceInfoResult> {
+  public serviceInfo(username: string, serviceName: string, authToken: string): Promise<ServiceInfoResult> {
     const url = `/user/${username}/service/${serviceName}`
-    return this.makeAuthenticatedRequest<ServiceInfoResult>(url, HttpMethod.Get, apiToken)
+    return this.makeAuthenticatedRequest<ServiceInfoResult>(url, HttpMethod.Get, authToken)
   }
 
-  public serviceList(username: string, apiToken: string): Promise<ServiceListResult> {
+  public serviceList(username: string, authToken: string): Promise<ServiceListResult> {
     const url = `/user/${username}/services`
-    return this.makeAuthenticatedRequest<ServiceListResult>(url, HttpMethod.Get, apiToken)
+    return this.makeAuthenticatedRequest<ServiceListResult>(url, HttpMethod.Get, authToken)
   }
 
-  public spawn(username: string, serviceName: string, apiToken: string, body: SpawnRequestBody): Promise<SpawnResult> {
+  public spawn(username: string, serviceName: string, authToken: string, body: SpawnRequestBody): Promise<SpawnResult> {
     const url = `/user/${username}/service/${serviceName}/spawn`
-    return this.makeAuthenticatedRequest<SpawnResult>(url, HttpMethod.Post, apiToken, body)
+    return this.makeAuthenticatedRequest<SpawnResult>(url, HttpMethod.Post, authToken, body)
   }
 
-  public streamLogs(backend: string, apiToken: string, callback: (line: string) => void): Promise<void> {
+  public streamLogs(backend: string, authToken: string, callback: (line: string) => void): Promise<void> {
     const url = `/backend/${backend}/logs`
-    return this.makeAuthenticatedStreamRequest(url, apiToken, callback)
+    return this.makeAuthenticatedStreamRequest(url, authToken, callback)
   }
 
-  public streamStatus(backend: string, apiToken: string, callback: (statusMessage: StatusMessage) => void): Promise<void> {
+  public streamStatus(backend: string, authToken: string, callback: (statusMessage: StatusMessage) => void): Promise<void> {
     const url = `/backend/${backend}/status/stream`
     const wrappedCallback = (line: string) => {
       const val = JSON.parse(line)
@@ -238,27 +238,27 @@ export class JamsocketApi {
         time: new Date(val.time),
       })
     }
-    return this.makeAuthenticatedStreamRequest(url, apiToken, wrappedCallback)
+    return this.makeAuthenticatedStreamRequest(url, authToken, wrappedCallback)
   }
 
-  public async status(backend: string, apiToken: string): Promise<StatusMessage> {
+  public async status(backend: string, authToken: string): Promise<StatusMessage> {
     const url = `/backend/${backend}/status`
-    return this.makeAuthenticatedRequest<StatusMessage>(url, HttpMethod.Get, apiToken)
+    return this.makeAuthenticatedRequest<StatusMessage>(url, HttpMethod.Get, authToken)
   }
 
-  public async terminate(backend: string, apiToken: string): Promise<TerminateResult> {
+  public async terminate(backend: string, authToken: string): Promise<TerminateResult> {
     const url = `/backend/${backend}/terminate`
-    return this.makeAuthenticatedRequest<TerminateResult>(url, HttpMethod.Post, apiToken)
+    return this.makeAuthenticatedRequest<TerminateResult>(url, HttpMethod.Post, authToken)
   }
 
-  public async spawnTokenCreate(username: string, serviceName: string, apiToken: string, body: SpawnTokenRequestBody): Promise<SpawnTokenCreateResult> {
+  public async spawnTokenCreate(username: string, serviceName: string, authToken: string, body: SpawnTokenRequestBody): Promise<SpawnTokenCreateResult> {
     const url = `/user/${username}/service/${serviceName}/token`
-    return this.makeAuthenticatedRequest<SpawnTokenCreateResult>(url, HttpMethod.Post, apiToken, body)
+    return this.makeAuthenticatedRequest<SpawnTokenCreateResult>(url, HttpMethod.Post, authToken, body)
   }
 
-  public async spawnTokenRevoke(spawnToken: string, apiToken: string): Promise<SpawnTokenRevokeResult> {
+  public async spawnTokenRevoke(spawnToken: string, authToken: string): Promise<SpawnTokenRevokeResult> {
     const url = `/token/${spawnToken}`
-    return this.makeAuthenticatedRequest<SpawnTokenRevokeResult>(url, HttpMethod.Delete, apiToken)
+    return this.makeAuthenticatedRequest<SpawnTokenRevokeResult>(url, HttpMethod.Delete, authToken)
   }
 
   public async spawnTokenSpawn(spawnToken: string): Promise<SpawnResult> {
