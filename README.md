@@ -24,7 +24,7 @@ Most of the Jamsocket CLI commands require you to be logged in. The CLI uses acc
 # Commands
 <!-- commands -->
 * [`jamsocket help [COMMAND]`](#jamsocket-help-command)
-* [`jamsocket login [TOKEN]`](#jamsocket-login-token)
+* [`jamsocket login`](#jamsocket-login)
 * [`jamsocket logout`](#jamsocket-logout)
 * [`jamsocket logs BACKEND`](#jamsocket-logs-backend)
 * [`jamsocket push SERVICE IMAGE`](#jamsocket-push-service-image)
@@ -58,27 +58,25 @@ DESCRIPTION
 
 _See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v5.1.12/src/commands/help.ts)_
 
-## `jamsocket login [TOKEN]`
+## `jamsocket login`
 
-Authenticates user to the Jamsocket API with a token.
+Authenticates user to the Jamsocket API.
 
 ```
 USAGE
-  $ jamsocket login [TOKEN]
+  $ jamsocket login [-t <value>]
 
-ARGUMENTS
-  TOKEN  optional token to log into the CLI with
+FLAGS
+  -t, --token=<value>  for automated environments, optional API token to log into the CLI with
 
 DESCRIPTION
-  Authenticates user to the Jamsocket API with a token.
+  Authenticates user to the Jamsocket API.
 
 EXAMPLES
   $ jamsocket login
-
-  $ jamsocket login W3guqHFk0FJdtquC.iDxcHZr4rg1AIWPxpnk0SWHm95Vfdl
 ```
 
-_See code: [src/commands/login.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.4.9/src/commands/login.ts)_
+_See code: [src/commands/login.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.5.0/src/commands/login.ts)_
 
 ## `jamsocket logout`
 
@@ -95,7 +93,7 @@ EXAMPLES
   $ jamsocket logout
 ```
 
-_See code: [src/commands/logout.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.4.9/src/commands/logout.ts)_
+_See code: [src/commands/logout.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.5.0/src/commands/logout.ts)_
 
 ## `jamsocket logs BACKEND`
 
@@ -115,7 +113,7 @@ EXAMPLES
   $ jamsocket logs f7em2
 ```
 
-_See code: [src/commands/logs.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.4.9/src/commands/logs.ts)_
+_See code: [src/commands/logs.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.5.0/src/commands/logs.ts)_
 
 ## `jamsocket push SERVICE IMAGE`
 
@@ -141,7 +139,7 @@ EXAMPLES
   $ jamsocket push my-service my-image -t my-tag
 ```
 
-_See code: [src/commands/push.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.4.9/src/commands/push.ts)_
+_See code: [src/commands/push.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.5.0/src/commands/push.ts)_
 
 ## `jamsocket service create NAME`
 
@@ -232,7 +230,7 @@ EXAMPLES
   $ jamsocket spawn my-service -t latest
 ```
 
-_See code: [src/commands/spawn.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.4.9/src/commands/spawn.ts)_
+_See code: [src/commands/spawn.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.5.0/src/commands/spawn.ts)_
 
 ## `jamsocket spawn-token create SERVICE`
 
@@ -301,5 +299,5 @@ EXAMPLES
   $ jamsocket terminate a8m32q
 ```
 
-_See code: [src/commands/terminate.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.4.9/src/commands/terminate.ts)_
+_See code: [src/commands/terminate.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.5.0/src/commands/terminate.ts)_
 <!-- commandsstop -->
