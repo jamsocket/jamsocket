@@ -74,6 +74,23 @@ export interface TerminateResult {
   status: 'ok',
 }
 
+export interface UserSessionRevokeResult {
+  status: 'ok',
+}
+
+export interface CliLoginAttemptResult {
+  token: string,
+}
+
+export interface CompleteCliLoginResult {
+  uuid: string,
+  user_id: string,
+  user_agent: string
+  created_at: string,
+  expiration: string,
+  token: string,
+}
+
 export class HTTPError extends Error {
   constructor(public code: number, message: string) {
     super(message)
@@ -132,9 +149,9 @@ export class JamsocketApi {
     return `https://app.${rootDomain}`
   }
 
-  public getLoginUrl(): string {
+  public getLoginUrl(loginToken: string): string {
     const baseUrl = this.getAppBaseUrl()
-    return `${baseUrl}/cli-login`
+    return `${baseUrl}/cli-login/${loginToken}`
   }
 
   private async makeRequest<T>(endpoint: string, method: HttpMethod, body?: any, headers?: Headers): Promise<T> {
@@ -264,5 +281,35 @@ export class JamsocketApi {
   public async spawnTokenSpawn(spawnToken: string): Promise<SpawnResult> {
     const url = `/token/${spawnToken}/spawn`
     return this.makeRequest<SpawnResult>(url, HttpMethod.Post, {})
+  }
+
+  public async startLoginAttempt(): Promise<CliLoginAttemptResult> {
+    const url = '/cli_login'
+    return this.makeRequest<CliLoginAttemptResult>(url, HttpMethod.Post, {})
+  }
+
+  public async completeLoginAttempt(token: string, code: string): Promise<CompleteCliLoginResult> {
+    const url = `/cli_login/${token}/complete`
+    return this.makeRequest<CompleteCliLoginResult>(url, HttpMethod.Post, { code })
+  }
+
+  public async revokeUserSession(userSessionId: string, authToken: string): Promise<UserSessionRevokeResult> {
+    const url = `/user_session/${userSessionId}`
+    return this.makeAuthenticatedRequest<UserSessionRevokeResult>(url, HttpMethod.Delete, authToken)
+  }
+
+  public streamLoginStatus(loginToken: string): Promise<boolean> {
+    const endpoint = `/cli_login/${loginToken}/status/stream`
+    const url = `${this.apiBase}${endpoint}`
+    // right now, this stream only returns a single message and then closes
+    return new Promise(resolve => {
+      eventStream(url, {
+        ...this.options,
+        method: HttpMethod.Get,
+      }, (line: string) => {
+        const val = JSON.parse(line)
+        resolve(val.status === 'ok')
+      })
+    })
   }
 }
