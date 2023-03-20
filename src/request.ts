@@ -18,6 +18,12 @@ const platform = WSL ? 'wsl' : os.platform()
 const arch = os.arch() === 'ia32' ? 'x86' : os.arch()
 const userAgent = `jamsocket-cli/${version} ${platform}-${arch} node-${process.version}`
 
+// wrapping in try/catch as os.userInfo() will throw if no username or homedir is found
+let userHost: string | null = null
+try {
+  userHost = `${os.userInfo().username}@${os.hostname()}`
+} catch {}
+
 const PACKAGE_META_URL = 'https://registry.npmjs.org/jamsocket'
 
 export async function checkVersion(): Promise<void> {
@@ -65,6 +71,10 @@ export function request(
     if (jsonBody !== null) {
       headers['Content-Length'] = `${jsonBody.length}`
       headers['Content-Type'] = 'application/json'
+    }
+
+    if (userHost !== null) {
+      headers['X-User-Host'] = userHost
     }
 
     let protocol = https
