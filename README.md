@@ -19,7 +19,9 @@ npm install jamsocket@latest --global # to update the global installation of Jam
 
 # Authentication
 
-Most of the Jamsocket CLI commands require you to be logged in. The CLI uses access tokens for authentication, and you can generate a token for the CLI at [app.jamsocket.com/cli-login](https://app.jamsocket.com/cli-login). Then run `jamsocket login` and paste your token into the prompt. You can manage all your access tokens from the [Jamsocket Settings page](https://app.jamsocket.com/settings).
+Run `jamsocket login`.
+
+If you want to use the Jamsocket CLI from an automated environment (e.g. a CI/CD pipeline), you can authenticate with an access token by running `jamsocket login --token [ACCESS_TOKEN]`. You can manage and generate access tokens from the [Jamsocket Settings page](https://app.jamsocket.com/settings).
 
 # Commands
 <!-- commands -->
