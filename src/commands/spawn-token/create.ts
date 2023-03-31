@@ -1,5 +1,7 @@
 import { Command, Flags } from '@oclif/core'
+import chalk from 'chalk'
 import { Jamsocket } from '../../jamsocket'
+import { lightBlue } from '../../formatting'
 
 const MAX_PORT = (2 ** 16) - 1
 
@@ -29,6 +31,6 @@ export default class Create extends Command {
     const jamsocket = Jamsocket.fromEnvironment()
 
     const { token } = await jamsocket.spawnTokenCreate(args.service, flags.grace, flags.port, flags.tag)
-    this.log(token)
+    this.log(chalk.bold`Spawn token:`, lightBlue(token))
   }
 }

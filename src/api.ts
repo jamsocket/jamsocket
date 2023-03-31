@@ -57,8 +57,8 @@ export interface ServiceDeleteResult {
 export interface SpawnResult {
   url: string,
   name: string,
-  ready_url?: string,
-  status_url?: string,
+  ready_url: string,
+  status_url: string,
   bearer_token?: string,
 }
 

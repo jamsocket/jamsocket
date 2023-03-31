@@ -1,6 +1,8 @@
 import { Command, Flags } from '@oclif/core'
+import chalk from 'chalk'
 import { Jamsocket } from '../jamsocket'
 import * as customFlags from '../flags'
+import { blue, lightBlue } from '../formatting'
 
 const MAX_PORT = (2 ** 16) - 1
 
@@ -37,6 +39,13 @@ export default class Spawn extends Command {
     const jamsocket = Jamsocket.fromEnvironment()
     const responseBody = await jamsocket.spawn(args.service, env, flags.grace, flags.port, flags.tag, flags['require-bearer-token'])
 
-    this.log(JSON.stringify(responseBody, null, 2))
+    this.log(lightBlue('Backend spawned!'))
+    this.log(chalk.bold`backend name: `, blue(responseBody.name))
+    this.log(chalk.bold`backend url:  `, blue(responseBody.url))
+    this.log(chalk.bold`status url:   `, blue(responseBody.status_url))
+    this.log(chalk.bold`ready url:    `, blue(responseBody.ready_url))
+    if (responseBody.bearer_token) {
+      this.log(chalk.bold`bearer token: `, blue(responseBody.bearer_token))
+    }
   }
 }

@@ -2,7 +2,7 @@ import { Command, CliUx } from '@oclif/core'
 import { Jamsocket } from '../../jamsocket'
 import * as inquirer from 'inquirer'
 import { formatDistanceToNow } from 'date-fns'
-import chalk from 'chalk'
+import { lightBlue, lightMagenta } from '../../formatting'
 
 export default class Create extends Command {
   static description = 'Deletes a service'
@@ -25,10 +25,10 @@ export default class Create extends Command {
 
     const formattedInfo: string[] = [
       'The service',
-      chalk.bold.cyan(serviceInfo.name),
-      lastImgUpload === null ? ('has ' + chalk.bold.magentaBright`no container images` + ',') : ('had a ' + chalk.bold.magentaBright`container image pushed to it ${lastImgUpload} ago` + ','),
-      spawnTokenCount === 0 ? ('has ' + chalk.bold.magentaBright`no spawn tokens` + ',') : ('has ' + chalk.bold.magentaBright`${spawnTokenCount} spawn tokens` + ','),
-      lastSpawn === null ? ('and has ' + chalk.bold.magentaBright`never been spawned` + '.') : ('and was ' + chalk.bold.magentaBright`last spawned ${lastSpawn} ago` + '.'),
+      lightBlue(serviceInfo.name),
+      lastImgUpload === null ? ('has ' + lightMagenta('no container images') + ',') : ('had a ' + lightMagenta(`container image pushed to it ${lastImgUpload} ago`) + ','),
+      spawnTokenCount === 0 ? ('has ' + lightMagenta('no spawn tokens') + ',') : ('has ' + lightMagenta(`${spawnTokenCount} spawn tokens`) + ','),
+      lastSpawn === null ? ('and has ' + lightMagenta('never been spawned') + '.') : ('and was ' + lightMagenta(`last spawned ${lastSpawn} ago`) + '.'),
     ]
 
     this.log()
