@@ -1,4 +1,4 @@
-import { JamsocketApi, SpawnRequestBody, SpawnResult, StatusMessage, TerminateResult } from './api'
+import { JamsocketApi, RunningBackendsResult, SpawnRequestBody, SpawnResult, StatusMessage, TerminateResult } from './api'
 import type { SpawnTokenCreateResult, SpawnTokenRequestBody, SpawnTokenRevokeResult } from './api'
 import type { ServiceCreateResult, ServiceListResult, ServiceInfoResult, ServiceDeleteResult } from './api'
 import { JamsocketConfig } from './jamsocket-config'
@@ -62,6 +62,11 @@ export class Jamsocket {
     const config = this.expectAuthorized()
 
     return this.api.terminate(backend, config.getAccessToken())
+  }
+
+  public listRunningBackends(): Promise<RunningBackendsResult> {
+    const config = this.expectAuthorized()
+    return this.api.listRunningBackends(config.getAccount(), config.getAccessToken())
   }
 
   public serviceCreate(service: string): Promise<ServiceCreateResult> {

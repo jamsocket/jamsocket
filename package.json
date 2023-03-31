@@ -48,6 +48,9 @@
       "service": {
         "description": "manage jamsocket services"
       },
+      "backend": {
+        "description": "manage jamsocket backends"
+      },
       "token": {
         "description": "manage spawn tokens"
       }
