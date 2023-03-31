@@ -7,7 +7,7 @@ export function getImagePlatform(imageName: string): { os: string, arch: string 
   const getPlatform = spawnSync('docker', ['image', 'inspect', '--format', '{{.Os}} {{.Architecture}}', imageName])
   if (getPlatform.status !== 0) {
     const stderr = getPlatform.stderr.toString().trim()
-    throw new Error(`Encountered docker error while checking image platform:\n${stderr}`)
+    throw new Error(`Encountered docker error:\n${stderr}`)
   }
   const stdout = getPlatform.stdout.toString().trim()
   const [os, arch] = stdout.split(' ').map(s => s.trim())
