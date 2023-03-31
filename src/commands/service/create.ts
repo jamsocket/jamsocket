@@ -1,5 +1,6 @@
 import { Command } from '@oclif/core'
 import { Jamsocket } from '../../jamsocket'
+import { lightMagenta } from '../../formatting'
 
 export default class Create extends Command {
   static description = 'Creates a service'
@@ -16,6 +17,6 @@ export default class Create extends Command {
     const jamsocket = Jamsocket.fromEnvironment()
     await jamsocket.serviceCreate(args.name)
 
-    this.log(`Created service: ${args.name}`)
+    this.log(`Created service: ${lightMagenta(args.name)}`)
   }
 }

@@ -1,6 +1,8 @@
 import { Command, CliUx, Flags } from '@oclif/core'
+import chalk from 'chalk'
 import { JamsocketApi, AuthenticationError } from '../api'
 import { deleteJamsocketConfig, JamsocketConfig } from '../jamsocket-config'
+import { lightMagenta, lightGreen, lightBlue, gradientBlue } from '../formatting'
 
 export default class Login extends Command {
   static description = 'Authenticates user to the Jamsocket API.'
@@ -20,8 +22,9 @@ export default class Login extends Command {
       const token = savedConfig.getAccessToken()
       try {
         const result = await api.checkAuth(token)
+        this.log()
         if (result.account === null) throw new Error(`No account found for logged in user. You may need to log in to ${api.getAppBaseUrl()} to finish setting up your account.`)
-        this.log(`You are already logged into account "${result.account}". To log into a different account, run jamsocket logout first.`)
+        this.log(`You are already logged into account ${lightBlue(result.account)}. To log into a different account, run ${lightMagenta('jamsocket logout')} first.\n`)
         return
       } catch (error) {
         const isAuthError = error instanceof AuthenticationError
@@ -50,10 +53,11 @@ export default class Login extends Command {
 
     const loginAttempt = await api.startLoginAttempt()
 
-    this.log('Log in with this URL:\n')
-    this.log(`    ${api.getLoginUrl(loginAttempt.token)}\n`)
+    this.log()
+    this.log(chalk.bold`Log in with this URL:\n`)
+    this.log(`    ${lightBlue(api.getLoginUrl(loginAttempt.token))}\n`)
 
-    CliUx.ux.action.start('waiting for login')
+    CliUx.ux.action.start('')
     const success = await api.streamLoginStatus(loginAttempt.token)
     CliUx.ux.action.stop(success ? '✅' : '❌')
     if (!success) {
@@ -61,12 +65,12 @@ export default class Login extends Command {
     }
 
     this.log()
-    const code = (await CliUx.ux.prompt('Paste the 4-digit code you received at login here')).trim()
+    const code = (await CliUx.ux.prompt(`Paste the ${lightGreen('4-digit code')} you received at login here`)).trim()
 
     const userSession = await api.completeLoginAttempt(loginAttempt.token, code)
     const authResult = await api.checkAuth(userSession.token)
 
-    if (authResult.account === null) throw new Error(`No account found for user. You may need to log in to ${api.getAppBaseUrl()} to finish setting up your account.`)
+    if (authResult.account === null) throw new Error(`No account found for user. You may need to ${lightMagenta(`log in to ${api.getAppBaseUrl()}`)} to finish setting up your account.`)
 
     const config = new JamsocketConfig({
       user_session: {
@@ -79,6 +83,7 @@ export default class Login extends Command {
     config.save()
 
     this.log()
-    this.log(`Logged in as "${authResult.account}"`)
+    this.log(`Welcome to ${gradientBlue('Jamsocket')}!`)
+    this.log(`You're logged in as ${lightMagenta(authResult.account)}\n`)
   }
 }

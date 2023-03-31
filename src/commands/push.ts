@@ -1,7 +1,9 @@
 import { Command, Flags } from '@oclif/core'
+import chalk from 'chalk'
 import * as inquirer from 'inquirer'
 import { Jamsocket } from '../jamsocket'
 import { getImagePlatform } from '../docker'
+import { lightMagenta } from '../formatting'
 
 export default class Push extends Command {
   static description = 'Pushes a docker image to the jamcr.io container registry under your logged in user\'s name'
@@ -26,13 +28,13 @@ export default class Push extends Command {
     const { os, arch } = getImagePlatform(args.image)
     if (os !== 'linux' || arch !== 'amd64') {
       this.log()
-      this.warn(`The image ${args.image} may not be compatible with Jamsocket because its image os/arch is ${os}/${arch}.`)
+      this.warn(chalk.bold.red`The image ${args.image} may not be compatible with Jamsocket because its image os/arch is ${os}/${arch}.`)
       this.log('If you encounter errors while spawning with this image, you may need to rebuild the image with the platform flag (--platform=linux/amd64) and push again.')
       this.log()
 
       const response = await inquirer.prompt([{
         name: 'goAhead',
-        message: 'Go ahead and push image?',
+        message: lightMagenta('Go ahead and push image?'),
         type: 'list',
         choices: [{ name: 'no' }, { name: 'yes' }],
       }])
