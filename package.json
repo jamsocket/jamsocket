@@ -80,6 +80,7 @@
   "bugs": "https://github.com/drifting-in-space/jamsocket-cli/issues",
   "keywords": [
     "jamsocket",
+    "plane",
     "spawner",
     "session-lived backends",
     "session-lived application backends",
