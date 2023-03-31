@@ -76,8 +76,8 @@ export type BackendWithStatus = {
   service_name: string
   cluster_name: string
   account_name: string
-  status?: string | null
-  status_timestamp?: string | null
+  status?: string
+  status_timestamp?: string
 }
 
 export interface RunningBackendsResult {
