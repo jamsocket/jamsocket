@@ -70,6 +70,20 @@ export interface SpawnTokenRevokeResult {
   status: 'ok',
 }
 
+export type BackendWithStatus = {
+  name: string
+  created_at: string
+  service_name: string
+  cluster_name: string
+  account_name: string
+  status?: string | null
+  status_timestamp?: string | null
+}
+
+export interface RunningBackendsResult {
+  running_backends: BackendWithStatus[]
+}
+
 export interface TerminateResult {
   status: 'ok',
 }
@@ -239,6 +253,11 @@ export class JamsocketApi {
   public spawn(username: string, serviceName: string, authToken: string, body: SpawnRequestBody): Promise<SpawnResult> {
     const url = `/user/${username}/service/${serviceName}/spawn`
     return this.makeAuthenticatedRequest<SpawnResult>(url, HttpMethod.Post, authToken, body)
+  }
+
+  public listRunningBackends(username: string, authToken: string): Promise<RunningBackendsResult> {
+    const url = `/user/${username}/backends`
+    return this.makeAuthenticatedRequest<RunningBackendsResult>(url, HttpMethod.Get, authToken)
   }
 
   public streamLogs(backend: string, authToken: string, callback: (line: string) => void): Promise<void> {
