@@ -25,6 +25,7 @@ If you want to use the Jamsocket CLI from an automated environment (e.g. a CI/CD
 
 # Commands
 <!-- commands -->
+* [`jamsocket backend list`](#jamsocket-backend-list)
 * [`jamsocket help [COMMAND]`](#jamsocket-help-command)
 * [`jamsocket login`](#jamsocket-login)
 * [`jamsocket logout`](#jamsocket-logout)
@@ -39,6 +40,21 @@ If you want to use the Jamsocket CLI from an automated environment (e.g. a CI/CD
 * [`jamsocket spawn-token revoke TOKEN`](#jamsocket-spawn-token-revoke-token)
 * [`jamsocket spawn-token spawn TOKEN`](#jamsocket-spawn-token-spawn-token)
 * [`jamsocket terminate BACKEND`](#jamsocket-terminate-backend)
+
+## `jamsocket backend list`
+
+List running backends for the logged-in user
+
+```
+USAGE
+  $ jamsocket backend list
+
+DESCRIPTION
+  List running backends for the logged-in user
+
+EXAMPLES
+  $ jamsocket backend list
+```
 
 ## `jamsocket help [COMMAND]`
 
