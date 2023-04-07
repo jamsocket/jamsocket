@@ -1,5 +1,5 @@
 import { Command } from '@oclif/core'
-import { Jamsocket } from '../jamsocket'
+import { Jamsocket } from '../../jamsocket'
 import chalk from 'chalk'
 
 function prettifyBytes(bytes: number) {
