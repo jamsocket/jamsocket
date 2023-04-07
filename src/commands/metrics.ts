@@ -1,6 +1,14 @@
-import { Command } from '@oclif/core'
+import { Command, CliUx } from '@oclif/core'
 import { Jamsocket } from '../jamsocket'
 
+type BackendMetrics = {
+  cluster: string,
+  backend_id: string,
+  mem_used: number,
+  mem_available: number,
+  cpu_used: number,
+  sys_cpu: number
+}
 
 export default class Metrics extends Command {
   static description = 'Stream metrics from a running backend'
@@ -15,9 +23,20 @@ export default class Metrics extends Command {
   public async run(): Promise<void> {
     const jamsocket = Jamsocket.fromEnvironment()
     const { args } = await this.parse(Metrics)
+    const boldStart = '\x1b[1m'
+    const boldEnd = '\x1b[0m'
+    this.log(boldStart + "cpu_util\tmem_used\tmem_avail" + boldEnd)
 
     await jamsocket.streamMetrics(args.backend, line => {
-      this.log(line)
+      const metrics: BackendMetrics = JSON.parse(line)
+      const cpu_util = (metrics.cpu_used / metrics.sys_cpu) * 100
+      const mem_used_mb = metrics.mem_used * (10**(-6))
+      const mem_avail_mb = metrics.mem_available * (10**(-6))
+      const formatToHeader = (a: string, header: string) => a.padEnd(header.length, " ")
+      this.log(
+	`${formatToHeader(cpu_util.toFixed(1) + "%", "cpu_util")}\t` +
+	  `${formatToHeader(mem_used_mb.toFixed(2) + " mb", "mem_used")}\t` +
+	  `${formatToHeader(mem_avail_mb.toFixed(2) + " mb", "mem_avail")}`)
     })
   }
 }
