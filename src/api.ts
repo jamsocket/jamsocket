@@ -265,6 +265,11 @@ export class JamsocketApi {
     return this.makeAuthenticatedStreamRequest(url, authToken, callback)
   }
 
+  public streamMetrics(backend: string, authToken: string, callback: (line: string) => void): Promise<void> {
+    const url = `/backend/${backend}/metrics/stream`
+    return this.makeAuthenticatedStreamRequest(url, authToken, callback)
+  }
+
   public streamStatus(backend: string, authToken: string, callback: (statusMessage: StatusMessage) => void): Promise<void> {
     const url = `/backend/${backend}/status/stream`
     const wrappedCallback = (line: string) => {
