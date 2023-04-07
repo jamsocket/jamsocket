@@ -33,8 +33,8 @@ export default class Metrics extends Command {
       const cpu_util = (metrics.cpu_used / metrics.sys_cpu) * 100
       const mem_used_mb = metrics.mem_used * (10 ** (-6))
       const mem_avail_mb = metrics.mem_available * (10 ** (-6))
-      this.log(
-        `${formatToHeader(cpu_util.toFixed(1) + '%', 'cpu_util')}\t` +
+      process.stdout.write(
+        `\r${formatToHeader(cpu_util.toFixed(1) + '%', 'cpu_util')}\t` +
           `${formatToHeader(mem_used_mb.toFixed(2) + ' mb', 'mem_used')}\t` +
           `${formatToHeader(mem_avail_mb.toFixed(2) + ' mb', 'mem_avail')}`)
     })
