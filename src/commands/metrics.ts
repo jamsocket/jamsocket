@@ -1,4 +1,4 @@
-import { Command, CliUx } from '@oclif/core'
+import { Command } from '@oclif/core'
 import { Jamsocket } from '../jamsocket'
 
 type BackendMetrics = {
@@ -10,6 +10,7 @@ type BackendMetrics = {
   sys_cpu: number
 }
 
+const formatToHeader = (a: string, header: string) => a.padEnd(header.length, ' ')
 export default class Metrics extends Command {
   static description = 'Stream metrics from a running backend'
   static examples = [
@@ -23,20 +24,19 @@ export default class Metrics extends Command {
   public async run(): Promise<void> {
     const jamsocket = Jamsocket.fromEnvironment()
     const { args } = await this.parse(Metrics)
-    const boldStart = '\x1b[1m'
-    const boldEnd = '\x1b[0m'
-    this.log(boldStart + "cpu_util\tmem_used\tmem_avail" + boldEnd)
+    const boldStart = '\u001B[1m'
+    const boldEnd = '\u001B[0m'
+    this.log(boldStart + 'cpu_util\tmem_used\tmem_avail' + boldEnd)
 
     await jamsocket.streamMetrics(args.backend, line => {
       const metrics: BackendMetrics = JSON.parse(line)
       const cpu_util = (metrics.cpu_used / metrics.sys_cpu) * 100
-      const mem_used_mb = metrics.mem_used * (10**(-6))
-      const mem_avail_mb = metrics.mem_available * (10**(-6))
-      const formatToHeader = (a: string, header: string) => a.padEnd(header.length, " ")
+      const mem_used_mb = metrics.mem_used * (10 ** (-6))
+      const mem_avail_mb = metrics.mem_available * (10 ** (-6))
       this.log(
-	`${formatToHeader(cpu_util.toFixed(1) + "%", "cpu_util")}\t` +
-	  `${formatToHeader(mem_used_mb.toFixed(2) + " mb", "mem_used")}\t` +
-	  `${formatToHeader(mem_avail_mb.toFixed(2) + " mb", "mem_avail")}`)
+        `${formatToHeader(cpu_util.toFixed(1) + '%', 'cpu_util')}\t` +
+          `${formatToHeader(mem_used_mb.toFixed(2) + ' mb', 'mem_used')}\t` +
+          `${formatToHeader(mem_avail_mb.toFixed(2) + ' mb', 'mem_avail')}`)
     })
   }
 }
