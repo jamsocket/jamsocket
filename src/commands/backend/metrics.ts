@@ -34,15 +34,15 @@ export default class Metrics extends Command {
   public async run(): Promise<void> {
     const jamsocket = Jamsocket.fromEnvironment()
     const { args } = await this.parse(Metrics)
-    this.log(chalk.bold('cpu_util\tmem_used\tmem_avail'))
+    this.log(chalk.bold('cpu util\tmem used\tmem avail'))
 
     await jamsocket.streamMetrics(args.backend, line => {
       const metrics: BackendMetrics = JSON.parse(line)
       const cpu_util = (metrics.cpu_used / metrics.sys_cpu) * 100
       process.stdout.write(
-        `\r${formatToHeader(cpu_util.toFixed(1) + '%', 'cpu_util')}\t` +
-          `${formatToHeader(prettifyBytes(metrics.mem_used), 'mem_used')}\t` +
-          `${formatToHeader(prettifyBytes(metrics.mem_available), 'mem_avail')}`)
+        `\r${formatToHeader(cpu_util.toFixed(1) + '%', 'cpu util')}\t` +
+          `${formatToHeader(prettifyBytes(metrics.mem_used), 'mem used')}\t` +
+          `${formatToHeader(prettifyBytes(metrics.mem_available), 'mem avail')}`)
     })
   }
 }
