@@ -1,5 +1,15 @@
 import { Command } from '@oclif/core'
 import { Jamsocket } from '../jamsocket'
+import chalk from 'chalk'
+
+function prettifyBytes(bytes: number) {
+  const suffixes = ['B', 'KiB', 'MiB', 'GiB']
+  let i = 0
+  for (i; bytes > 1 << 10; i++) {
+    bytes /= 1 << 10
+  }
+  return bytes.toFixed(2) + ' ' + suffixes[i]
+}
 
 type BackendMetrics = {
   cluster: string,
@@ -24,19 +34,15 @@ export default class Metrics extends Command {
   public async run(): Promise<void> {
     const jamsocket = Jamsocket.fromEnvironment()
     const { args } = await this.parse(Metrics)
-    const boldStart = '\u001B[1m'
-    const boldEnd = '\u001B[0m'
-    this.log(boldStart + 'cpu_util\tmem_used\tmem_avail' + boldEnd)
+    this.log(chalk.bold('cpu_util\tmem_used\tmem_avail'))
 
     await jamsocket.streamMetrics(args.backend, line => {
       const metrics: BackendMetrics = JSON.parse(line)
       const cpu_util = (metrics.cpu_used / metrics.sys_cpu) * 100
-      const mem_used_mb = metrics.mem_used * (10 ** (-6))
-      const mem_avail_mb = metrics.mem_available * (10 ** (-6))
       process.stdout.write(
         `\r${formatToHeader(cpu_util.toFixed(1) + '%', 'cpu_util')}\t` +
-          `${formatToHeader(mem_used_mb.toFixed(2) + ' mb', 'mem_used')}\t` +
-          `${formatToHeader(mem_avail_mb.toFixed(2) + ' mb', 'mem_avail')}`)
+          `${formatToHeader(prettifyBytes(metrics.mem_used), 'mem_used')}\t` +
+          `${formatToHeader(prettifyBytes(metrics.mem_available), 'mem_avail')}`)
     })
   }
 }
