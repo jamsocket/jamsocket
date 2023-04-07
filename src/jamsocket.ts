@@ -94,6 +94,11 @@ export class Jamsocket {
     return this.api.streamLogs(backend, config.getAccessToken(), callback)
   }
 
+  public streamMetrics(backend: string, callback: (v: string) => void): Promise<void> {
+    const config = this.expectAuthorized()
+    this.api.streamMetrics(backend, config.getAccessToken(), callback)
+  }
+
   public streamStatus(backend: string, callback: (v: StatusMessage) => void): Promise<void> {
     const config = this.expectAuthorized()
     return this.api.streamStatus(backend, config.getAccessToken(), callback)
