@@ -4,8 +4,8 @@ import chalk from 'chalk'
 
 function prettifyBytes(bytes: number) {
   const suffixes = ['B', 'KiB', 'MiB', 'GiB', 'TiB']
-  const i = Math.trunc(Math.log2(bytes) / 10)
-  return (bytes / (1 << (i * 10))).toFixed(2) + ' ' + suffixes[i]
+  const i = Math.trunc(Math.log2(bytes)/10)
+  return (bytes / (1024**i)).toFixed(2) + ' ' + suffixes[i]
 }
 
 type BackendMetrics = {
@@ -17,7 +17,7 @@ type BackendMetrics = {
   sys_cpu: number
 }
 
-const resetLine = '\r\u001B[0J'
+const resetLine = '\r\u001B[0K' //set cursor to start of line, then clear to end of line
 export default class Metrics extends Command {
   static description = 'Stream metrics from a running backend'
   static examples = [
