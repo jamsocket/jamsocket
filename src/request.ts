@@ -131,7 +131,7 @@ export function eventStream(
       headers: headers,
     }, res => {
       if (res.statusCode !== 200) {
-        responseIntoError(res).catch(error => reject(error))
+        responseIntoError(res).catch(reject)
         return
       }
 
