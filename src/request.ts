@@ -1,5 +1,6 @@
 import * as https from 'https'
 import * as http from 'http'
+import { HTTPError } from './api'
 import * as os from 'os'
 import WSL from 'is-wsl'
 
@@ -130,7 +131,8 @@ export function eventStream(
       headers: headers,
     }, res => {
       if (res.statusCode !== 200) {
-        reject(new Error('Non-200 status code from API on event stream.'))
+        responseIntoError(res).catch(reject)
+        return
       }
 
       res.on('data', (chunk: Buffer) => {
@@ -157,5 +159,22 @@ export function eventStream(
       reject(err)
     })
     req.end()
+  })
+}
+
+function responseIntoError(res: http.IncomingMessage): Promise<void> {
+  return new Promise((_, reject) => {
+    let body = ''
+    res.on('data', (chunk: Buffer) => {
+      body += chunk.toString()
+    })
+    res.on('end', () => {
+      let msg = body
+      try {
+        const parsed = JSON.parse(body)
+        msg = parsed.error.message ?? msg
+      } catch {}
+      reject(new HTTPError(res.statusCode!, msg))
+    })
   })
 }
