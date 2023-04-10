@@ -3,12 +3,9 @@ import { Jamsocket } from '../../jamsocket'
 import chalk from 'chalk'
 
 function prettifyBytes(bytes: number) {
-  const suffixes = ['B', 'KiB', 'MiB', 'GiB']
-  let i = 0
-  for (i; bytes > 1 << 10; i++) {
-    bytes /= 1 << 10
-  }
-  return bytes.toFixed(2) + ' ' + suffixes[i]
+  const suffixes = ['B', 'KiB', 'MiB', 'GiB', 'TiB']
+  const i = Math.trunc(Math.log2(bytes) / 10)
+  return (bytes / (1 << (i * 10))).toFixed(2) + ' ' + suffixes[i]
 }
 
 type BackendMetrics = {
@@ -21,6 +18,7 @@ type BackendMetrics = {
 }
 
 const formatToHeader = (a: string, header: string) => a.padEnd(header.length, ' ')
+const resetLine = '\r\u001B[0J'
 export default class Metrics extends Command {
   static description = 'Stream metrics from a running backend'
   static examples = [
@@ -40,7 +38,8 @@ export default class Metrics extends Command {
       const metrics: BackendMetrics = JSON.parse(line)
       const cpu_util = (metrics.cpu_used / metrics.sys_cpu) * 100
       process.stdout.write(
-        `\r${formatToHeader(cpu_util.toFixed(1) + '%', 'cpu util')}\t` +
+        resetLine +
+        `${formatToHeader(cpu_util.toFixed(1) + '%', 'cpu util')}\t` +
           `${formatToHeader(prettifyBytes(metrics.mem_used), 'mem used')}\t` +
           `${formatToHeader(prettifyBytes(metrics.mem_available), 'mem avail')}`)
     })
