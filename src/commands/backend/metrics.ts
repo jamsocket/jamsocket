@@ -17,7 +17,6 @@ type BackendMetrics = {
   sys_cpu: number
 }
 
-const formatToHeader = (a: string, header: string) => a.padEnd(header.length, ' ')
 const resetLine = '\r\u001B[0J'
 export default class Metrics extends Command {
   static description = 'Stream metrics from a running backend'
@@ -32,16 +31,23 @@ export default class Metrics extends Command {
   public async run(): Promise<void> {
     const jamsocket = Jamsocket.fromEnvironment()
     const { args } = await this.parse(Metrics)
-    this.log(chalk.bold('cpu util\tmem used\tmem avail'))
+    const headers = ['cpu util', 'mem used', 'mem avail']
+    function formatRow(values: string[]) {
+      const output = values.map((val, i) => val.padEnd(headers[i].length, ' '))
+      return output.join('\t')
+    }
+
+    this.log(chalk.bold(headers.join('\t')))
 
     await jamsocket.streamMetrics(args.backend, line => {
       const metrics: BackendMetrics = JSON.parse(line)
       const cpu_util = (metrics.cpu_used / metrics.sys_cpu) * 100
-      process.stdout.write(
-        resetLine +
-        `${formatToHeader(cpu_util.toFixed(1) + '%', 'cpu util')}\t` +
-          `${formatToHeader(prettifyBytes(metrics.mem_used), 'mem used')}\t` +
-          `${formatToHeader(prettifyBytes(metrics.mem_available), 'mem avail')}`)
+      const values = [
+        cpu_util.toFixed(1) + '%',
+        prettifyBytes(metrics.mem_used),
+        prettifyBytes(metrics.mem_available),
+      ]
+      process.stdout.write(resetLine + formatRow(values))
     })
   }
 }
