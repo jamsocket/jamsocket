@@ -1,9 +1,10 @@
 import { Command } from '@oclif/core'
-import { Jamsocket } from '../jamsocket'
+import { Jamsocket } from '../../jamsocket'
+import { lightMagenta } from '../../formatting'
 
 export default class Terminate extends Command {
   static description = 'Terminates a backend based on its backend name.'
-
+  static aliases = ['terminate']
   static examples = [
     '<%= config.bin %> <%= command.id %> a8m32q',
   ]
@@ -14,8 +15,8 @@ export default class Terminate extends Command {
     const { args } = await this.parse(Terminate)
 
     const jamsocket = Jamsocket.fromEnvironment()
-    const responseBody = await jamsocket.terminate(args.backend)
+    await jamsocket.terminate(args.backend)
 
-    this.log(JSON.stringify(responseBody, null, 2))
+    this.log(`Termination requested for backend: ${lightMagenta(args.backend)}`)
   }
 }
