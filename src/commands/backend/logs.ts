@@ -1,9 +1,9 @@
 import { Command } from '@oclif/core'
-import { Jamsocket } from '../jamsocket'
+import { Jamsocket } from '../../jamsocket'
 
 export default class Logs extends Command {
     static description = 'Stream logs from a running backend.'
-
+    static aliases = ['logs']
     static examples = [
       '<%= config.bin %> <%= command.id %> f7em2',
     ]
