@@ -88,6 +88,20 @@ export interface TerminateResult {
   status: 'ok',
 }
 
+export interface BackendStatus {
+  value: string
+  timestamp: string
+}
+
+export interface BackendInfoResult {
+  name: string
+  created_at: string
+  service_name: string
+  cluster_name: string
+  account_name: string
+  statuses: BackendStatus[]
+}
+
 export interface UserSessionRevokeResult {
   status: 'ok',
 }
@@ -290,6 +304,11 @@ export class JamsocketApi {
   public async terminate(backend: string, authToken: string): Promise<TerminateResult> {
     const url = `/backend/${backend}/terminate`
     return this.makeAuthenticatedRequest<TerminateResult>(url, HttpMethod.Post, authToken)
+  }
+
+  public async backendInfo(backend: string, authToken: string): Promise<BackendInfoResult> {
+    const url = `/backend/${backend}`
+    return this.makeAuthenticatedRequest<BackendInfoResult>(url, HttpMethod.Get, authToken)
   }
 
   public async spawnTokenCreate(username: string, serviceName: string, authToken: string, body: SpawnTokenRequestBody): Promise<SpawnTokenCreateResult> {
