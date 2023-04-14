@@ -1,6 +1,6 @@
 {
   "name": "jamsocket",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "description": "A CLI for the Jamsocket platform",
   "author": "Taylor Baldwin <taylor@driftingin.space>",
   "bin": {
@@ -17,7 +17,7 @@
     "/oclif.manifest.json"
   ],
   "dependencies": {
-    "@oclif/core": "1.9.0",
+    "@oclif/core": "1.24.3",
     "@oclif/plugin-help": "5.1.12",
     "@oclif/plugin-warn-if-update-available": "2.0.4",
     "@types/chalk": "^2.2.0",
@@ -33,11 +33,9 @@
     "eslint": "^7.32.0",
     "eslint-config-oclif": "^4",
     "eslint-config-oclif-typescript": "^1.0.2",
-    "globby": "^11",
-    "oclif": "^3.7.3",
+    "oclif": "^3.8.0",
     "shx": "^0.3.3",
     "ts-node": "^10.2.1",
-    "tslib": "^2.3.1",
     "typescript": "^4.4.3"
   },
   "oclif": {
