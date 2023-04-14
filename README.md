@@ -51,7 +51,7 @@ Retrieves information about a backend given its name.
 
 ```
 USAGE
-  $ jamsocket backend info BACKEND
+  $ jamsocket backend info [BACKEND]
 
 DESCRIPTION
   Retrieves information about a backend given its name.
@@ -81,7 +81,7 @@ Stream logs from a running backend.
 
 ```
 USAGE
-  $ jamsocket backend logs BACKEND
+  $ jamsocket backend logs [BACKEND]
 
 ARGUMENTS
   BACKEND  The name of the backend, a random string of letters and numbers returned by the spawn command.
@@ -102,7 +102,7 @@ Stream metrics from a running backend
 
 ```
 USAGE
-  $ jamsocket backend metrics BACKEND
+  $ jamsocket backend metrics [BACKEND]
 
 ARGUMENTS
   BACKEND  The name of the backend, a random string of letters and numbers returned by the spawn command.
@@ -120,7 +120,7 @@ Terminates a backend based on its backend name.
 
 ```
 USAGE
-  $ jamsocket backend terminate BACKEND
+  $ jamsocket backend terminate [BACKEND]
 
 DESCRIPTION
   Terminates a backend based on its backend name.
@@ -170,7 +170,7 @@ EXAMPLES
   $ jamsocket login
 ```
 
-_See code: [src/commands/login.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.6.2/src/commands/login.ts)_
+_See code: [src/commands/login.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.6.3/src/commands/login.ts)_
 
 ## `jamsocket logout`
 
@@ -187,7 +187,7 @@ EXAMPLES
   $ jamsocket logout
 ```
 
-_See code: [src/commands/logout.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.6.2/src/commands/logout.ts)_
+_See code: [src/commands/logout.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.6.3/src/commands/logout.ts)_
 
 ## `jamsocket logs BACKEND`
 
@@ -195,7 +195,7 @@ Stream logs from a running backend.
 
 ```
 USAGE
-  $ jamsocket logs BACKEND
+  $ jamsocket logs [BACKEND]
 
 ARGUMENTS
   BACKEND  The name of the backend, a random string of letters and numbers returned by the spawn command.
@@ -216,7 +216,7 @@ Pushes a docker image to the jamcr.io container registry under your logged in us
 
 ```
 USAGE
-  $ jamsocket push SERVICE IMAGE [-t <value>]
+  $ jamsocket push [SERVICE] [IMAGE] [-t <value>]
 
 ARGUMENTS
   SERVICE  Jamsocket service to push the image to
@@ -234,7 +234,7 @@ EXAMPLES
   $ jamsocket push my-service my-image -t my-tag
 ```
 
-_See code: [src/commands/push.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.6.2/src/commands/push.ts)_
+_See code: [src/commands/push.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.6.3/src/commands/push.ts)_
 
 ## `jamsocket service create NAME`
 
@@ -242,7 +242,7 @@ Creates a service
 
 ```
 USAGE
-  $ jamsocket service create NAME
+  $ jamsocket service create [NAME]
 
 DESCRIPTION
   Creates a service
@@ -257,7 +257,7 @@ Deletes a service
 
 ```
 USAGE
-  $ jamsocket service delete NAME
+  $ jamsocket service delete [NAME]
 
 DESCRIPTION
   Deletes a service
@@ -272,7 +272,7 @@ Gets some information about a service
 
 ```
 USAGE
-  $ jamsocket service info NAME
+  $ jamsocket service info [NAME]
 
 DESCRIPTION
   Gets some information about a service
@@ -302,7 +302,7 @@ Spawns a session-lived application backend from the provided docker image
 
 ```
 USAGE
-  $ jamsocket spawn SERVICE [-e <value>] [-g <value>] [-t <value>] [-r]
+  $ jamsocket spawn [SERVICE] [-e <value>] [-g <value>] [-t <value>] [-r]
 
 FLAGS
   -e, --env=<value>...        optional environment variables to pass to the container
@@ -325,7 +325,7 @@ EXAMPLES
   $ jamsocket spawn my-service -t latest
 ```
 
-_See code: [src/commands/spawn.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.6.2/src/commands/spawn.ts)_
+_See code: [src/commands/spawn.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.6.3/src/commands/spawn.ts)_
 
 ## `jamsocket spawn-token create SERVICE`
 
@@ -333,7 +333,7 @@ Generate a token that can be used to spawn the given service.
 
 ```
 USAGE
-  $ jamsocket spawn-token create SERVICE [-g <value>] [-t <value>]
+  $ jamsocket spawn-token create [SERVICE] [-g <value>] [-t <value>]
 
 FLAGS
   -g, --grace=<value>  optional grace period (in seconds) to wait after last connection is closed before shutting down
@@ -355,7 +355,7 @@ Revoke a spawn token permanently.
 
 ```
 USAGE
-  $ jamsocket spawn-token revoke TOKEN
+  $ jamsocket spawn-token revoke [TOKEN]
 
 DESCRIPTION
   Revoke a spawn token permanently.
@@ -370,7 +370,7 @@ Spawn a backend using a spawn token.
 
 ```
 USAGE
-  $ jamsocket spawn-token spawn TOKEN
+  $ jamsocket spawn-token spawn [TOKEN]
 
 DESCRIPTION
   Spawn a backend using a spawn token.
@@ -385,7 +385,7 @@ Terminates a backend based on its backend name.
 
 ```
 USAGE
-  $ jamsocket terminate BACKEND
+  $ jamsocket terminate [BACKEND]
 
 DESCRIPTION
   Terminates a backend based on its backend name.
