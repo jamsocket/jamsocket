@@ -19,6 +19,7 @@ export type SpawnRequestBody = {
   port?: number;
   tag?: string;
   require_bearer_token?: boolean;
+  lock?: string;
 }
 
 export type SpawnTokenRequestBody = {
@@ -60,6 +61,7 @@ export interface SpawnResult {
   ready_url: string,
   status_url: string,
   bearer_token?: string,
+  spawned: boolean,
 }
 
 export interface SpawnTokenCreateResult {
