@@ -82,8 +82,9 @@
     "jamsocket",
     "plane",
     "spawner",
-    "session-lived backends",
-    "session-lived application backends",
+    "session backends",
+    "session lived backends",
+    "session lived application backends",
     "drifting in space",
     "docker"
   ],
