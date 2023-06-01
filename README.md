@@ -298,7 +298,7 @@ EXAMPLES
 
 ## `jamsocket spawn SERVICE`
 
-Spawns a session-lived application backend from the provided docker image
+Spawns a session backend from the provided docker image
 
 ```
 USAGE
@@ -314,7 +314,7 @@ FLAGS
   -t, --tag=<value>           optional tag for the service to spawn (default is latest)
 
 DESCRIPTION
-  Spawns a session-lived application backend from the provided docker image
+  Spawns a session backend from the provided docker image
 
 EXAMPLES
   $ jamsocket spawn my-service
