@@ -23,6 +23,7 @@ export default class Spawn extends Command {
     port: Flags.integer({ char: 'p', description: 'optional port for jamsocket to proxy requests to (default is 8080)', hidden: true }),
     tag: Flags.string({ char: 't', description: 'optional tag for the service to spawn (default is latest)' }),
     'require-bearer-token': Flags.boolean({ char: 'r', description: 'require a bearer token to access the service. A random bearer token will be generated and returned in the result.' }),
+    lock: Flags.string({ char: 'l', description: 'optional lock to spawn the service with' }),
   }
 
   static args = [{ name: 'service', required: true }]
@@ -37,7 +38,7 @@ export default class Spawn extends Command {
     }
 
     const jamsocket = Jamsocket.fromEnvironment()
-    const responseBody = await jamsocket.spawn(args.service, env, flags.grace, flags.port, flags.tag, flags['require-bearer-token'])
+    const responseBody = await jamsocket.spawn(args.service, env, flags.grace, flags.port, flags.tag, flags['require-bearer-token'], flags.lock)
 
     this.log(lightBlue('Backend spawned!'))
     this.log(chalk.bold`backend name: `, blue(responseBody.name))
@@ -46,6 +47,9 @@ export default class Spawn extends Command {
     this.log(chalk.bold`ready url:    `, blue(responseBody.ready_url))
     if (responseBody.bearer_token) {
       this.log(chalk.bold`bearer token: `, blue(responseBody.bearer_token))
+    }
+    if (flags.lock) {
+      this.log(chalk.bold`spawned:      `, blue(responseBody.spawned.toString()))
     }
   }
 }

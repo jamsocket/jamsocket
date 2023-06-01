@@ -302,12 +302,13 @@ Spawns a session-lived application backend from the provided docker image
 
 ```
 USAGE
-  $ jamsocket spawn [SERVICE] [-e <value>] [-g <value>] [-t <value>] [-r]
+  $ jamsocket spawn [SERVICE] [-e <value>] [-g <value>] [-t <value>] [-r] [-l <value>]
 
 FLAGS
   -e, --env=<value>...        optional environment variables to pass to the container
   -g, --grace=<value>         optional grace period (in seconds) to wait after last connection is closed before shutting
                               down container
+  -l, --lock=<value>          optional lock to spawn the service with
   -r, --require-bearer-token  require a bearer token to access the service. A random bearer token will be generated and
                               returned in the result.
   -t, --tag=<value>           optional tag for the service to spawn (default is latest)
