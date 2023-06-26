@@ -2,7 +2,7 @@ import { existsSync } from 'fs'
 import path from 'path'
 import { Command } from '@oclif/core'
 import { Jamsocket } from '../jamsocket'
-import { buildImage } from '../docker'
+import DevServer from '../dev-server'
 
 export default class Dev extends Command {
   static description = 'Starts a jamsocket dev server'
@@ -10,22 +10,26 @@ export default class Dev extends Command {
 
   public async run(): Promise<void> {
     const jamsocket = Jamsocket.fromEnvironment()
-    const { dockerfile, service } = loadProjectConfig()
+    const { dockerfile, service, watch } = loadProjectConfig()
+    const account = jamsocket.config?.getAccount()
 
-    const imageId = buildImage(dockerfile)
-    await jamsocket.push(service, imageId)
+    if (!account) {
+      throw new Error('Must be logged in to use this command. Log in with jamsocket login')
+    }
 
-    this.log('Built and pushed image to registry. ImageID:', imageId)
+    const devServer = new DevServer(jamsocket, { dockerfile, service, watch, account })
+    await devServer.start()
   }
 }
 
 const PROJECT_CONFIG_PATH = path.resolve(process.cwd(), 'jamsocket.config.js')
 
-function loadProjectConfig(): { dockerfile: string, service: string } {
+function loadProjectConfig(): { dockerfile: string, service: string, watch?: string[] } {
   if (!existsSync(PROJECT_CONFIG_PATH)) throw new Error('No jamsocket.config.js found in current directory')
-  const { dockerfile, service } = require(PROJECT_CONFIG_PATH)
+  const { dockerfile, service, watch } = require(PROJECT_CONFIG_PATH)
   return {
     dockerfile: path.resolve(process.cwd(), dockerfile),
     service,
+    watch: typeof watch === 'string' ? [watch] : watch,
   }
 }

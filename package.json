@@ -23,9 +23,11 @@
     "@types/chalk": "^2.2.0",
     "@types/date-fns": "^2.6.0",
     "chalk": "^4",
+    "chokidar": "^3.5.3",
     "date-fns": "^2.29.3",
     "inquirer": "^8.2.5",
-    "is-wsl": "^2.2.0"
+    "is-wsl": "^2.2.0",
+    "string-length": "4.0.2"
   },
   "devDependencies": {
     "@types/inquirer": "^8.2.4",
