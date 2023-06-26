@@ -14,6 +14,22 @@ export function getImagePlatform(imageName: string): { os: string, arch: string 
   return { os, arch }
 }
 
+export function buildImage(dockerfilePath: string): string {
+  const buildProcess = spawnSync('docker', ['build', '--quiet', '--platform', 'linux/amd64', '-f', dockerfilePath, '.'], { encoding: 'utf-8' })
+  const exitCode = buildProcess.status
+  if (exitCode !== null && exitCode !== 0) {
+    throw new Error(`Process exited with a non-zero code: ${exitCode}`)
+  }
+
+  // eslint-disable-next-line unicorn/better-regex
+  const match = /sha256:([a-f0-9]+)/.exec(buildProcess.stdout)
+  const imageId = match?.[1] || null
+  if (imageId === null) {
+    throw new Error("Process exited with zero exit code but couldn't extract image id from output.")
+  }
+  return imageId
+}
+
 export async function push(imageName: string, auth: string): Promise<void> {
   const dockerConfigDir = join(JAMSOCKET_CONFIG_DIR, 'docker-config')
   mkdirSync(dockerConfigDir, { recursive: true })
