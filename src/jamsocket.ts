@@ -4,7 +4,7 @@ import { JamsocketConfig } from './jamsocket-config'
 import { tag as dockerTag, push as dockerPush } from './docker'
 
 export class Jamsocket {
-  constructor(private config: JamsocketConfig | null, private api: JamsocketApi) {}
+  constructor(public config: JamsocketConfig | null, private api: JamsocketApi) {}
 
   public static fromEnvironment(): Jamsocket {
     const config = JamsocketConfig.fromSaved()
