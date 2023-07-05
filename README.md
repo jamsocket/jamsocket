@@ -30,6 +30,7 @@ If you want to use the Jamsocket CLI from an automated environment (e.g. a CI/CD
 * [`jamsocket backend logs BACKEND`](#jamsocket-backend-logs-backend)
 * [`jamsocket backend metrics BACKEND`](#jamsocket-backend-metrics-backend)
 * [`jamsocket backend terminate BACKEND`](#jamsocket-backend-terminate-backend)
+* [`jamsocket dev`](#jamsocket-dev)
 * [`jamsocket help [COMMAND]`](#jamsocket-help-command)
 * [`jamsocket login`](#jamsocket-login)
 * [`jamsocket logout`](#jamsocket-logout)
@@ -132,6 +133,23 @@ EXAMPLES
   $ jamsocket backend terminate a8m32q
 ```
 
+## `jamsocket dev`
+
+(Experimental) Starts a jamsocket dev server
+
+```
+USAGE
+  $ jamsocket dev
+
+DESCRIPTION
+  (Experimental) Starts a jamsocket dev server
+
+EXAMPLES
+  $ jamsocket dev
+```
+
+_See code: [src/commands/dev.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.6.5-0/src/commands/dev.ts)_
+
 ## `jamsocket help [COMMAND]`
 
 Display help for jamsocket.
@@ -170,7 +188,7 @@ EXAMPLES
   $ jamsocket login
 ```
 
-_See code: [src/commands/login.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.6.4/src/commands/login.ts)_
+_See code: [src/commands/login.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.6.5-0/src/commands/login.ts)_
 
 ## `jamsocket logout`
 
@@ -187,7 +205,7 @@ EXAMPLES
   $ jamsocket logout
 ```
 
-_See code: [src/commands/logout.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.6.4/src/commands/logout.ts)_
+_See code: [src/commands/logout.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.6.5-0/src/commands/logout.ts)_
 
 ## `jamsocket logs BACKEND`
 
@@ -234,7 +252,7 @@ EXAMPLES
   $ jamsocket push my-service my-image -t my-tag
 ```
 
-_See code: [src/commands/push.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.6.4/src/commands/push.ts)_
+_See code: [src/commands/push.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.6.5-0/src/commands/push.ts)_
 
 ## `jamsocket service create NAME`
 
@@ -326,7 +344,7 @@ EXAMPLES
   $ jamsocket spawn my-service -t latest
 ```
 
-_See code: [src/commands/spawn.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.6.4/src/commands/spawn.ts)_
+_See code: [src/commands/spawn.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.6.5-0/src/commands/spawn.ts)_
 
 ## `jamsocket spawn-token create SERVICE`
 
