@@ -5,7 +5,7 @@ import { Jamsocket } from '../jamsocket'
 import DevServer from '../dev-server'
 
 export default class Dev extends Command {
-  static description = 'Starts a jamsocket dev server'
+  static description = '(Experimental) Starts a jamsocket dev server'
   static examples = ['<%= config.bin %> <%= command.id %>']
 
   public async run(): Promise<void> {
