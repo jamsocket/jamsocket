@@ -45,49 +45,37 @@ export default class DevServer {
 
     const server = this.startSpawnProxy()
 
-    const serverStopped = new Promise<void>(resolve => {
+    const timeToExit = new Promise<void>(resolve => {
       // listen for keyboard input
       process.stdin.setRawMode(true)
       process.stdin.resume()
       process.stdin.setEncoding('utf8')
       process.stdin.on('data', async (key: string) => {
         // ctrl-c
-        if (key === '\u0003') {
-          server.close(async () => {
-            this.clearFooter()
-            console.log('Spawn proxy server stopped')
-
-            const curBackends = [...this.devBackends.values()].map(backend => backend.spawnResult.name)
-            if (curBackends.length > 0) {
-              console.log('Terminating development backends...')
-              await this.terminateBackends(curBackends)
-              this.clearFooter()
-            }
-            resolve()
-          })
-        }
-        if (key === 'b') {
-          this.rebuild()
-        }
-        if (key === 't') {
-          const backendNames = [...this.devBackends.values()].map(b => b.spawnResult.name)
-          if (backendNames.length > 0) {
-            this.updateFooterAndLog(['', 'Terminating development backends...'])
-            await this.terminateBackends(backendNames)
-          } else {
-            this.updateFooterAndLog(['', 'No development backends to terminate'])
-          }
-        }
+        if (key === '\u0003') resolve()
+        if (key === 'b') await this.rebuild()
+        if (key === 't') await this.terminateAllDevbackends()
       })
     })
 
+    let fsWatcher: chokidar.FSWatcher | null = null
     if (watch) {
       this.updateFooterAndLog([`Watching ${watch.join(', ')} for changes...`, ''])
       const watchPaths = watch.map(w => path.resolve(process.cwd(), w))
-      chokidar.watch(watchPaths).on('change', this.rebuild.bind(this))
+      fsWatcher = chokidar.watch(watchPaths).on('change', this.rebuild.bind(this))
     }
 
-    await serverStopped
+    await timeToExit
+
+    server.close()
+
+    await this.terminateAllDevbackends()
+    this.clearFooter()
+
+    fsWatcher?.close()
+    process.stdin.removeAllListeners()
+    process.stdin.setRawMode(false)
+    process.stdin.unref()
   }
 
   async buildSessionBackend(): Promise<string> {
@@ -106,6 +94,16 @@ export default class DevServer {
     if (outdatedBackends.length > 0) {
       this.updateFooterAndLog(['', 'Terminating outdated backends...'])
       await this.terminateBackends(outdatedBackends)
+    }
+  }
+
+  async terminateAllDevbackends(): Promise<void> {
+    const backendNames = [...this.devBackends.values()].map(b => b.spawnResult.name)
+    if (backendNames.length > 0) {
+      this.updateFooterAndLog(['', 'Terminating development backends...'])
+      await this.terminateBackends(backendNames)
+    } else {
+      this.updateFooterAndLog(['', 'No development backends to terminate'])
     }
   }
 
