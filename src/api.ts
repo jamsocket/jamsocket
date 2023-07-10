@@ -1,4 +1,4 @@
-import { eventStream, request, Headers } from './request'
+import { eventStream, request, Headers, EventStreamReturn } from './request'
 import * as https from 'https'
 
 enum HttpMethod {
@@ -225,7 +225,7 @@ export class JamsocketApi {
     }
   }
 
-  private async makeAuthenticatedStreamRequest(endpoint: string, authToken: string, callback: (line: string) => void): Promise<void> {
+  private makeAuthenticatedStreamRequest(endpoint: string, authToken: string, callback: (line: string) => void): EventStreamReturn {
     const url = `${this.apiBase}${endpoint}`
     return eventStream(url, {
       ...this.options,
@@ -276,17 +276,17 @@ export class JamsocketApi {
     return this.makeAuthenticatedRequest<RunningBackendsResult>(url, HttpMethod.Get, authToken)
   }
 
-  public streamLogs(backend: string, authToken: string, callback: (line: string) => void): Promise<void> {
+  public streamLogs(backend: string, authToken: string, callback: (line: string) => void): EventStreamReturn {
     const url = `/backend/${backend}/logs`
     return this.makeAuthenticatedStreamRequest(url, authToken, callback)
   }
 
-  public streamMetrics(backend: string, authToken: string, callback: (line: string) => void): Promise<void> {
+  public streamMetrics(backend: string, authToken: string, callback: (line: string) => void): EventStreamReturn {
     const url = `/backend/${backend}/metrics/stream`
     return this.makeAuthenticatedStreamRequest(url, authToken, callback)
   }
 
-  public streamStatus(backend: string, authToken: string, callback: (statusMessage: StatusMessage) => void): Promise<void> {
+  public streamStatus(backend: string, authToken: string, callback: (statusMessage: StatusMessage) => void): EventStreamReturn {
     const url = `/backend/${backend}/status/stream`
     const wrappedCallback = (line: string) => {
       const val = JSON.parse(line)
@@ -348,12 +348,13 @@ export class JamsocketApi {
     const url = `${this.apiBase}${endpoint}`
     // right now, this stream only returns a single message and then closes
     return new Promise(resolve => {
-      eventStream(url, {
+      const stream = eventStream(url, {
         ...this.options,
         method: HttpMethod.Get,
       }, (line: string) => {
         const val = JSON.parse(line)
         resolve(val.status === 'ok')
+        stream.close()
       })
     })
   }
