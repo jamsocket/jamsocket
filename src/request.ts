@@ -14,6 +14,11 @@ type RequestReturn = {
   headers: Headers;
 }
 
+export type EventStreamReturn = {
+  close: () => void;
+  onClose: Promise<void>
+}
+
 const version = require('../package.json').version
 const platform = WSL ? 'wsl' : os.platform()
 const arch = os.arch() === 'ia32' ? 'x86' : os.arch()
@@ -115,8 +120,16 @@ export function eventStream(
   url: string,
   options: https.RequestOptions,
   callback: (line: string) => void,
-): Promise<void> {
-  return new Promise((resolve, reject) => {
+): EventStreamReturn {
+  let request: http.ClientRequest | null = null
+  let response: http.IncomingMessage | null = null
+
+  function close() {
+    if (request) request.destroy()
+    if (response) response.destroy()
+  }
+
+  const onClose = new Promise<void>((resolve, reject) => {
     const wrappedURL = new URL(url)
     const headers = {
       'User-Agent': userAgent,
@@ -124,12 +137,13 @@ export function eventStream(
       Accept: 'text/event-stream',
     }
 
-    const req = https.request({
+    request = https.request({
       ...options,
       hostname: wrappedURL.hostname,
       path: wrappedURL.pathname,
       headers: headers,
     }, res => {
+      response = res
       if (res.statusCode !== 200) {
         responseIntoError(res).catch(reject)
         return
@@ -151,15 +165,17 @@ export function eventStream(
           }
         }
       })
-      res.on('end', () => {
+      res.on('close', () => {
         resolve()
       })
     })
-    req.on('error', err => {
+    request.on('error', err => {
       reject(err)
     })
-    req.end()
+    request.end()
   })
+
+  return { close, onClose }
 }
 
 function responseIntoError(res: http.IncomingMessage): Promise<void> {

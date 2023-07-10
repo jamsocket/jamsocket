@@ -39,7 +39,7 @@ export default class Metrics extends Command {
 
     this.log(chalk.bold(headers.join('\t')))
 
-    await jamsocket.streamMetrics(args.backend, line => {
+    const metricsStream = jamsocket.streamMetrics(args.backend, line => {
       const metrics: BackendMetrics = JSON.parse(line)
       const cpu_util = (metrics.cpu_used / metrics.sys_cpu) * 100
       const values = [
@@ -49,5 +49,7 @@ export default class Metrics extends Command {
       ]
       process.stdout.write(resetLine + formatRow(values))
     })
+
+    await metricsStream.onClose
   }
 }
