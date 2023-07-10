@@ -19,6 +19,7 @@ type Backend = {
   lock: string | null,
   isStreaming: boolean,
   color: Color,
+  closeStreams: (() => void) | null,
 }
 
 const BACKEND_LOG_COLORS: Color[] = ['cyan', 'magenta', 'yellow', 'blue']
@@ -72,6 +73,12 @@ export default class DevServer {
     await this.terminateAllDevbackends()
     this.clearFooter()
 
+    // close any streams that are still open
+    for (const [name, backend] of this.devBackends) {
+      if (backend.closeStreams) backend.closeStreams()
+      this.devBackends.delete(name)
+    }
+
     fsWatcher?.close()
     process.stdin.removeAllListeners()
     process.stdin.setRawMode(false)
@@ -111,9 +118,8 @@ export default class DevServer {
     const terminationPromises = backends.map(name => this.jamsocket.terminate(name))
     this.updateFooterAndLog([`Terminating ${backends.length} backend(s): ${backends.map(name => name).join(', ')}`])
     await Promise.all(terminationPromises)
-    for (const name of backends) {
-      this.devBackends.delete(name)
-    }
+    // we don't delete the backends from devBackends here because we want to let any last status updates and logs come through
+    // when the backend receives a terminal status, then we'll close the streams and remove it from devBackends
   }
 
   getFooter(): string[] {
@@ -197,12 +203,14 @@ export default class DevServer {
 
     backend.isStreaming = true
 
-    // TODO: come up with a way to cancel these streams
     const statusStream = this.jamsocket.streamStatus(backendName, status => {
       const curStatus = status.state
       backend.lastStatus = curStatus
       this.updateFooterAndLog([chalk[backend.color](`[${backendName}] status: ${curStatus}`)])
       if (!['Loading', 'Starting', 'Ready'].includes(curStatus)) {
+        if (backend?.closeStreams) {
+          backend.closeStreams()
+        }
         this.devBackends.delete(backendName)
       }
     })
@@ -210,7 +218,12 @@ export default class DevServer {
       this.updateFooterAndLog([chalk[backend.color](`[${backendName}] ${log}`)])
     })
 
-    await Promise.all([statusStream, logsStream])
+    backend.closeStreams = () => {
+      statusStream.close()
+      logsStream.close()
+    }
+
+    await Promise.all([statusStream.onClose, logsStream.onClose])
 
     this.updateFooterAndLog([chalk[backend.color](`[${backendName}] streams ended`)])
     backend.isStreaming = false
@@ -315,6 +328,7 @@ export default class DevServer {
         lock: body.lock ?? null,
         isStreaming: false,
         color,
+        closeStreams: null,
       })
       this.updateFooterAndLog(['', `Spawned backend: ${result.name}`])
     } else {

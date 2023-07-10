@@ -2,6 +2,7 @@ import { JamsocketApi, BackendInfoResult, RunningBackendsResult, SpawnRequestBod
 import type { ServiceCreateResult, ServiceListResult, ServiceInfoResult, ServiceDeleteResult } from './api'
 import { JamsocketConfig } from './jamsocket-config'
 import { tag as dockerTag, push as dockerPush } from './docker'
+import type { EventStreamReturn } from './request'
 
 export class Jamsocket {
   constructor(public config: JamsocketConfig | null, private api: JamsocketApi) {}
@@ -93,17 +94,17 @@ export class Jamsocket {
     return this.api.serviceList(config.getAccount(), config.getAccessToken())
   }
 
-  public streamLogs(backend: string, callback: (v: string) => void): Promise<void> {
+  public streamLogs(backend: string, callback: (v: string) => void): EventStreamReturn {
     const config = this.expectAuthorized()
     return this.api.streamLogs(backend, config.getAccessToken(), callback)
   }
 
-  public streamMetrics(backend: string, callback: (v: string) => void): Promise<void> {
+  public streamMetrics(backend: string, callback: (v: string) => void): EventStreamReturn {
     const config = this.expectAuthorized()
     return this.api.streamMetrics(backend, config.getAccessToken(), callback)
   }
 
-  public streamStatus(backend: string, callback: (v: StatusMessage) => void): Promise<void> {
+  public streamStatus(backend: string, callback: (v: StatusMessage) => void): EventStreamReturn {
     const config = this.expectAuthorized()
     return this.api.streamStatus(backend, config.getAccessToken(), callback)
   }

@@ -16,8 +16,10 @@ export default class Logs extends Command {
       const jamsocket = Jamsocket.fromEnvironment()
       const { args } = await this.parse(Logs)
 
-      await jamsocket.streamLogs(args.backend, line => {
+      const logsStream = jamsocket.streamLogs(args.backend, line => {
         this.log(line)
       })
+
+      await logsStream.onClose
     }
 }
