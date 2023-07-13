@@ -243,27 +243,22 @@ export default class DevServer {
       const reqAccount = match[1]
       const reqService = match[2]
 
+      // NOTE: the service used with the dev CLI should be a service that is just for development
+      // How do we enforce this or guide users to do this? Maybe we should make dev/prod environments
+      // first-class concepts for Jamsocket services?
       if (service !== reqService) {
-        // TODO: make this a warning
-        this.updateFooterAndLog([`Request for service ${reqService} does not match service in config (${service}). Blocking spawn.`])
+        this.updateFooterAndLog([chalk.red`Warning: Request for service ${reqService} does not match service in config (${service}). Blocking spawn.`])
         res.writeHead(401)
         res.end()
         return
       }
 
       if (account !== reqAccount) {
-        // TODO: make this a warning
-        this.updateFooterAndLog(['Request for account does not match logged-in account. Blocking spawn.'])
+        this.updateFooterAndLog([chalk.red`Warning: Request for account does not match logged-in account. Blocking spawn.`])
         res.writeHead(401)
         res.end()
         return
       }
-
-      /*
-        * TODO: The service really should be a development service, not a production one,
-        *       otherwise these pushes could break the production service.
-        *       Maybe use a special "development" tag for these?
-        */
 
       const text = await readBody(req)
       let body: Record<string, any> = {}
@@ -313,8 +308,7 @@ export default class DevServer {
       }
       const backend = this.devBackends.get(result.name)!
       if (backend.imageId !== imageId) {
-        // TODO: make this a warning
-        this.updateFooterAndLog(['Spawn with lock returned a running backend with an outdated version of the session backend code. Blocking spawn.'])
+        this.updateFooterAndLog([chalk.red`Warning: Spawn with lock returned a running backend with an outdated version of the session backend code. Blocking spawn.`])
         return new Error('dev-server spawn proxy: Spawn with lock returned a running backend with an outdated version of the session backend code. Blocking spawn.')
       }
     } else if (result.spawned) {
@@ -332,8 +326,7 @@ export default class DevServer {
       })
       this.updateFooterAndLog(['', `Spawned backend: ${result.name}`])
     } else {
-      // TODO: make this a warning
-      this.updateFooterAndLog(['Spawn with lock returned a running backend that was not originally spawned by this dev server. This may be dangerous. Blocking spawn.'])
+      this.updateFooterAndLog([chalk.red`Warning: Spawn with lock returned a running backend that was not originally spawned by this dev server. This may be dangerous. Blocking spawn.`])
       return new Error('dev-server spawn proxy: Spawn with lock returned a running backend that was not originally spawned by this dev server. This may be dangerous. Blocking spawn.')
     }
 
