@@ -40,9 +40,6 @@ If you want to use the Jamsocket CLI from an automated environment (e.g. a CI/CD
 * [`jamsocket service info NAME`](#jamsocket-service-info-name)
 * [`jamsocket service list`](#jamsocket-service-list)
 * [`jamsocket spawn SERVICE`](#jamsocket-spawn-service)
-* [`jamsocket spawn-token create SERVICE`](#jamsocket-spawn-token-create-service)
-* [`jamsocket spawn-token revoke TOKEN`](#jamsocket-spawn-token-revoke-token)
-* [`jamsocket spawn-token spawn TOKEN`](#jamsocket-spawn-token-spawn-token)
 * [`jamsocket terminate BACKEND`](#jamsocket-terminate-backend)
 
 ## `jamsocket backend info BACKEND`
@@ -327,58 +324,6 @@ EXAMPLES
 ```
 
 _See code: [src/commands/spawn.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.6.4/src/commands/spawn.ts)_
-
-## `jamsocket spawn-token create SERVICE`
-
-Generate a token that can be used to spawn the given service.
-
-```
-USAGE
-  $ jamsocket spawn-token create [SERVICE] [-g <value>] [-t <value>]
-
-FLAGS
-  -g, --grace=<value>  optional grace period (in seconds) to wait after last connection is closed before shutting down
-                       container
-  -t, --tag=<value>    optional tag for the service to spawn (default is latest)
-
-DESCRIPTION
-  Generate a token that can be used to spawn the given service.
-
-EXAMPLES
-  $ jamsocket spawn-token create my-service
-
-  $ jamsocket spawn-token create my-service --tag latest --grace 300
-```
-
-## `jamsocket spawn-token revoke TOKEN`
-
-Revoke a spawn token permanently.
-
-```
-USAGE
-  $ jamsocket spawn-token revoke [TOKEN]
-
-DESCRIPTION
-  Revoke a spawn token permanently.
-
-EXAMPLES
-  $ jamsocket spawn-token revoke jNCuGvecEEk706SDm2xYRJc7mqplE2
-```
-
-## `jamsocket spawn-token spawn TOKEN`
-
-Spawn a backend using a spawn token.
-
-```
-USAGE
-  $ jamsocket spawn-token spawn [TOKEN]
-
-DESCRIPTION
-  Spawn a backend using a spawn token.
-
-EXAMPLES
-  $ jamsocket spawn-token spawn jNCuGvecEEk706SDm2xYRJc7mqplE2
-```
 
 ## `jamsocket terminate BACKEND`
 
