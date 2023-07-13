@@ -1,5 +1,4 @@
 import { JamsocketApi, BackendInfoResult, RunningBackendsResult, SpawnRequestBody, SpawnResult, StatusMessage, TerminateResult } from './api'
-import type { SpawnTokenCreateResult, SpawnTokenRequestBody, SpawnTokenRevokeResult } from './api'
 import type { ServiceCreateResult, ServiceListResult, ServiceInfoResult, ServiceDeleteResult } from './api'
 import { JamsocketConfig } from './jamsocket-config'
 import { tag as dockerTag, push as dockerPush } from './docker'
@@ -112,21 +111,5 @@ export class Jamsocket {
   public status(backend: string): Promise<StatusMessage> {
     const config = this.expectAuthorized()
     return this.api.status(backend, config.getAccessToken())
-  }
-
-  public spawnTokenCreate(service: string, grace?: number, port?: number, tag?: string): Promise<SpawnTokenCreateResult> {
-    const config = this.expectAuthorized()
-    const body: SpawnTokenRequestBody = {
-      grace_period_seconds: grace,
-      port,
-      tag,
-    }
-
-    return this.api.spawnTokenCreate(config.getAccount(), service, config.getAccessToken(), body)
-  }
-
-  public spawnTokenRevoke(spawnToken: string): Promise<SpawnTokenRevokeResult> {
-    const config = this.expectAuthorized()
-    return this.api.spawnTokenRevoke(spawnToken, config.getAccessToken())
   }
 }
