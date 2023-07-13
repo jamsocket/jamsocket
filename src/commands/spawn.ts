@@ -7,7 +7,7 @@ import { blue, lightBlue } from '../formatting'
 const MAX_PORT = (2 ** 16) - 1
 
 export default class Spawn extends Command {
-  static description = 'Spawns a session backend from the provided docker image'
+  static description = 'Spawns a session backend from the provided docker image.'
 
   static examples = [
     '<%= config.bin %> <%= command.id %> my-service',
