@@ -6,7 +6,7 @@ import { getImagePlatform } from '../docker'
 import { lightMagenta } from '../formatting'
 
 export default class Push extends Command {
-  static description = 'Pushes a docker image to the jamcr.io container registry under your logged in user\'s name'
+  static description = 'Pushes a docker image to the jamcr.io container registry under your logged in user\'s name.'
 
   static examples = [
     '<%= config.bin %> <%= command.id %> my-service my-image',
