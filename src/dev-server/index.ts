@@ -9,6 +9,8 @@ import { Jamsocket } from '../jamsocket'
 import { buildImage } from '../docker'
 import { SpawnResult, SpawnRequestBody } from '../api'
 
+const CTRL_C = '\u0003'
+
 type Color = 'cyan' | 'magenta' | 'yellow' | 'blue'
 
 type Backend = {
@@ -52,8 +54,7 @@ export default class DevServer {
       process.stdin.resume()
       process.stdin.setEncoding('utf8')
       process.stdin.on('data', async (key: string) => {
-        // ctrl-c
-        if (key === '\u0003') resolve()
+        if (key === CTRL_C) resolve()
         if (key === 'b') await this.rebuild()
         if (key === 't') await this.terminateAllDevbackends()
       })
@@ -223,7 +224,7 @@ export default class DevServer {
       logsStream.close()
     }
 
-    await Promise.all([statusStream.onClose, logsStream.onClose])
+    await Promise.all([statusStream.closed, logsStream.closed])
 
     this.updateFooterAndLog([chalk[backend.color](`[${backendName}] streams ended`)])
     backend.isStreaming = false
