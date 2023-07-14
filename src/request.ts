@@ -16,7 +16,7 @@ type RequestReturn = {
 
 export type EventStreamReturn = {
   close: () => void;
-  onClose: Promise<void>
+  closed: Promise<void>
 }
 
 const version = require('../package.json').version
@@ -129,7 +129,7 @@ export function eventStream(
     if (response) response.destroy()
   }
 
-  const onClose = new Promise<void>((resolve, reject) => {
+  const closed = new Promise<void>((resolve, reject) => {
     const wrappedURL = new URL(url)
     const headers = {
       'User-Agent': userAgent,
@@ -175,7 +175,7 @@ export function eventStream(
     request.end()
   })
 
-  return { close, onClose }
+  return { close, closed }
 }
 
 function responseIntoError(res: http.IncomingMessage): Promise<void> {

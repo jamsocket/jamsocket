@@ -50,6 +50,6 @@ export default class Metrics extends Command {
       process.stdout.write(resetLine + formatRow(values))
     })
 
-    await metricsStream.onClose
+    await metricsStream.closed
   }
 }

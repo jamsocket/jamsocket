@@ -20,6 +20,6 @@ export default class Logs extends Command {
         this.log(line)
       })
 
-      await logsStream.onClose
+      await logsStream.closed
     }
 }
