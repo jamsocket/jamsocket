@@ -132,14 +132,14 @@ EXAMPLES
 
 ## `jamsocket dev`
 
-(Experimental) Starts a jamsocket dev server
+(Experimental) Starts a jamsocket dev server.
 
 ```
 USAGE
   $ jamsocket dev
 
 DESCRIPTION
-  (Experimental) Starts a jamsocket dev server
+  (Experimental) Starts a jamsocket dev server.
 
 EXAMPLES
   $ jamsocket dev
@@ -227,7 +227,7 @@ EXAMPLES
 
 ## `jamsocket push SERVICE IMAGE`
 
-Pushes a docker image to the jamcr.io container registry under your logged in user's name
+Pushes a docker image to the jamcr.io container registry under your logged in user's name.
 
 ```
 USAGE
@@ -241,7 +241,7 @@ FLAGS
   -t, --tag=<value>  optional tag to apply to the image in the jamsocket registry
 
 DESCRIPTION
-  Pushes a docker image to the jamcr.io container registry under your logged in user's name
+  Pushes a docker image to the jamcr.io container registry under your logged in user's name.
 
 EXAMPLES
   $ jamsocket push my-service my-image
@@ -313,7 +313,7 @@ EXAMPLES
 
 ## `jamsocket spawn SERVICE`
 
-Spawns a session backend from the provided docker image
+Spawns a session backend from the provided docker image.
 
 ```
 USAGE
@@ -329,7 +329,7 @@ FLAGS
   -t, --tag=<value>           optional tag for the service to spawn (default is latest)
 
 DESCRIPTION
-  Spawns a session backend from the provided docker image
+  Spawns a session backend from the provided docker image.
 
 EXAMPLES
   $ jamsocket spawn my-service
