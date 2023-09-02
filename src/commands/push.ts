@@ -6,7 +6,8 @@ import { getImagePlatform } from '../docker'
 import { lightMagenta } from '../formatting'
 
 export default class Push extends Command {
-  static description = 'Pushes a docker image to the jamcr.io container registry under your logged in user\'s name.'
+  static description =
+    "Pushes a docker image to the jamcr.io container registry under your logged in user's name."
 
   static examples = [
     '<%= config.bin %> <%= command.id %> my-service my-image',
@@ -14,7 +15,10 @@ export default class Push extends Command {
   ]
 
   static flags = {
-    tag: Flags.string({ char: 't', description: 'optional tag to apply to the image in the jamsocket registry' }),
+    tag: Flags.string({
+      char: 't',
+      description: 'optional tag to apply to the image in the jamsocket registry',
+    }),
   }
 
   static args = [
@@ -28,16 +32,23 @@ export default class Push extends Command {
     const { os, arch } = getImagePlatform(args.image)
     if (os !== 'linux' || arch !== 'amd64') {
       this.log()
-      this.warn(chalk.bold.red`The image ${args.image} may not be compatible with Jamsocket because its image os/arch is ${os}/${arch}.`)
-      this.log('If you encounter errors while spawning with this image, you may need to rebuild the image with the platform flag (--platform=linux/amd64) and push again.')
+      this.warn(
+        chalk.bold
+          .red`The image ${args.image} may not be compatible with Jamsocket because its image os/arch is ${os}/${arch}.`,
+      )
+      this.log(
+        'If you encounter errors while spawning with this image, you may need to rebuild the image with the platform flag (--platform=linux/amd64) and push again.',
+      )
       this.log()
 
-      const response = await inquirer.prompt([{
-        name: 'goAhead',
-        message: lightMagenta('Go ahead and push image?'),
-        type: 'list',
-        choices: [{ name: 'no' }, { name: 'yes' }],
-      }])
+      const response = await inquirer.prompt([
+        {
+          name: 'goAhead',
+          message: lightMagenta('Go ahead and push image?'),
+          type: 'list',
+          choices: [{ name: 'no' }, { name: 'yes' }],
+        },
+      ])
 
       if (response.goAhead !== 'yes') {
         this.log('Image push canceled.')

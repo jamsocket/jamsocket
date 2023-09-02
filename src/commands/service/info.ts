@@ -4,9 +4,7 @@ import { Jamsocket } from '../../jamsocket'
 export default class Create extends Command {
   static description = 'Gets some information about a service'
 
-  static examples = [
-    '<%= config.bin %> <%= command.id %> my-service',
-  ]
+  static examples = ['<%= config.bin %> <%= command.id %> my-service']
 
   static args = [{ name: 'name', required: true }]
 

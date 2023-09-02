@@ -1,11 +1,27 @@
-import { JamsocketApi, BackendInfoResult, RunningBackendsResult, SpawnRequestBody, SpawnResult, StatusMessage, TerminateResult } from './api'
-import type { ServiceCreateResult, ServiceListResult, ServiceInfoResult, ServiceDeleteResult } from './api'
+import {
+  JamsocketApi,
+  BackendInfoResult,
+  RunningBackendsResult,
+  SpawnRequestBody,
+  SpawnResult,
+  StatusMessage,
+  TerminateResult,
+} from './api'
+import type {
+  ServiceCreateResult,
+  ServiceListResult,
+  ServiceInfoResult,
+  ServiceDeleteResult,
+} from './api'
 import { JamsocketConfig } from './jamsocket-config'
 import { tag as dockerTag, push as dockerPush } from './docker'
 import type { EventStreamReturn } from './request'
 
 export class Jamsocket {
-  constructor(public config: JamsocketConfig | null, private api: JamsocketApi) {}
+  constructor(
+    public config: JamsocketConfig | null,
+    private api: JamsocketApi,
+  ) {}
 
   public static fromEnvironment(): Jamsocket {
     const config = JamsocketConfig.fromSaved()
@@ -24,7 +40,11 @@ export class Jamsocket {
 
   public async serviceImage(service: string): Promise<string> {
     const config = this.expectAuthorized()
-    const result = await this.api.serviceImage(config.getAccount(), service, config.getAccessToken())
+    const result = await this.api.serviceImage(
+      config.getAccount(),
+      service,
+      config.getAccessToken(),
+    )
     return result.imageName
   }
 
@@ -44,7 +64,16 @@ export class Jamsocket {
     console.log('Done.')
   }
 
-  public spawn(service: string, env?: Record<string, string>, grace?: number, port?: number, tag?: string, requireBearerToken?: boolean, lock?: string): Promise<SpawnResult> {
+  public spawn(
+    service: string,
+    env?: Record<string, string>,
+    grace?: number,
+    port?: number,
+    tag?: string,
+    requireBearerToken?: boolean,
+    lock?: string,
+    stableHostname?: boolean,
+  ): Promise<SpawnResult> {
     const config = this.expectAuthorized()
 
     const body: SpawnRequestBody = {
@@ -54,6 +83,7 @@ export class Jamsocket {
       tag,
       require_bearer_token: requireBearerToken,
       lock,
+      stable_hostname: stableHostname,
     }
 
     return this.api.spawn(config.getAccount(), service, config.getAccessToken(), body)

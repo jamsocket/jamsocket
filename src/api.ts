@@ -4,45 +4,46 @@ import * as https from 'https'
 enum HttpMethod {
   Get = 'GET',
   Post = 'POST',
-  Delete = 'DELETE'
+  Delete = 'DELETE',
 }
 
 export type CheckAuthResult = {
-  status: 'ok';
-  account: string | null;
-  accounts: string[];
+  status: 'ok'
+  account: string | null
+  accounts: string[]
 }
 
 export type SpawnRequestBody = {
-  env?: Record<string, string>; // env vars always map strings to strings
-  grace_period_seconds?: number;
-  port?: number;
-  tag?: string;
-  require_bearer_token?: boolean;
-  lock?: string;
+  env?: Record<string, string> // env vars always map strings to strings
+  grace_period_seconds?: number
+  port?: number
+  tag?: string
+  require_bearer_token?: boolean
+  lock?: string
+  stable_hostname?: boolean
 }
 
 export interface ServiceImageResult {
-  status: 'ok',
-  imageName: string,
+  status: 'ok'
+  imageName: string
 }
 
 export interface ServiceListResult {
-  services: Array<string>,
+  services: Array<string>
 }
 
 export interface ServiceCreateResult {
-  status: 'ok',
+  status: 'ok'
 }
 
 export interface ServiceInfoResult {
-  name: string,
-  account_name: string,
-  created_at: string,
-  last_spawned_at: string | null,
-  last_image_upload_time: string | null,
-  last_image_tag: string | null,
-  spawn_tokens_count: number,
+  name: string
+  account_name: string
+  created_at: string
+  last_spawned_at: string | null
+  last_image_upload_time: string | null
+  last_image_tag: string | null
+  spawn_tokens_count: number
 }
 
 export interface ServiceDeleteResult {
@@ -50,12 +51,12 @@ export interface ServiceDeleteResult {
 }
 
 export interface SpawnResult {
-  url: string,
-  name: string,
-  ready_url: string,
-  status_url: string,
-  bearer_token?: string,
-  spawned: boolean,
+  url: string
+  name: string
+  ready_url: string
+  status_url: string
+  bearer_token?: string
+  spawned: boolean
 }
 
 export type BackendWithStatus = {
@@ -73,7 +74,7 @@ export interface RunningBackendsResult {
 }
 
 export interface TerminateResult {
-  status: 'ok',
+  status: 'ok'
 }
 
 export interface BackendStatus {
@@ -91,24 +92,27 @@ export interface BackendInfoResult {
 }
 
 export interface UserSessionRevokeResult {
-  status: 'ok',
+  status: 'ok'
 }
 
 export interface CliLoginAttemptResult {
-  token: string,
+  token: string
 }
 
 export interface CompleteCliLoginResult {
-  uuid: string,
-  user_id: string,
+  uuid: string
+  user_id: string
   user_agent: string
-  created_at: string,
-  expiration: string,
-  token: string,
+  created_at: string
+  expiration: string
+  token: string
 }
 
 export class HTTPError extends Error {
-  constructor(public code: number, message: string) {
+  constructor(
+    public code: number,
+    message: string,
+  ) {
     super(message)
     this.name = 'HTTPError'
   }
@@ -116,19 +120,25 @@ export class HTTPError extends Error {
 
 const AUTH_ERROR_HTTP_CODES = new Set([401, 403, 407])
 export class AuthenticationError extends HTTPError {
-  constructor(public code: number, message: string) {
+  constructor(
+    public code: number,
+    message: string,
+  ) {
     super(code, message)
     this.name = 'AuthenticationError'
   }
 }
 
 export interface StatusMessage {
-  state: string,
-  time: Date,
+  state: string
+  time: Date
 }
 
 export class JamsocketApi {
-  constructor(private apiBase: string, private options: https.RequestOptions = {}) {}
+  constructor(
+    private apiBase: string,
+    private options: https.RequestOptions = {},
+  ) {}
 
   public static fromEnvironment(): JamsocketApi {
     const override = process.env.JAMSOCKET_SERVER_API
@@ -144,7 +154,9 @@ export class JamsocketApi {
     let rejectUnauthorized
     if (allowInsecure) {
       if (override === undefined) {
-        console.warn('Insecure connections are only allowed when overriding the Jamsocket server. (Ignoring env var ALLOW_INSECURE)')
+        console.warn(
+          'Insecure connections are only allowed when overriding the Jamsocket server. (Ignoring env var ALLOW_INSECURE)',
+        )
         rejectUnauthorized = true
       } else {
         console.warn('Allowing insecure connections. (Found env var ALLOW_INSECURE)')
@@ -170,7 +182,12 @@ export class JamsocketApi {
     return `${baseUrl}/cli-login/${loginToken}`
   }
 
-  private async makeRequest<T>(endpoint: string, method: HttpMethod, body?: any, headers?: Headers): Promise<T> {
+  private async makeRequest<T>(
+    endpoint: string,
+    method: HttpMethod,
+    body?: any,
+    headers?: Headers,
+  ): Promise<T> {
     const url = `${this.apiBase}${endpoint}`
     const response = await request(url, body || null, { ...this.options, method, headers })
 
@@ -184,40 +201,64 @@ export class JamsocketApi {
     if (response.statusCode && response.statusCode >= 400) {
       if (isJSONContentType && isValidJSON) {
         const { message, status, code, id } = responseBody.error
-        throw new HTTPError(response.statusCode, `jamsocket: ${status} - ${code}: ${message} (id: ${id})`)
+        throw new HTTPError(
+          response.statusCode,
+          `jamsocket: ${status} - ${code}: ${message} (id: ${id})`,
+        )
       }
-      throw new HTTPError(response.statusCode, `jamsocket: ${response.statusCode}: ${response.body}`)
+      throw new HTTPError(
+        response.statusCode,
+        `jamsocket: ${response.statusCode}: ${response.body}`,
+      )
     }
 
     if (!isJSONContentType) {
-      throw new Error(`Unexpected content-type: ${response.headers['content-type']}. Url was: ${url}.`)
+      throw new Error(
+        `Unexpected content-type: ${response.headers['content-type']}. Url was: ${url}.`,
+      )
     }
 
     if (!isValidJSON) {
-      throw new Error(`jamsocket: error parsing JSON response: "${response.body}". Url was: ${url}. Status was: ${response.statusCode}`)
+      throw new Error(
+        `jamsocket: error parsing JSON response: "${response.body}". Url was: ${url}. Status was: ${response.statusCode}`,
+      )
     }
 
     return responseBody
   }
 
-  private async makeAuthenticatedRequest<T>(endpoint: string, method: HttpMethod, authToken: string, body?: any): Promise<T> {
-    const additionalHeaders = { 'Authorization': `Bearer ${authToken}` }
+  private async makeAuthenticatedRequest<T>(
+    endpoint: string,
+    method: HttpMethod,
+    authToken: string,
+    body?: any,
+  ): Promise<T> {
+    const additionalHeaders = { Authorization: `Bearer ${authToken}` }
     try {
       // NOTE: this await here is required so that all the Promise "callback" logic is wrapped in this try/catch
       return await this.makeRequest<T>(endpoint, method, body, additionalHeaders)
     } catch (error) {
-      if (error instanceof HTTPError && AUTH_ERROR_HTTP_CODES.has(error.code)) throw new AuthenticationError(error.code, error.message)
+      if (error instanceof HTTPError && AUTH_ERROR_HTTP_CODES.has(error.code))
+        throw new AuthenticationError(error.code, error.message)
       throw error
     }
   }
 
-  private makeAuthenticatedStreamRequest(endpoint: string, authToken: string, callback: (line: string) => void): EventStreamReturn {
+  private makeAuthenticatedStreamRequest(
+    endpoint: string,
+    authToken: string,
+    callback: (line: string) => void,
+  ): EventStreamReturn {
     const url = `${this.apiBase}${endpoint}`
-    return eventStream(url, {
-      ...this.options,
-      method: HttpMethod.Get,
-      headers: { 'Authorization': `Bearer ${authToken}` },
-    }, callback)
+    return eventStream(
+      url,
+      {
+        ...this.options,
+        method: HttpMethod.Get,
+        headers: { Authorization: `Bearer ${authToken}` },
+      },
+      callback,
+    )
   }
 
   public checkAuth(authToken: string): Promise<CheckAuthResult> {
@@ -225,24 +266,40 @@ export class JamsocketApi {
     return this.makeAuthenticatedRequest<CheckAuthResult>(url, HttpMethod.Get, authToken)
   }
 
-  public serviceImage(username: string, serviceName: string, authToken: string): Promise<ServiceImageResult> {
+  public serviceImage(
+    username: string,
+    serviceName: string,
+    authToken: string,
+  ): Promise<ServiceImageResult> {
     const url = `/user/${username}/service/${serviceName}/image`
     return this.makeAuthenticatedRequest<ServiceImageResult>(url, HttpMethod.Get, authToken)
   }
 
-  public serviceCreate(username: string, name: string, authToken: string): Promise<ServiceCreateResult> {
+  public serviceCreate(
+    username: string,
+    name: string,
+    authToken: string,
+  ): Promise<ServiceCreateResult> {
     const url = `/user/${username}/service`
     return this.makeAuthenticatedRequest<ServiceCreateResult>(url, HttpMethod.Post, authToken, {
       name,
     })
   }
 
-  public serviceDelete(username: string, serviceName: string, authToken: string): Promise<ServiceDeleteResult> {
+  public serviceDelete(
+    username: string,
+    serviceName: string,
+    authToken: string,
+  ): Promise<ServiceDeleteResult> {
     const url = `/user/${username}/service/${serviceName}/delete`
     return this.makeAuthenticatedRequest<ServiceDeleteResult>(url, HttpMethod.Post, authToken)
   }
 
-  public serviceInfo(username: string, serviceName: string, authToken: string): Promise<ServiceInfoResult> {
+  public serviceInfo(
+    username: string,
+    serviceName: string,
+    authToken: string,
+  ): Promise<ServiceInfoResult> {
     const url = `/user/${username}/service/${serviceName}`
     return this.makeAuthenticatedRequest<ServiceInfoResult>(url, HttpMethod.Get, authToken)
   }
@@ -252,7 +309,12 @@ export class JamsocketApi {
     return this.makeAuthenticatedRequest<ServiceListResult>(url, HttpMethod.Get, authToken)
   }
 
-  public spawn(username: string, serviceName: string, authToken: string, body: SpawnRequestBody): Promise<SpawnResult> {
+  public spawn(
+    username: string,
+    serviceName: string,
+    authToken: string,
+    body: SpawnRequestBody,
+  ): Promise<SpawnResult> {
     const url = `/user/${username}/service/${serviceName}/spawn`
     return this.makeAuthenticatedRequest<SpawnResult>(url, HttpMethod.Post, authToken, body)
   }
@@ -262,17 +324,29 @@ export class JamsocketApi {
     return this.makeAuthenticatedRequest<RunningBackendsResult>(url, HttpMethod.Get, authToken)
   }
 
-  public streamLogs(backend: string, authToken: string, callback: (line: string) => void): EventStreamReturn {
+  public streamLogs(
+    backend: string,
+    authToken: string,
+    callback: (line: string) => void,
+  ): EventStreamReturn {
     const url = `/backend/${backend}/logs`
     return this.makeAuthenticatedStreamRequest(url, authToken, callback)
   }
 
-  public streamMetrics(backend: string, authToken: string, callback: (line: string) => void): EventStreamReturn {
+  public streamMetrics(
+    backend: string,
+    authToken: string,
+    callback: (line: string) => void,
+  ): EventStreamReturn {
     const url = `/backend/${backend}/metrics/stream`
     return this.makeAuthenticatedStreamRequest(url, authToken, callback)
   }
 
-  public streamStatus(backend: string, authToken: string, callback: (statusMessage: StatusMessage) => void): EventStreamReturn {
+  public streamStatus(
+    backend: string,
+    authToken: string,
+    callback: (statusMessage: StatusMessage) => void,
+  ): EventStreamReturn {
     const url = `/backend/${backend}/status/stream`
     const wrappedCallback = (line: string) => {
       const val = JSON.parse(line)
@@ -309,7 +383,10 @@ export class JamsocketApi {
     return this.makeRequest<CompleteCliLoginResult>(url, HttpMethod.Post, { code })
   }
 
-  public async revokeUserSession(userSessionId: string, authToken: string): Promise<UserSessionRevokeResult> {
+  public async revokeUserSession(
+    userSessionId: string,
+    authToken: string,
+  ): Promise<UserSessionRevokeResult> {
     const url = `/user_session/${userSessionId}`
     return this.makeAuthenticatedRequest<UserSessionRevokeResult>(url, HttpMethod.Delete, authToken)
   }
@@ -318,15 +395,19 @@ export class JamsocketApi {
     const endpoint = `/cli_login/${loginToken}/status/stream`
     const url = `${this.apiBase}${endpoint}`
     // right now, this stream only returns a single message and then closes
-    return new Promise(resolve => {
-      const stream = eventStream(url, {
-        ...this.options,
-        method: HttpMethod.Get,
-      }, (line: string) => {
-        const val = JSON.parse(line)
-        resolve(val.status === 'ok')
-        stream.close()
-      })
+    return new Promise((resolve) => {
+      const stream = eventStream(
+        url,
+        {
+          ...this.options,
+          method: HttpMethod.Get,
+        },
+        (line: string) => {
+          const val = JSON.parse(line)
+          resolve(val.status === 'ok')
+          stream.close()
+        },
+      )
     })
   }
 }

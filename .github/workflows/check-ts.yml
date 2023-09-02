@@ -1,0 +1,20 @@
+name: Check TypeScript code
+
+on:
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  check-ts-format:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out code
+      uses: actions/checkout@v2
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '18'
+
+    - name: Check formatting formatter
+      run: npx prettier --check "src/**/*.{ts,tsx}"

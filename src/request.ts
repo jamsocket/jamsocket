@@ -8,14 +8,14 @@ type Header = string | string[] | undefined
 export type Headers = Record<string, Header>
 
 type RequestReturn = {
-  body: string;
-  statusCode: number | undefined;
-  statusMessage: string | undefined;
-  headers: Headers;
+  body: string
+  statusCode: number | undefined
+  statusMessage: string | undefined
+  headers: Headers
 }
 
 export type EventStreamReturn = {
-  close: () => void;
+  close: () => void
   closed: Promise<void>
 }
 
@@ -38,7 +38,9 @@ export async function checkVersion(): Promise<void> {
     const latestVersion = JSON.parse(response.body)['dist-tags'].latest
     const isVersionOld = isVersionLessThan(version, latestVersion)
     if (isVersionOld) {
-      console.error(`    Your Jamsocket CLI version (${version}) is out of date. You can update to the latest version (${latestVersion}) with:`)
+      console.error(
+        `    Your Jamsocket CLI version (${version}) is out of date. You can update to the latest version (${latestVersion}) with:`,
+      )
       console.error('        npm install jamsocket@latest --global')
       console.error()
     }
@@ -49,10 +51,12 @@ function isVersionLessThan(version1: string, version2: string): boolean {
   const version1Components = version1.split('.')
   const version2Components = version2.split('.')
   if (version1Components.length !== 3 || version2Components.length !== 3) {
-    throw new Error(`version comparison failed due to invalid versions. Received versions: ${version1} and ${version2}`)
+    throw new Error(
+      `version comparison failed due to invalid versions. Received versions: ${version1} and ${version2}`,
+    )
   }
-  const [major1, minor1, patch1] = version1Components.map(val => Number.parseInt(val, 10))
-  const [major2, minor2, patch2] = version2Components.map(val => Number.parseInt(val, 10))
+  const [major1, minor1, patch1] = version1Components.map((val) => Number.parseInt(val, 10))
+  const [major2, minor2, patch2] = version2Components.map((val) => Number.parseInt(val, 10))
   if (major1 > major2) return false
   if (major1 < major2) return true
   if (minor1 > minor2) return false
@@ -89,26 +93,29 @@ export function request(
     }
 
     let result = ''
-    const req = protocol.request({
-      ...options,
-      hostname: wrappedURL.hostname,
-      path: wrappedURL.pathname,
-      port: wrappedURL.port,
-      headers: headers,
-    }, res => {
-      res.on('data', chunk => {
-        result += chunk
-      })
-      res.on('end', () => {
-        resolve({
-          body: result,
-          statusCode: res.statusCode,
-          statusMessage: res.statusMessage,
-          headers: res.headers,
+    const req = protocol.request(
+      {
+        ...options,
+        hostname: wrappedURL.hostname,
+        path: wrappedURL.pathname,
+        port: wrappedURL.port,
+        headers: headers,
+      },
+      (res) => {
+        res.on('data', (chunk) => {
+          result += chunk
         })
-      })
-    })
-    req.on('error', err => {
+        res.on('end', () => {
+          resolve({
+            body: result,
+            statusCode: res.statusCode,
+            statusMessage: res.statusMessage,
+            headers: res.headers,
+          })
+        })
+      },
+    )
+    req.on('error', (err) => {
       reject(err)
     })
     if (jsonBody !== null) req.write(jsonBody)
@@ -137,39 +144,42 @@ export function eventStream(
       Accept: 'text/event-stream',
     }
 
-    request = https.request({
-      ...options,
-      hostname: wrappedURL.hostname,
-      path: wrappedURL.pathname,
-      headers: headers,
-    }, res => {
-      response = res
-      if (res.statusCode !== 200) {
-        responseIntoError(res).catch(reject)
-        return
-      }
+    request = https.request(
+      {
+        ...options,
+        hostname: wrappedURL.hostname,
+        path: wrappedURL.pathname,
+        headers: headers,
+      },
+      (res) => {
+        response = res
+        if (res.statusCode !== 200) {
+          responseIntoError(res).catch(reject)
+          return
+        }
 
-      res.on('data', (chunk: Buffer) => {
-        const lines = chunk.toString().trim().split(/\n\n/)
-        for (const line of lines) {
-          const match = line.match(/data: ?(.*)/)
-          if (match) {
-            callback(match[1])
-          } else {
-            try {
-              const parsed = JSON.parse(line)
-              reject(new Error(parsed.error.message))
-            } catch {
-              reject(new Error(`Expected line to start with data:, got ${line}`))
+        res.on('data', (chunk: Buffer) => {
+          const lines = chunk.toString().trim().split(/\n\n/)
+          for (const line of lines) {
+            const match = line.match(/data: ?(.*)/)
+            if (match) {
+              callback(match[1])
+            } else {
+              try {
+                const parsed = JSON.parse(line)
+                reject(new Error(parsed.error.message))
+              } catch {
+                reject(new Error(`Expected line to start with data:, got ${line}`))
+              }
             }
           }
-        }
-      })
-      res.on('close', () => {
-        resolve()
-      })
-    })
-    request.on('error', err => {
+        })
+        res.on('close', () => {
+          resolve()
+        })
+      },
+    )
+    request.on('error', (err) => {
       reject(err)
     })
     request.end()

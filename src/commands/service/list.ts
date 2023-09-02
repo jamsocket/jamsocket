@@ -4,9 +4,7 @@ import { Jamsocket } from '../../jamsocket'
 export default class List extends Command {
   static description = 'List services for the logged-in user'
 
-  static examples = [
-    '<%= config.bin %> <%= command.id %>',
-  ]
+  static examples = ['<%= config.bin %> <%= command.id %>']
 
   public async run(): Promise<void> {
     const jamsocket = Jamsocket.fromEnvironment()

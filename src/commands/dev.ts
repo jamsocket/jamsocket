@@ -24,8 +24,9 @@ export default class Dev extends Command {
 
 const PROJECT_CONFIG_PATH = path.resolve(process.cwd(), 'jamsocket.config.js')
 
-function loadProjectConfig(): { dockerfile: string, service: string, watch?: string[] } {
-  if (!existsSync(PROJECT_CONFIG_PATH)) throw new Error('No jamsocket.config.js found in current directory')
+function loadProjectConfig(): { dockerfile: string; service: string; watch?: string[] } {
+  if (!existsSync(PROJECT_CONFIG_PATH))
+    throw new Error('No jamsocket.config.js found in current directory')
   const { dockerfile, service, watch } = require(PROJECT_CONFIG_PATH)
   return {
     dockerfile: path.resolve(process.cwd(), dockerfile),

@@ -38,7 +38,8 @@
     "shx": "^0.3.3",
     "ts-node": "^10.2.1",
     "tslib": "^2.3.1",
-    "typescript": "^4.4.3"
+    "typescript": "^4.4.3",
+    "prettier": "^3.0.2"
   },
   "oclif": {
     "bin": "jamsocket",
@@ -72,7 +73,8 @@
     "posttest": "npm run lint",
     "prepare": "npm run build",
     "prepack": "npm run build && oclif manifest && oclif readme",
-    "version": "oclif readme && git add README.md"
+    "version": "oclif readme && git add README.md",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx}\""
   },
   "engines": {
     "node": ">=12.0.0"

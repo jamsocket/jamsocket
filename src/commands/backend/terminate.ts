@@ -5,9 +5,7 @@ import { lightMagenta } from '../../formatting'
 export default class Terminate extends Command {
   static description = 'Terminates a backend based on its backend name.'
   static aliases = ['terminate']
-  static examples = [
-    '<%= config.bin %> <%= command.id %> a8m32q',
-  ]
+  static examples = ['<%= config.bin %> <%= command.id %> a8m32q']
 
   static args = [{ name: 'backend', required: true }]
 

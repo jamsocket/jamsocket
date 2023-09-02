@@ -5,9 +5,7 @@ import { lightMagenta } from '../../formatting'
 export default class Create extends Command {
   static description = 'Creates a service'
 
-  static examples = [
-    '<%= config.bin %> <%= command.id %> my-service',
-  ]
+  static examples = ['<%= config.bin %> <%= command.id %> my-service']
 
   static args = [{ name: 'name', required: true }]
 
