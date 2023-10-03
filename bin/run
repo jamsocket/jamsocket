@@ -3,7 +3,27 @@
 const oclif = require('@oclif/core')
 const { checkVersion } = require('../lib/request.js')
 
+const CODE_TO_ERROR_MESSAGE = {
+  Forbidden: 'You do not have permission to access this resource.',
+  InvalidAuth: 'Your credentials may have expired. Please try logging in again.',
+  EmailNotVerified: 'The email for this account has not been verified. Please log in to https://app.jamsocket.com to finish setting up your account.',
+  NoAccountFoundForUser: 'No account found for this user. Please log in to https://app.jamsocket.com to finish setting up your account.',
+  UsageLimit: 'You have exceeded the usage limit for this account. See https://https://docs.jamsocket.com for more information on account limits.',
+  UserNotEnabled: 'This user account has been disabled. Please contact support.',
+}
+
 oclif.run().then(require('@oclif/core/flush')).catch(error => {
   const oclifHandler = require('@oclif/core/handle')
-  return checkVersion().finally(() => oclifHandler(error))
+  const { HTTPError } = require('../lib/api.js')
+
+  return checkVersion().finally(() => {
+    if (error instanceof HTTPError) {
+      const message = CODE_TO_ERROR_MESSAGE[error.code]
+      if (message) {
+        console.error(message)
+        return
+      }
+    }
+    return oclifHandler(error)
+  })
 })

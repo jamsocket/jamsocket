@@ -108,16 +108,16 @@ export interface CompleteCliLoginResult {
 }
 
 export class HTTPError extends Error {
-  constructor(public code: number, message: string) {
+  constructor(public status: number, public code: string | null, message: string) {
     super(message)
     this.name = 'HTTPError'
   }
 }
 
-const AUTH_ERROR_HTTP_CODES = new Set([401, 403, 407])
+export const AUTH_ERROR_HTTP_CODES = new Set([401, 403, 407])
 export class AuthenticationError extends HTTPError {
-  constructor(public code: number, message: string) {
-    super(code, message)
+  constructor(public status: number, public code: string | null, message: string) {
+    super(status, code, message)
     this.name = 'AuthenticationError'
   }
 }
@@ -184,9 +184,9 @@ export class JamsocketApi {
     if (response.statusCode && response.statusCode >= 400) {
       if (isJSONContentType && isValidJSON) {
         const { message, status, code, id } = responseBody.error
-        throw new HTTPError(response.statusCode, `jamsocket: ${status} - ${code}: ${message} (id: ${id})`)
+        throw new HTTPError(response.statusCode, code, `jamsocket: ${status} - ${code}: ${message} (id: ${id})`)
       }
-      throw new HTTPError(response.statusCode, `jamsocket: ${response.statusCode}: ${response.body}`)
+      throw new HTTPError(response.statusCode, null, `jamsocket: ${response.statusCode}: ${response.body}`)
     }
 
     if (!isJSONContentType) {
@@ -206,7 +206,7 @@ export class JamsocketApi {
       // NOTE: this await here is required so that all the Promise "callback" logic is wrapped in this try/catch
       return await this.makeRequest<T>(endpoint, method, body, additionalHeaders)
     } catch (error) {
-      if (error instanceof HTTPError && AUTH_ERROR_HTTP_CODES.has(error.code)) throw new AuthenticationError(error.code, error.message)
+      if (error instanceof HTTPError && AUTH_ERROR_HTTP_CODES.has(error.status)) throw new AuthenticationError(error.status, error.code, error.message)
       throw error
     }
   }
