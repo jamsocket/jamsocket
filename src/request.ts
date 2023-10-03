@@ -4,6 +4,7 @@ import { HTTPError } from './api'
 import * as os from 'os'
 import WSL from 'is-wsl'
 import { AUTH_ERROR_HTTP_CODES, AuthenticationError } from './api'
+import assert from 'assert'
 
 type Header = string | string[] | undefined
 export type Headers = Record<string, Header>
@@ -145,7 +146,7 @@ export function eventStream(
       headers: headers,
     }, res => {
       response = res
-      if (res.statusCode !== 200) {
+      if (res.statusCode && res.statusCode >= 400) {
         responseIntoError(res).catch(reject)
         return
       }
@@ -179,8 +180,9 @@ export function eventStream(
   return { close, closed }
 }
 
-// this should only be called for non-200 responses
+// this should only be called for 4xx/5xx responses
 function responseIntoError(res: http.IncomingMessage): Promise<void> {
+  assert(res.statusCode && res.statusCode >= 400)
   return new Promise((_, reject) => {
     let body = ''
     res.on('data', (chunk: Buffer) => {
