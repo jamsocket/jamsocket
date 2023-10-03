@@ -3,6 +3,7 @@ import * as http from 'http'
 import { HTTPError } from './api'
 import * as os from 'os'
 import WSL from 'is-wsl'
+import { AUTH_ERROR_HTTP_CODES, AuthenticationError } from './api'
 
 type Header = string | string[] | undefined
 export type Headers = Record<string, Header>
@@ -178,6 +179,7 @@ export function eventStream(
   return { close, closed }
 }
 
+// this should only be called for non-200 responses
 function responseIntoError(res: http.IncomingMessage): Promise<void> {
   return new Promise((_, reject) => {
     let body = ''
@@ -185,12 +187,19 @@ function responseIntoError(res: http.IncomingMessage): Promise<void> {
       body += chunk.toString()
     })
     res.on('end', () => {
+      const statusCode = res.statusCode!
+      let code: string | null = null
       let msg = body
       try {
         const parsed = JSON.parse(body)
         msg = parsed.error.message ?? msg
+        code = parsed.error.code ?? null
       } catch {}
-      reject(new HTTPError(res.statusCode!, msg))
+      if (AUTH_ERROR_HTTP_CODES.has(statusCode)) {
+        reject(new AuthenticationError(statusCode, code, msg))
+      } else {
+        reject(new HTTPError(statusCode, code, msg))
+      }
     })
   })
 }
