@@ -56,6 +56,7 @@ export interface SpawnResult {
   status_url: string,
   bearer_token?: string,
   spawned: boolean,
+  status: string | null
 }
 
 export type BackendWithStatus = {
