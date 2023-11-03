@@ -41,15 +41,16 @@ export default class Spawn extends Command {
     const responseBody = await jamsocket.spawn(args.service, env, flags.grace, flags.port, flags.tag, flags['require-bearer-token'], flags.lock)
 
     this.log(lightBlue('Backend spawned!'))
-    this.log(chalk.bold`backend name: `, blue(responseBody.name))
-    this.log(chalk.bold`backend url:  `, blue(responseBody.url))
-    this.log(chalk.bold`status url:   `, blue(responseBody.status_url))
-    this.log(chalk.bold`ready url:    `, blue(responseBody.ready_url))
+    this.log(chalk.bold`backend name:   `, blue(responseBody.name))
+    this.log(chalk.bold`backend status: `, blue(responseBody.status ?? '-'))
+    this.log(chalk.bold`backend url:    `, blue(responseBody.url))
+    this.log(chalk.bold`status url:     `, blue(responseBody.status_url))
+    this.log(chalk.bold`ready url:      `, blue(responseBody.ready_url))
     if (responseBody.bearer_token) {
-      this.log(chalk.bold`bearer token: `, blue(responseBody.bearer_token))
+      this.log(chalk.bold`bearer token:   `, blue(responseBody.bearer_token))
     }
     if (flags.lock) {
-      this.log(chalk.bold`spawned:      `, blue(responseBody.spawned.toString()))
+      this.log(chalk.bold`spawned:        `, blue(responseBody.spawned.toString()))
     }
   }
 }
