@@ -67,7 +67,7 @@
   },
   "scripts": {
     "build": "shx rm -rf lib && tsc -b",
-    "lint": "eslint . --ext .ts --config .eslintrc",
+    "lint": "eslint src --ext .ts --config .eslintrc",
     "postpack": "shx rm -f oclif.manifest.json",
     "posttest": "npm run lint",
     "prepare": "npm run build",
