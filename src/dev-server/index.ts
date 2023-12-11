@@ -44,6 +44,8 @@ export default class DevServer {
   // returns a promise that resolves when the dev server is stopped
   async start(): Promise<void> {
     const { watch } = this.opts
+
+    console.log('Starting dev server...')
     this.currentImageId = await this.buildSessionBackend()
 
     const server = this.startSpawnProxy()
@@ -88,10 +90,13 @@ export default class DevServer {
 
   async buildSessionBackend(): Promise<string> {
     const { dockerfile, service } = this.opts
+    this.updateFooterAndLog(['Building image...'])
     this.clearFooter()
     const imageId = buildImage(dockerfile)
+    this.updateFooterAndLog(['Image built.', 'Pushing image...'])
+    this.clearFooter()
     await this.jamsocket.push(service, imageId)
-    this.updateFooterAndLog(['', `Built and pushed image to ${service} service on the Jamsocket registry. ImageID: ${imageId}`])
+    this.updateFooterAndLog([`Image pushed to ${service} service on the Jamsocket registry. ImageID: ${imageId}`])
     return imageId
   }
 
