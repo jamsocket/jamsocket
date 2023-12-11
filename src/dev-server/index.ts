@@ -35,6 +35,7 @@ type Options = {
 
 export default class DevServer {
   currentImageId: string | null = null
+  fsWatcher: chokidar.FSWatcher | null = null
   devBackends: Map<string, Backend> = new Map()
   curFooterLength = 0
   totalBackendsSpawned = 0
@@ -56,18 +57,27 @@ export default class DevServer {
       process.stdin.resume()
       process.stdin.setEncoding('utf8')
       process.stdin.on('data', async (key: string) => {
-        if (key === CTRL_C) resolve()
-        if (key === 'b') await this.rebuild()
-        if (key === 't') await this.terminateAllDevbackends()
+        try {
+          if (key === CTRL_C) resolve()
+          if (key === 'b') await this.rebuild()
+          if (key === 't') await this.terminateAllDevbackends()
+        } catch {
+          resolve()
+        }
       })
-    })
 
-    let fsWatcher: chokidar.FSWatcher | null = null
-    if (watch) {
-      this.updateFooterAndLog([`Watching ${watch.join(', ')} for changes...`, ''])
-      const watchPaths = watch.map(w => path.resolve(process.cwd(), w))
-      fsWatcher = chokidar.watch(watchPaths).on('change', this.rebuild.bind(this))
-    }
+      if (watch) {
+        this.updateFooterAndLog([`Watching ${watch.join(', ')} for changes...`, ''])
+        const watchPaths = watch.map(w => path.resolve(process.cwd(), w))
+        this.fsWatcher = chokidar.watch(watchPaths).on('change', async () => {
+          try {
+            await this.rebuild()
+          } catch {
+            resolve()
+          }
+        })
+      }
+    })
 
     await timeToExit
 
@@ -82,7 +92,7 @@ export default class DevServer {
       this.devBackends.delete(name)
     }
 
-    fsWatcher?.close()
+    this.fsWatcher?.close()
     process.stdin.removeAllListeners()
     process.stdin.setRawMode(false)
     process.stdin.unref()
