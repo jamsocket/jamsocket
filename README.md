@@ -29,7 +29,7 @@ If you want to use the Jamsocket CLI from an automated environment (e.g. a CI/CD
 * [`jamsocket backend list`](#jamsocket-backend-list)
 * [`jamsocket backend logs BACKEND`](#jamsocket-backend-logs-backend)
 * [`jamsocket backend metrics BACKEND`](#jamsocket-backend-metrics-backend)
-* [`jamsocket backend terminate BACKEND`](#jamsocket-backend-terminate-backend)
+* [`jamsocket backend terminate BACKENDS`](#jamsocket-backend-terminate-backends)
 * [`jamsocket dev`](#jamsocket-dev)
 * [`jamsocket help [COMMAND]`](#jamsocket-help-command)
 * [`jamsocket login`](#jamsocket-login)
@@ -41,7 +41,7 @@ If you want to use the Jamsocket CLI from an automated environment (e.g. a CI/CD
 * [`jamsocket service info NAME`](#jamsocket-service-info-name)
 * [`jamsocket service list`](#jamsocket-service-list)
 * [`jamsocket spawn SERVICE`](#jamsocket-spawn-service)
-* [`jamsocket terminate BACKEND`](#jamsocket-terminate-backend)
+* [`jamsocket terminate BACKENDS`](#jamsocket-terminate-backends)
 
 ## `jamsocket backend info BACKEND`
 
@@ -112,13 +112,13 @@ EXAMPLES
   $ jamsocket backend metrics f7em2
 ```
 
-## `jamsocket backend terminate BACKEND`
+## `jamsocket backend terminate BACKENDS`
 
 Terminates a backend based on its backend name.
 
 ```
 USAGE
-  $ jamsocket backend terminate [BACKEND]
+  $ jamsocket backend terminate [BACKENDS]
 
 DESCRIPTION
   Terminates a backend based on its backend name.
@@ -127,7 +127,7 @@ ALIASES
   $ jamsocket terminate
 
 EXAMPLES
-  $ jamsocket backend terminate a8m32q
+  $ jamsocket backend terminate abc123 def456 ...
 ```
 
 ## `jamsocket dev`
@@ -145,7 +145,7 @@ EXAMPLES
   $ jamsocket dev
 ```
 
-_See code: [src/commands/dev.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.7.3/src/commands/dev.ts)_
+_See code: [src/commands/dev.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.7.4/src/commands/dev.ts)_
 
 ## `jamsocket help [COMMAND]`
 
@@ -185,7 +185,7 @@ EXAMPLES
   $ jamsocket login
 ```
 
-_See code: [src/commands/login.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.7.3/src/commands/login.ts)_
+_See code: [src/commands/login.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.7.4/src/commands/login.ts)_
 
 ## `jamsocket logout`
 
@@ -202,7 +202,7 @@ EXAMPLES
   $ jamsocket logout
 ```
 
-_See code: [src/commands/logout.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.7.3/src/commands/logout.ts)_
+_See code: [src/commands/logout.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.7.4/src/commands/logout.ts)_
 
 ## `jamsocket logs BACKEND`
 
@@ -249,7 +249,7 @@ EXAMPLES
   $ jamsocket push my-service my-image -t my-tag
 ```
 
-_See code: [src/commands/push.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.7.3/src/commands/push.ts)_
+_See code: [src/commands/push.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.7.4/src/commands/push.ts)_
 
 ## `jamsocket service create NAME`
 
@@ -341,15 +341,15 @@ EXAMPLES
   $ jamsocket spawn my-service -t latest
 ```
 
-_See code: [src/commands/spawn.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.7.3/src/commands/spawn.ts)_
+_See code: [src/commands/spawn.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.7.4/src/commands/spawn.ts)_
 
-## `jamsocket terminate BACKEND`
+## `jamsocket terminate BACKENDS`
 
 Terminates a backend based on its backend name.
 
 ```
 USAGE
-  $ jamsocket terminate [BACKEND]
+  $ jamsocket terminate [BACKENDS]
 
 DESCRIPTION
   Terminates a backend based on its backend name.
@@ -358,6 +358,6 @@ ALIASES
   $ jamsocket terminate
 
 EXAMPLES
-  $ jamsocket terminate a8m32q
+  $ jamsocket terminate abc123 def456 ...
 ```
 <!-- commandsstop -->
