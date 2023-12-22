@@ -37,6 +37,7 @@ export default class List extends Command {
             '-'
         },
       },
+      lock: { header: 'Lock' },
     }, {
       printLine: this.log.bind(this),
     })
