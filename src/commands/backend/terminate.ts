@@ -4,19 +4,28 @@ import { lightMagenta } from '../../formatting'
 
 export default class Terminate extends Command {
   static description = 'Terminates a backend based on its backend name.'
+  // we turn off strict mode so that we can accept multiple values for the same argument
+  static strict = false
   static aliases = ['terminate']
   static examples = [
-    '<%= config.bin %> <%= command.id %> a8m32q',
+    '<%= config.bin %> <%= command.id %> abc123 def456 ...',
   ]
 
-  static args = [{ name: 'backend', required: true }]
+  static args = [{ name: 'backends', required: true }]
 
   public async run(): Promise<void> {
-    const { args } = await this.parse(Terminate)
-
+    // it's not possible to have a multiple values for the same argument, so this is the workaround
+    const backends = [...this.argv]
     const jamsocket = Jamsocket.fromEnvironment()
-    await jamsocket.terminate(args.backend)
 
-    this.log(`Termination requested for backend: ${lightMagenta(args.backend)}`)
+    for (const backend of backends) {
+      try {
+        await jamsocket.terminate(backend)
+      } catch {
+        this.warn(`Failed to request termination for backend: ${lightMagenta(backend)}. Skipping...`)
+        continue
+      }
+      this.log(`Termination requested for backend: ${lightMagenta(backend)}`)
+    }
   }
 }
