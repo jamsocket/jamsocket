@@ -67,6 +67,7 @@ export type BackendWithStatus = {
   account_name: string
   status?: string
   status_timestamp?: string
+  lock?: string
 }
 
 export interface RunningBackendsResult {
