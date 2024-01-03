@@ -20,6 +20,7 @@ export type SpawnRequestBody = {
   tag?: string;
   require_bearer_token?: boolean;
   lock?: string;
+  service_environment?: string;
 }
 
 export interface ServiceImageResult {
@@ -35,14 +36,24 @@ export interface ServiceCreateResult {
   status: 'ok',
 }
 
+export interface Environment {
+  name: string,
+  image_tag: string,
+  cluster: string,
+  created_at: string,
+  last_spawned_at: string | null,
+}
+
 export interface ServiceInfoResult {
   name: string,
   account_name: string,
   created_at: string,
   last_spawned_at: string | null,
   last_image_upload_time: string | null,
-  last_image_tag: string | null,
+  last_image_digest: string | null,
   spawn_tokens_count: number,
+  image_name: string,
+  environments: Environment[],
 }
 
 export interface ServiceDeleteResult {

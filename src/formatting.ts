@@ -6,6 +6,7 @@ const JAMSOCKET_BLUE: Vec3 = [0, 98, 255]
 const LIGHT_BLUE: Vec3 = [97, 213, 255]
 const LIGHT_GREEN: Vec3 = [97, 255, 183]
 const LIGHT_MAGENTA: Vec3 = [255, 97, 208]
+const GRAY: Vec3 = [128, 128, 128]
 
 function makeColorFormatter(color: Vec3): (text: string) => string {
   return text => chalk.bold.rgb(...color)(text)
@@ -15,6 +16,7 @@ export const blue = makeColorFormatter(JAMSOCKET_BLUE)
 export const lightBlue = makeColorFormatter(LIGHT_BLUE)
 export const lightGreen = makeColorFormatter(LIGHT_GREEN)
 export const lightMagenta = makeColorFormatter(LIGHT_MAGENTA)
+export const gray = makeColorFormatter(GRAY)
 
 export function gradientBlue(text: string): string {
   return getFormattedTextWithGradient(text, JAMSOCKET_BLUE, LIGHT_BLUE)
