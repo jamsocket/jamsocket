@@ -7,10 +7,11 @@ import { blue, lightBlue } from '../formatting'
 const MAX_PORT = (2 ** 16) - 1
 
 export default class Spawn extends Command {
-  static description = 'Spawns a session backend from the provided docker image.'
+  static description = 'Spawns a session backend with the provided service\'s docker image.'
 
   static examples = [
     '<%= config.bin %> <%= command.id %> my-service',
+    '<%= config.bin %> <%= command.id %> my-service prod',
     '<%= config.bin %> <%= command.id %> my-service -e SOME_ENV_VAR=foo -e ANOTHER_ENV_VAR=bar',
     '<%= config.bin %> <%= command.id %> my-service -g 60',
     '<%= config.bin %> <%= command.id %> my-service -t latest',
@@ -26,7 +27,10 @@ export default class Spawn extends Command {
     lock: Flags.string({ char: 'l', description: 'optional lock to spawn the service with' }),
   }
 
-  static args = [{ name: 'service', required: true }]
+  static args = [
+    { name: 'service', required: true, description: 'name of service to spawn' },
+    { name: 'environment', required: false, description: 'service environment to spawn the service with (optional if service only has one environment, otherwise required)' },
+  ]
 
   public async run(): Promise<void> {
     const { args, flags } = await this.parse(Spawn)
@@ -38,7 +42,7 @@ export default class Spawn extends Command {
     }
 
     const jamsocket = Jamsocket.fromEnvironment()
-    const responseBody = await jamsocket.spawn(args.service, env, flags.grace, flags.port, flags.tag, flags['require-bearer-token'], flags.lock)
+    const responseBody = await jamsocket.spawn(args.service, args.environment, env, flags.grace, flags.port, flags.tag, flags['require-bearer-token'], flags.lock)
 
     this.log(lightBlue('Backend spawned!'))
     this.log(chalk.bold`backend name:   `, blue(responseBody.name))

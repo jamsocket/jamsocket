@@ -310,6 +310,7 @@ export default class DevServer {
 
     const result = await this.jamsocket.spawn(
       service,
+      undefined,
       body.env,
       body.grace_period_seconds,
       body.port,

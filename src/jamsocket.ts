@@ -44,7 +44,8 @@ export class Jamsocket {
     console.log('Done.')
   }
 
-  public spawn(service: string, env?: Record<string, string>, grace?: number, port?: number, tag?: string, requireBearerToken?: boolean, lock?: string): Promise<SpawnResult> {
+  // eslint-ignore-next-line max-params
+  public spawn(service: string, serviceEnvironment?: string, env?: Record<string, string>, grace?: number, port?: number, tag?: string, requireBearerToken?: boolean, lock?: string): Promise<SpawnResult> {
     const config = this.expectAuthorized()
 
     const body: SpawnRequestBody = {
@@ -54,6 +55,7 @@ export class Jamsocket {
       tag,
       require_bearer_token: requireBearerToken,
       lock,
+      service_environment: serviceEnvironment,
     }
 
     return this.api.spawn(config.getAccount(), service, config.getAccessToken(), body)
