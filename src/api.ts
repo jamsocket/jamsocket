@@ -36,6 +36,17 @@ export interface ServiceCreateResult {
   status: 'ok',
 }
 
+export type Image = {
+  repository: string,
+  digest: string,
+  tag: string,
+  upload_time: string,
+}
+
+export interface ServiceImagesResult {
+  images: Image[]
+}
+
 export interface Environment {
   name: string,
   image_tag: string,
@@ -273,6 +284,11 @@ export class JamsocketApi {
   public listRunningBackends(username: string, authToken: string): Promise<RunningBackendsResult> {
     const url = `/user/${username}/backends`
     return this.makeAuthenticatedRequest<RunningBackendsResult>(url, HttpMethod.Get, authToken)
+  }
+
+  public imagesList(account: string, serviceName: string, authToken: string): Promise<ServiceImagesResult> {
+    const url = `/user/${account}/service/${serviceName}/images`
+    return this.makeAuthenticatedRequest<ServiceImagesResult>(url, HttpMethod.Get, authToken)
   }
 
   public streamLogs(backend: string, authToken: string, callback: (line: string) => void): EventStreamReturn {
