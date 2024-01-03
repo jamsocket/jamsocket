@@ -1,5 +1,5 @@
 import { JamsocketApi, BackendInfoResult, RunningBackendsResult, SpawnRequestBody, SpawnResult, StatusMessage, TerminateResult } from './api'
-import type { ServiceCreateResult, ServiceListResult, ServiceInfoResult, ServiceDeleteResult } from './api'
+import type { ServiceCreateResult, ServiceListResult, ServiceInfoResult, ServiceDeleteResult, ServiceImagesResult } from './api'
 import { JamsocketConfig } from './jamsocket-config'
 import { tag as dockerTag, push as dockerPush } from './docker'
 import type { EventStreamReturn } from './request'
@@ -94,6 +94,11 @@ export class Jamsocket {
   public serviceList(): Promise<ServiceListResult> {
     const config = this.expectAuthorized()
     return this.api.serviceList(config.getAccount(), config.getAccessToken())
+  }
+
+  public imagesList(service: string): Promise<ServiceImagesResult> {
+    const config = this.expectAuthorized()
+    return this.api.imagesList(config.getAccount(), service, config.getAccessToken())
   }
 
   public streamLogs(backend: string, callback: (v: string) => void): EventStreamReturn {
