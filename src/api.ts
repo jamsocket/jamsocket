@@ -23,6 +23,11 @@ export type SpawnRequestBody = {
   service_environment?: string;
 }
 
+export type UpdateEnvironmentBody = {
+  name?: string;
+  image_tag?: string;
+}
+
 export interface ServiceImageResult {
   status: 'ok',
   imageName: string,
@@ -68,6 +73,10 @@ export interface ServiceInfoResult {
 }
 
 export interface ServiceDeleteResult {
+  status: 'ok'
+}
+
+export interface EnvironmentUpdateResult {
   status: 'ok'
 }
 
@@ -274,6 +283,11 @@ export class JamsocketApi {
   public serviceList(username: string, authToken: string): Promise<ServiceListResult> {
     const url = `/user/${username}/services`
     return this.makeAuthenticatedRequest<ServiceListResult>(url, HttpMethod.Get, authToken)
+  }
+
+  public updateEnvironment(account: string, service: string, environment: string, authToken: string, body: UpdateEnvironmentBody): Promise<EnvironmentUpdateResult> {
+    const url = `/env/${account}/${service}/${environment}/update`
+    return this.makeAuthenticatedRequest<EnvironmentUpdateResult>(url, HttpMethod.Post, authToken, body)
   }
 
   public spawn(username: string, serviceName: string, authToken: string, body: SpawnRequestBody): Promise<SpawnResult> {
