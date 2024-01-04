@@ -7,7 +7,7 @@ export default class UseImage extends Command {
 
   static examples = [
     '<%= config.bin %> <%= command.id %> my-service -i latest',
-    '<%= config.bin %> <%= command.id %> my-service prod -i sha256:1234abcd',
+    '<%= config.bin %> <%= command.id %> my-service/prod -i sha256:1234abcd',
   ]
 
   static flags = {
@@ -15,8 +15,7 @@ export default class UseImage extends Command {
   }
 
   static args = [
-    { name: 'service', required: true, description: 'name of service whose image should be updated' },
-    { name: 'environment', required: false, description: 'service environment whose image should be updated (optional, if omitted the default environment is used)' },
+    { name: 'service', required: true, description: 'Name of service/environment whose image should be updated. If only a service is provided, the "default" environment is used.' },
   ]
 
   public async run(): Promise<void> {
@@ -24,10 +23,17 @@ export default class UseImage extends Command {
 
     const jamsocket = Jamsocket.fromEnvironment()
 
-    const environment = args.environment ?? 'default'
-    await jamsocket.updateEnvironment(args.service, environment, flags.image)
+    const parts = args.service.split('/')
+    if (parts.length > 2 || parts[0] === '' || parts[1] === '') {
+      this.error(`Invalid service/environment name: ${args.service}`)
+    }
 
-    this.log(`Updated ${lightMagenta(`${args.service}/${environment}`)} to use image ${blue(flags.image)}`)
-    this.log(`Run ${lightBlue(`jamsocket service info ${args.service}`)} for more information about your service and its environments.`)
+    const service = parts[0]
+    const environment = parts[1] ?? 'default'
+
+    await jamsocket.updateEnvironment(service, environment, flags.image)
+
+    this.log(`Updated ${lightMagenta(`${service}/${environment}`)} to use image ${blue(flags.image)}`)
+    this.log(`Run ${lightBlue(`jamsocket service info ${service}`)} for more information about your service and its environments.`)
   }
 }
