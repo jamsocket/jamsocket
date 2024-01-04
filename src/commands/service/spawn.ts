@@ -1,12 +1,14 @@
 import { Command, Flags } from '@oclif/core'
 import chalk from 'chalk'
-import { Jamsocket } from '../jamsocket'
-import * as customFlags from '../flags'
-import { blue, lightBlue } from '../formatting'
+import { Jamsocket } from '../../jamsocket'
+import * as customFlags from '../../flags'
+import { blue, lightBlue } from '../../formatting'
 
 const MAX_PORT = (2 ** 16) - 1
 
 export default class Spawn extends Command {
+  static aliases = ['spawn']
+
   static description = 'Spawns a session backend with the provided service/environment\'s docker image.'
 
   static examples = [
