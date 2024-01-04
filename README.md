@@ -6,22 +6,13 @@ A CLI for the Jamsocket platform
 
 # Install
 
-You may run the Jamsocket CLI without explicitly installing it using `npx jamsocket`. However, this may lead to CLI-version-related issues as [NPX is not guaranteed to run the latest version](https://github.com/npm/cli/issues/4108) and will instead use whatever version was cached with the first usage.
-
-For this reason it is recommended that you first install the Jamsocket CLI either globally or in your project and _then_ use `npx jamsocket`. (When running `npx jamsocket` from your project, the locally-installed `jamsocket` will be used.) When installing the Jamsocket CLI globally, it is recommended you use a tool like [Node Version Manager](https://github.com/nvm-sh/nvm#installing-and-updating) to manage your NodeJS binaries. NVM makes sure these binaries are installed under your user so global npm installs do not require root privileges. Once NVM is set up, run `npm install jamsocket --global`.
-
-# Upgrading
-
-```sh
-npm install jamsocket@latest # to update the locally-installed Jamsocket
-npm install jamsocket@latest --global # to update the global installation of Jamsocket
-```
+We recommend you run the Jamsocket CLI without explicitly installing it using `npx jamsocket`. You may also install it locally within a project or globally using `npm install jamsocket` (and `npm install jamsocket -g`).
 
 # Authentication
 
-Run `jamsocket login`.
+Run `npx jamsocket login`.
 
-If you want to use the Jamsocket CLI from an automated environment (e.g. a CI/CD pipeline), you can authenticate with an access token by running `jamsocket login --token [ACCESS_TOKEN]`. You can manage and generate access tokens from the [Jamsocket Settings page](https://app.jamsocket.com/settings).
+If you want to use the Jamsocket CLI from an automated environment (e.g. a CI/CD pipeline), you can authenticate with an access token by running `npx jamsocket login --token [ACCESS_TOKEN]`. You can manage and generate access tokens from the [Jamsocket Settings page](https://app.jamsocket.com/settings).
 
 # Commands
 <!-- commands -->
