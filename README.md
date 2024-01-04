@@ -6,7 +6,7 @@ A CLI for the Jamsocket platform
 
 # Install
 
-We recommend you run the Jamsocket CLI without explicitly installing it using `npx jamsocket`. You may also install it locally within a project or globally using `npm install jamsocket` (and `npm install jamsocket -g`).
+We recommend you use `npx jamsocket` to run the Jamsocket CLI without explicitly installing it. You may also install it locally within a project using `npm install jamsocket`.
 
 # Authentication
 
