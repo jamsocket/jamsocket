@@ -40,8 +40,8 @@ export async function checkVersion(): Promise<void> {
     const latestVersion = JSON.parse(response.body)['dist-tags'].latest
     const isVersionOld = isVersionLessThan(version, latestVersion)
     if (isVersionOld) {
-      console.error(`    Your Jamsocket CLI version (${version}) is out of date. You can update to the latest version (${latestVersion}) with:`)
-      console.error('        npm install jamsocket@latest --global')
+      console.error(`    Your Jamsocket CLI version (${version}) is out of date. You may need to update to the latest version (${latestVersion}) with:`)
+      console.error('        npm install jamsocket@latest')
       console.error()
     }
   } catch {}
