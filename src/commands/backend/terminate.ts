@@ -3,7 +3,7 @@ import { Jamsocket } from '../../jamsocket'
 import { lightMagenta } from '../../formatting'
 
 export default class Terminate extends Command {
-  static description = 'Terminates a backend based on its backend name.'
+  static description = 'Terminates one or more backends given the backend name(s).'
   // we turn off strict mode so that we can accept multiple values for the same argument
   static strict = false
   static aliases = ['terminate']
