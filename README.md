@@ -109,14 +109,14 @@ EXAMPLES
 
 ## `jamsocket backend terminate BACKENDS`
 
-Terminates a backend based on its backend name.
+Terminates one or more backends given the backend name(s).
 
 ```
 USAGE
   $ jamsocket backend terminate [BACKENDS]
 
 DESCRIPTION
-  Terminates a backend based on its backend name.
+  Terminates one or more backends given the backend name(s).
 
 ALIASES
   $ jamsocket terminate
@@ -447,14 +447,14 @@ EXAMPLES
 
 ## `jamsocket terminate BACKENDS`
 
-Terminates a backend based on its backend name.
+Terminates one or more backends given the backend name(s).
 
 ```
 USAGE
   $ jamsocket terminate [BACKENDS]
 
 DESCRIPTION
-  Terminates a backend based on its backend name.
+  Terminates one or more backends given the backend name(s).
 
 ALIASES
   $ jamsocket terminate
