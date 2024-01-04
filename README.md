@@ -32,14 +32,18 @@ If you want to use the Jamsocket CLI from an automated environment (e.g. a CI/CD
 * [`jamsocket backend terminate BACKENDS`](#jamsocket-backend-terminate-backends)
 * [`jamsocket dev`](#jamsocket-dev)
 * [`jamsocket help [COMMAND]`](#jamsocket-help-command)
+* [`jamsocket images SERVICE`](#jamsocket-images-service)
 * [`jamsocket login`](#jamsocket-login)
 * [`jamsocket logout`](#jamsocket-logout)
 * [`jamsocket logs BACKEND`](#jamsocket-logs-backend)
 * [`jamsocket push SERVICE IMAGE`](#jamsocket-push-service-image)
 * [`jamsocket service create NAME`](#jamsocket-service-create-name)
 * [`jamsocket service delete NAME`](#jamsocket-service-delete-name)
+* [`jamsocket service images SERVICE`](#jamsocket-service-images-service)
 * [`jamsocket service info NAME`](#jamsocket-service-info-name)
 * [`jamsocket service list`](#jamsocket-service-list)
+* [`jamsocket service spawn SERVICE`](#jamsocket-service-spawn-service)
+* [`jamsocket service use-image SERVICE`](#jamsocket-service-use-image-service)
 * [`jamsocket spawn SERVICE`](#jamsocket-spawn-service)
 * [`jamsocket terminate BACKENDS`](#jamsocket-terminate-backends)
 
@@ -167,6 +171,24 @@ DESCRIPTION
 
 _See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v5.1.12/src/commands/help.ts)_
 
+## `jamsocket images SERVICE`
+
+List uploaded images for a given service (limited to 50 most recent images)
+
+```
+USAGE
+  $ jamsocket images [SERVICE]
+
+DESCRIPTION
+  List uploaded images for a given service (limited to 50 most recent images)
+
+ALIASES
+  $ jamsocket images
+
+EXAMPLES
+  $ jamsocket images my-service
+```
+
 ## `jamsocket login`
 
 Authenticates user to the Jamsocket API.
@@ -281,6 +303,24 @@ EXAMPLES
   $ jamsocket service delete my-service
 ```
 
+## `jamsocket service images SERVICE`
+
+List uploaded images for a given service (limited to 50 most recent images)
+
+```
+USAGE
+  $ jamsocket service images [SERVICE]
+
+DESCRIPTION
+  List uploaded images for a given service (limited to 50 most recent images)
+
+ALIASES
+  $ jamsocket images
+
+EXAMPLES
+  $ jamsocket service images my-service
+```
+
 ## `jamsocket service info NAME`
 
 Gets some information about a service
@@ -311,28 +351,101 @@ EXAMPLES
   $ jamsocket service list
 ```
 
+## `jamsocket service spawn SERVICE`
+
+Spawns a session backend with the provided service/environment's docker image.
+
+```
+USAGE
+  $ jamsocket service spawn [SERVICE] [-e <value>] [-g <value>] [-t <value>] [-r] [-l <value>]
+
+ARGUMENTS
+  SERVICE  Name of service/environment to spawn. (Providing the environment is optional if service only has one
+           environment, otherwise it is required)
+
+FLAGS
+  -e, --env=<value>...        optional environment variables to pass to the container
+  -g, --grace=<value>         optional grace period (in seconds) to wait after last connection is closed before shutting
+                              down container (default is 300)
+  -l, --lock=<value>          optional lock to spawn the service with
+  -r, --require-bearer-token  require a bearer token to access the service. A random bearer token will be generated and
+                              returned in the result.
+  -t, --tag=<value>           optional image tag or digest for the service to spawn
+
+DESCRIPTION
+  Spawns a session backend with the provided service/environment's docker image.
+
+ALIASES
+  $ jamsocket spawn
+
+EXAMPLES
+  $ jamsocket service spawn my-service
+
+  $ jamsocket service spawn my-service/prod
+
+  $ jamsocket service spawn my-service -e SOME_ENV_VAR=foo -e ANOTHER_ENV_VAR=bar
+
+  $ jamsocket service spawn my-service -g 60
+
+  $ jamsocket service spawn my-service -t latest
+```
+
+## `jamsocket service use-image SERVICE`
+
+Sets the image tag or digest to use when spawning a service/environment
+
+```
+USAGE
+  $ jamsocket service use-image [SERVICE] -i <value>
+
+ARGUMENTS
+  SERVICE  Name of service/environment whose image should be updated. If only a service is provided, the "default"
+           environment is used.
+
+FLAGS
+  -i, --image=<value>  (required) image tag or digest for the service/environment to use (Run `jamsocket images` for a
+                       list of images you can use.)
+
+DESCRIPTION
+  Sets the image tag or digest to use when spawning a service/environment
+
+EXAMPLES
+  $ jamsocket service use-image my-service -i latest
+
+  $ jamsocket service use-image my-service/prod -i sha256:1234abcd
+```
+
 ## `jamsocket spawn SERVICE`
 
-Spawns a session backend from the provided docker image.
+Spawns a session backend with the provided service/environment's docker image.
 
 ```
 USAGE
   $ jamsocket spawn [SERVICE] [-e <value>] [-g <value>] [-t <value>] [-r] [-l <value>]
 
+ARGUMENTS
+  SERVICE  Name of service/environment to spawn. (Providing the environment is optional if service only has one
+           environment, otherwise it is required)
+
 FLAGS
   -e, --env=<value>...        optional environment variables to pass to the container
   -g, --grace=<value>         optional grace period (in seconds) to wait after last connection is closed before shutting
-                              down container
+                              down container (default is 300)
   -l, --lock=<value>          optional lock to spawn the service with
   -r, --require-bearer-token  require a bearer token to access the service. A random bearer token will be generated and
                               returned in the result.
-  -t, --tag=<value>           optional tag for the service to spawn (default is latest)
+  -t, --tag=<value>           optional image tag or digest for the service to spawn
 
 DESCRIPTION
-  Spawns a session backend from the provided docker image.
+  Spawns a session backend with the provided service/environment's docker image.
+
+ALIASES
+  $ jamsocket spawn
 
 EXAMPLES
   $ jamsocket spawn my-service
+
+  $ jamsocket spawn my-service/prod
 
   $ jamsocket spawn my-service -e SOME_ENV_VAR=foo -e ANOTHER_ENV_VAR=bar
 
@@ -340,8 +453,6 @@ EXAMPLES
 
   $ jamsocket spawn my-service -t latest
 ```
-
-_See code: [src/commands/spawn.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.7.6/src/commands/spawn.ts)_
 
 ## `jamsocket terminate BACKENDS`
 
