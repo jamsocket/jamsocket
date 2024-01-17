@@ -23,11 +23,13 @@
     "chalk": "^4",
     "chokidar": "^3.5.3",
     "date-fns": "^2.29.3",
+    "eventsource": "^2.0.2",
     "inquirer": "^8.2.5",
     "is-wsl": "^2.2.0",
     "string-length": "4.0.2"
   },
   "devDependencies": {
+    "@types/eventsource": "^1.1.15",
     "@types/inquirer": "^8.2.4",
     "@types/node": "^16.9.4",
     "eslint": "^7.32.0",
