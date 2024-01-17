@@ -1,57 +1,79 @@
 import path from 'path'
 import http from 'http'
 import chalk from 'chalk'
-import stringLength from 'string-length'
 import chokidar from 'chokidar'
 import { formatDistanceToNow } from 'date-fns'
 import { CliUx } from '@oclif/core'
-import { Jamsocket } from '../jamsocket'
 import { buildImage } from '../docker'
-import { SpawnResult, SpawnRequestBody } from '../api'
+import { SpawnResult, SpawnRequestBody, HTTPError } from '../api'
+import { readRequestBody, createColorGetter, type Color } from './util'
+import { Logger } from './logger'
+import { LocalPlane, runPlane, ensurePlaneImage, isV1StatusAlive, type StatusV1 } from './plane'
 
 const CTRL_C = '\u0003'
-
-type Color = 'cyan' | 'magenta' | 'yellow' | 'blue'
+const DEV_SERVER_PORT = 8888
 
 type Backend = {
-  spawnResult: SpawnResult,
-  imageId: string,
-  spawnTime: number,
-  lastStatus: string | null,
-  lock: string | null,
-  isStreaming: boolean,
-  color: Color,
-  closeStreams: (() => void) | null,
+  spawnResult: SpawnResult
+  imageId: string
+  spawnTime: number
+  lastStatus: StatusV1 | null
+  lock: string | null
+  isStreaming: boolean
+  color: Color
+  closeStreams: (() => void) | null
 }
-
-const BACKEND_LOG_COLORS: Color[] = ['cyan', 'magenta', 'yellow', 'blue']
 
 type Options = {
-  dockerfile: string,
-  service: string,
-  account: string,
-  watch?: string[],
+  dockerfile: string
+  watch?: string[]
 }
 
-export default class DevServer {
+export async function createDevServer({ dockerfile, watch }: Options): Promise<void> {
+  await ensurePlaneImage()
+  const devServer = new DevServer({ dockerfile, watch })
+  await devServer.start()
+}
+
+class DevServer {
   currentImageId: string | null = null
   fsWatcher: chokidar.FSWatcher | null = null
   devBackends: Map<string, Backend> = new Map()
-  curFooterLength = 0
-  totalBackendsSpawned = 0
+  getColor = createColorGetter()
+  logger: Logger
+  plane: LocalPlane
 
-  constructor(private jamsocket: Jamsocket, private opts: Options) {}
+  constructor(private opts: Options) {
+    this.logger = new Logger(this.getFooter.bind(this))
+    this.logger.log(['Starting plane'])
+    const { url, process, containerName } = runPlane()
+    this.plane = new LocalPlane(url, process, containerName, this.logger)
+  }
 
   // returns a promise that resolves when the dev server is stopped
   async start(): Promise<void> {
     const { watch } = this.opts
 
-    console.log('Starting dev server...')
+    await this.plane.ready()
+
+    this.logger.log(['Starting dev server...'])
+
     this.currentImageId = await this.buildSessionBackend()
 
-    const server = this.startSpawnProxy()
+    const server = this.startServer()
 
     const timeToExit = new Promise<void>(resolve => {
+      const exitOnError = (err: Error) => {
+        this.logger.log([
+          '------------- ERROR -------------',
+          err.toString(),
+          '---------------------------------',
+        ])
+        resolve()
+      }
+      process.on('uncaughtException', exitOnError)
+      process.on('uncaughtRejection', exitOnError)
+
       // listen for keyboard input
       process.stdin.setRawMode(true)
       process.stdin.resume()
@@ -67,7 +89,7 @@ export default class DevServer {
       })
 
       if (watch) {
-        this.updateFooterAndLog([`Watching ${watch.join(', ')} for changes...`, ''])
+        this.logger.log([`Watching ${watch.join(', ')} for changes...`, ''])
         const watchPaths = watch.map(w => path.resolve(process.cwd(), w))
         this.fsWatcher = chokidar.watch(watchPaths).on('change', async () => {
           try {
@@ -79,12 +101,20 @@ export default class DevServer {
       }
     })
 
+    this.logger.footerOn()
+
+    const interval = setInterval(() => {
+      this.logger.refreshFooter()
+    }, 5000)
+
     await timeToExit
 
+    this.logger.footerOff()
+
+    clearInterval(interval)
     server.close()
 
     await this.terminateAllDevbackends()
-    this.clearFooter()
 
     // close any streams that are still open
     for (const [name, backend] of this.devBackends) {
@@ -92,54 +122,19 @@ export default class DevServer {
       this.devBackends.delete(name)
     }
 
+    this.plane.kill()
+
     this.fsWatcher?.close()
     process.stdin.removeAllListeners()
     process.stdin.setRawMode(false)
     process.stdin.unref()
-  }
 
-  async buildSessionBackend(): Promise<string> {
-    const { dockerfile, service } = this.opts
-    this.updateFooterAndLog(['Building image...'])
-    this.clearFooter()
-    const imageId = buildImage(dockerfile)
-    this.updateFooterAndLog(['Image built.', 'Pushing image...'])
-    this.clearFooter()
-    await this.jamsocket.push(service, imageId)
-    this.updateFooterAndLog([`Image pushed to ${service} service on the Jamsocket registry. ImageID: ${imageId}`])
-    return imageId
-  }
-
-  async rebuild(): Promise<void> {
-    this.currentImageId = await this.buildSessionBackend()
-
-    const outdatedBackends = [...this.devBackends.values()].filter(backend => backend.imageId !== this.currentImageId).map(backend => backend.spawnResult.name)
-    if (outdatedBackends.length > 0) {
-      this.updateFooterAndLog(['', 'Terminating outdated backends...'])
-      await this.terminateBackends(outdatedBackends)
-    }
-  }
-
-  async terminateAllDevbackends(): Promise<void> {
-    const backendNames = [...this.devBackends.values()].map(b => b.spawnResult.name)
-    if (backendNames.length > 0) {
-      this.updateFooterAndLog(['', 'Terminating development backends...'])
-      await this.terminateBackends(backendNames)
-    } else {
-      this.updateFooterAndLog(['', 'No development backends to terminate'])
-    }
-  }
-
-  async terminateBackends(backends: string[]): Promise<void> {
-    const terminationPromises = backends.map(name => this.jamsocket.terminate(name))
-    this.updateFooterAndLog([`Terminating ${backends.length} backend(s): ${backends.map(name => name).join(', ')}`])
-    await Promise.all(terminationPromises)
-    // we don't delete the backends from devBackends here because we want to let any last status updates and logs come through
-    // when the backend receives a terminal status, then we'll close the streams and remove it from devBackends
+    // eslint-disable-next-line unicorn/no-process-exit, no-process-exit
+    process.exit(0)
   }
 
   getFooter(): string[] {
-    let footer = ['']
+    const footer = ['']
     if (this.devBackends.size > 0) {
       CliUx.ux.table<Backend>([...this.devBackends.values()], {
         name: {
@@ -148,7 +143,7 @@ export default class DevServer {
         },
         status: {
           header: 'Status',
-          get: backend => chalk[backend.color](backend.lastStatus ?? '-'),
+          get: backend => chalk[backend.color](backend.lastStatus?.state ?? '-'),
         },
         spawned: {
           header: 'Spawn time',
@@ -173,44 +168,44 @@ export default class DevServer {
       chalk.bold.italic` ${chalk.underline`[b]`} Build ${chalk.underline`[t]`} Terminate backends ${chalk.underline`[ctrl-c]`} Stop`,
       '',
     )
-
-    // draw a box around the footer
-
-    const padding = 2
-    // eslint-disable-next-line unicorn/no-array-reduce
-    const boxWidth = footer.reduce((max, line) => Math.max(max, stringLength(line)), 0) + (padding * 2) + 2
-    footer = footer.map(line => {
-      line = `\u2016${' '.repeat(padding)}${line}`
-      const endPadding = boxWidth - stringLength(line) - 1
-      return `${line}${' '.repeat(endPadding)}\u2016`
-    })
-
-    footer.unshift(chalk.bold(`\u2554${'='.repeat(boxWidth - 2)}\u2557`))
-    footer.push(chalk.bold(`\u255A${'='.repeat(boxWidth - 2)}\u255D`))
-
     return footer
   }
 
-  clearFooter(): void {
-    for (let i = 0; i < this.curFooterLength; i++) {
-      process.stdout.write('\r\u001B[1A') // move cursor up by one line and to beginning of line
-      process.stdout.write('\u001B[2K') // clear line
-    }
-    this.curFooterLength = 0
+  async buildSessionBackend(): Promise<string> {
+    const { dockerfile } = this.opts
+    this.logger.log(['Building image...'])
+    this.logger.clearFooter()
+    const imageId = buildImage(dockerfile)
+    this.logger.log(['Image built.'])
+    return imageId
   }
 
-  updateFooterAndLog(logLines: string[] = []): void {
-    this.clearFooter()
+  async rebuild(): Promise<void> {
+    this.currentImageId = await this.buildSessionBackend()
 
-    for (const logLine of logLines) {
-      console.log(logLine)
+    const outdatedBackends = [...this.devBackends.values()].filter(backend => backend.imageId !== this.currentImageId).map(backend => backend.spawnResult.name)
+    if (outdatedBackends.length > 0) {
+      this.logger.log(['', 'Terminating outdated backends...'])
+      await this.terminateBackends(outdatedBackends)
     }
+  }
 
-    const footer = this.getFooter()
-    this.curFooterLength = footer.length
-    for (const line of footer) {
-      console.log(line)
+  async terminateAllDevbackends(): Promise<void> {
+    const backendNames = [...this.devBackends.values()].map(b => b.spawnResult.name)
+    if (backendNames.length > 0) {
+      this.logger.log(['', 'Terminating development backends...'])
+      await this.terminateBackends(backendNames)
+    } else {
+      this.logger.log(['', 'No development backends to terminate'])
     }
+  }
+
+  async terminateBackends(backends: string[]): Promise<void> {
+    const terminationPromises = backends.map(name => this.plane.terminate(name))
+    this.logger.log([`Terminating ${backends.length} backend(s): ${backends.map(name => name).join(', ')}`])
+    await Promise.all(terminationPromises)
+    // we don't delete the backends from devBackends here because we want to let any last status updates and logs come through
+    // when the backend receives a terminal status, then we'll close the streams and remove it from devBackends
   }
 
   async streamStatusAndLogs(backendName: string): Promise<void> {
@@ -219,19 +214,19 @@ export default class DevServer {
 
     backend.isStreaming = true
 
-    const statusStream = this.jamsocket.streamStatus(backendName, status => {
-      const curStatus = status.state
-      backend.lastStatus = curStatus
-      this.updateFooterAndLog([chalk[backend.color](`[${backendName}] status: ${curStatus}`)])
-      if (!['Loading', 'Starting', 'Ready'].includes(curStatus)) {
+    const statusStream = this.plane.streamStatus(backendName, status => {
+      backend.lastStatus = status
+      this.logger.log([chalk[backend.color](`[${backendName}] status: ${status.state}`)])
+      if (!isV1StatusAlive(status.state)) {
         if (backend?.closeStreams) {
           backend.closeStreams()
         }
         this.devBackends.delete(backendName)
       }
     })
-    const logsStream = this.jamsocket.streamLogs(backendName, log => {
-      this.updateFooterAndLog([chalk[backend.color](`[${backendName}] ${log}`)])
+
+    const logsStream = this.plane.streamLogs(backendName, log => {
+      this.logger.log([chalk[backend.color](`[${backendName}] ${log}`)])
     })
 
     backend.closeStreams = () => {
@@ -239,98 +234,127 @@ export default class DevServer {
       logsStream.close()
     }
 
-    await Promise.all([statusStream.closed, logsStream.closed])
+    await Promise.all([
+      statusStream.closed,
+      logsStream.closed,
+    ])
 
-    this.updateFooterAndLog([chalk[backend.color](`[${backendName}] streams ended`)])
+    this.logger.log([chalk[backend.color](`[${backendName}] streams ended`)])
     backend.isStreaming = false
   }
 
-  startSpawnProxy(): http.Server {
-    const { service, account } = this.opts
+  startServer(): http.Server {
     const server = http.createServer(async (req, res) => {
-      // The only route this server implements is POST /user/{ACCOUNT}/service/{SERVICE}/spawn
-      const match = /^\/user\/([^/]+)\/service\/([^/]+)\/spawn/.exec(req.url ?? '')
-      if (req.method !== 'POST' || match === null) {
-        res.writeHead(404)
+      if (req.method === 'OPTIONS') {
+        res.setHeader('Access-Control-Allow-Origin', '*')
+        res.writeHead(204)
         res.end()
         return
       }
 
-      const reqAccount = match[1]
-      const reqService = match[2]
-
-      // NOTE: the service used with the dev CLI should be a service that is just for development
-      // How do we enforce this or guide users to do this? Maybe we should make dev/prod environments
-      // first-class concepts for Jamsocket services?
-      if (service !== reqService) {
-        this.updateFooterAndLog([chalk.red`Warning: Request for service ${reqService} does not match service in config (${service}). Blocking spawn.`])
-        res.writeHead(401)
-        res.end()
+      const isSpawnReq = /^\/user\/([^/]+)\/service\/([^/]+)\/spawn/.exec(req.url ?? '') !== null
+      if (req.method === 'POST' && isSpawnReq) {
+        await this.handleSpawnRequest(req, res)
         return
       }
 
-      if (account !== reqAccount) {
-        this.updateFooterAndLog([chalk.red`Warning: Request for account does not match logged-in account. Blocking spawn.`])
-        res.writeHead(401)
-        res.end()
+      const statusStreamMatch = /^\/backend\/([^/]+)\/status\/stream/.exec(req.url ?? '')
+      if (req.method === 'GET' && statusStreamMatch !== null) {
+        const backendName = statusStreamMatch[1]
+        await this.handleStatusStreamRequest(backendName, res)
         return
       }
 
-      const text = await readBody(req)
-      let body: Record<string, any> = {}
-      try {
-        body = JSON.parse(text)
-      } catch {}
-
-      const result = await this.spawnBackend(body)
-      if (result instanceof Error) {
-        res.writeHead(400)
-        res.end(result.toString())
+      const statusMatch = /^\/backend\/([^/]+)\/status/.exec(req.url ?? '')
+      if (req.method === 'GET' && statusMatch !== null) {
+        const backendName = statusMatch[1]
+        await this.handleStatusRequest(backendName, res)
         return
       }
 
-      res.writeHead(200, { 'Content-Type': 'application/json' })
-      res.end(JSON.stringify(result))
+      res.writeHead(404)
+      res.end()
     })
 
-    server.listen(8080, () => {
-      this.updateFooterAndLog(['', 'Spawn proxy server running on http://localhost:8080', ''])
+    server.listen(DEV_SERVER_PORT, () => {
+      this.logger.log(['', `Jamsocket dev server running on http://localhost:${DEV_SERVER_PORT}`, ''])
     })
 
     return server
   }
 
-  async spawnBackend(body: SpawnRequestBody): Promise<SpawnResult | Error> {
-    const { service } = this.opts
-    const imageId = this.currentImageId
+  async handleStatusStreamRequest(backend: string, res: http.ServerResponse): Promise<void> {
+    res.setHeader('Access-Control-Allow-Origin', '*')
+    res.setHeader('Content-Type', 'text/event-stream')
+    res.writeHead(200)
+    const stream = this.plane.streamStatus(backend, status => {
+      // needs to return {"state":"Ready","backend":"usv10","time":"2024-01-17T21:41:35.682891Z"}
+      const data: StatusV1 = status
+      res.write(`data:${JSON.stringify(data)}\n\n`)
+    })
+    await stream.closed
 
-    if (!imageId) {
-      throw new Error('spawnBackend called before currentImageId was set. This is a bug.')
+    res.end()
+  }
+
+  async handleStatusRequest(backendName: string, res: http.ServerResponse): Promise<void> {
+    const b = this.devBackends.get(backendName)
+    // if the dev CLI doesn't know about this backend, then 404
+    if (!b || b.lastStatus === null) {
+      res.writeHead(404)
+      res.end()
+      return
     }
 
-    const result = await this.jamsocket.spawn(
-      service,
-      undefined,
-      body.env,
-      body.grace_period_seconds,
-      body.port,
-      body.tag,
-      body.require_bearer_token,
-      body.lock,
-    )
+    // needs to return {"state":"Ready","backend":"usv10","time":"2024-01-17T21:41:35.682891Z"}
+    const data: StatusV1 = b.lastStatus
+    res.setHeader('Access-Control-Allow-Origin', '*')
+    res.setHeader('Content-Type', 'application/json')
+    res.writeHead(200)
+    res.end(JSON.stringify(data))
+  }
+
+  async handleSpawnRequest(req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
+    // TODO: We are just ignoring account/service here. Is there some kind of validation we
+    // could do here to help clients avoid issues when going to production?
+    const text = await readRequestBody(req)
+    let body: Record<string, any> = {}
+    try {
+      body = JSON.parse(text)
+    } catch {}
+
+    const result = await this.spawnBackend(body)
+    if (result instanceof HTTPError) {
+      res.writeHead(result.status)
+      res.end(result.toString())
+      return
+    }
+
+    res.setHeader('Content-Type', 'application/json')
+    res.writeHead(200)
+    res.end(JSON.stringify(result))
+  }
+
+  async spawnBackend(body: SpawnRequestBody): Promise<SpawnResult | HTTPError> {
+    const imageId = this.currentImageId
+    if (!imageId) return new HTTPError(500, 'Internal Error', 'spawnBackend called before currentImageId was set. This is a bug.')
+
+    const result = await this.plane.spawn(imageId, body.env, body.grace_period_seconds, body.lock)
+    if (result instanceof HTTPError) return result
 
     if (this.devBackends.has(result.name)) {
       if (result.spawned) {
-        throw new Error(`Spawned backend ${result.name} already exists in devBackends but "spawned=true" in spawn response. Some bug has occurred.`)
+        return new HTTPError(500, 'Internal Error', `Spawned backend ${result.name} already exists in devBackends but "spawned=true" in spawn response. Some bug has occurred.`)
       }
       const backend = this.devBackends.get(result.name)!
       if (backend.imageId !== imageId) {
-        this.updateFooterAndLog([chalk.red`Warning: Spawn with lock returned a running backend with an outdated version of the session backend code. Blocking spawn.`])
-        return new Error('dev-server spawn proxy: Spawn with lock returned a running backend with an outdated version of the session backend code. Blocking spawn.')
+        this.logger.log([chalk.red`Warning: Spawn with lock returned a running backend with an outdated version of the session backend code. Blocking spawn.`])
+        return new HTTPError(500, 'Internal Error', 'jamsocket dev-server: Spawn with lock returned a running backend with an outdated version of the session backend code. Blocking spawn.')
       }
     } else if (result.spawned) {
-      const color = BACKEND_LOG_COLORS[this.totalBackendsSpawned % BACKEND_LOG_COLORS.length]
-      this.totalBackendsSpawned += 1
+      // rewrite status_url to point back to this dev server
+      result.status_url = `http://localhost:${DEV_SERVER_PORT}/backend/${result.name}/status`
+
       this.devBackends.set(result.name, {
         spawnResult: result,
         imageId: imageId,
@@ -338,40 +362,25 @@ export default class DevServer {
         lastStatus: null,
         lock: body.lock ?? null,
         isStreaming: false,
-        color,
+        color: this.getColor(),
         closeStreams: null,
       })
-      this.updateFooterAndLog(['', `Spawned backend: ${result.name}`])
+      this.logger.log(['', `Spawned backend: ${result.name}`])
     } else {
-      this.updateFooterAndLog([chalk.red`Warning: Spawn with lock returned a running backend that was not originally spawned by this dev server. This may be dangerous. Blocking spawn.`])
-      return new Error('dev-server spawn proxy: Spawn with lock returned a running backend that was not originally spawned by this dev server. This may be dangerous. Blocking spawn.')
+      this.logger.log([chalk.red`Warning: Spawn with lock returned a running backend that was not originally spawned by this dev server. This may be dangerous. Blocking spawn.`])
+      return new HTTPError(500, 'Internal Error', 'jamsocket dev-server: Spawn with lock returned a running backend that was not originally spawned by this dev server. This may be dangerous. Blocking spawn.')
     }
 
     const backend = this.devBackends.get(result.name)!
     if (!backend.isStreaming) {
-      this.updateFooterAndLog([`Streaming status and logs for ${result.name}...`, ''])
+      this.logger.log([`Streaming status and logs for ${result.name}`, ''])
       this.streamStatusAndLogs(result.name)
     }
 
     if (result.spawned) {
-      this.updateFooterAndLog()
+      this.logger.refreshFooter()
     }
 
     return result
   }
-}
-
-async function readBody(req: http.IncomingMessage): Promise<string> {
-  return new Promise((resolve, reject) => {
-    let body = ''
-    req.on('data', (chunk: string) => {
-      body += chunk
-    })
-    req.on('end', () => {
-      resolve(body)
-    })
-    req.on('error', err => {
-      reject(err)
-    })
-  })
 }
