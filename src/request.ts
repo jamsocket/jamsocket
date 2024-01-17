@@ -139,10 +139,16 @@ export function eventStream(
       Accept: 'text/event-stream',
     }
 
-    request = https.request({
+    let protocol = https
+    if (wrappedURL.protocol === 'http:') {
+      protocol = http as any
+    }
+
+    request = protocol.request({
       ...options,
       hostname: wrappedURL.hostname,
       path: wrappedURL.pathname,
+      port: wrappedURL.port,
       headers: headers,
     }, res => {
       response = res
