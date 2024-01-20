@@ -1,5 +1,6 @@
 import chalk from 'chalk'
 import stringLength from 'string-length'
+import { termwidth } from './util'
 
 export class Logger {
   curFooterLength = 0
@@ -40,18 +41,23 @@ export class Logger {
   getFooter(): string[] {
     let footer = this._getFooter()
 
+    const terminalWidth = termwidth()
+
     // draw a box around the footer
     const padding = 2
     // eslint-disable-next-line unicorn/no-array-reduce
     const boxWidth = footer.reduce((max, line) => Math.max(max, stringLength(line)), 0) + (padding * 2) + 2
-    footer = footer.map(line => {
-      line = `\u2016${' '.repeat(padding)}${line}`
-      const endPadding = boxWidth - stringLength(line) - 1
-      return `${line}${' '.repeat(endPadding)}\u2016`
-    })
+    if (boxWidth <= terminalWidth) {
+      footer = footer.map(line => {
+        line = `\u2016${' '.repeat(padding)}${line}`
+        const endPadding = boxWidth - stringLength(line) - 1
+        return `${line}${' '.repeat(endPadding)}\u2016`
+      })
+    }
 
-    footer.unshift(chalk.bold(`\u2554${'='.repeat(boxWidth - 2)}\u2557`))
-    footer.push(chalk.bold(`\u255A${'='.repeat(boxWidth - 2)}\u255D`))
+    const repeatCount = boxWidth <= terminalWidth ? boxWidth - 2 : terminalWidth - 2
+    footer.unshift(chalk.bold(`\u2554${'='.repeat(repeatCount)}\u2557`))
+    footer.push(chalk.bold(`\u255A${'='.repeat(repeatCount)}\u255D`))
 
     return footer
   }
