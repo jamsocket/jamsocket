@@ -14,7 +14,7 @@ const CTRL_C = '\u0003'
 const DEFAULT_DEV_SERVER_PORT = 8080
 
 type Backend = {
-  spawnResult: SpawnResult
+  name: string
   imageId: string
   spawnTime: number
   lastStatus: StatusV1 | null
@@ -142,7 +142,7 @@ class DevServer {
       CliUx.ux.table<Backend>([...this.devBackends.values()], {
         name: {
           header: 'Name',
-          get: backend => chalk[backend.color](backend.spawnResult.name),
+          get: backend => chalk[backend.color](backend.name),
         },
         status: {
           header: 'Status',
@@ -186,7 +186,7 @@ class DevServer {
   async rebuild(): Promise<void> {
     this.currentImageId = await this.buildSessionBackend()
 
-    const outdatedBackends = [...this.devBackends.values()].filter(backend => backend.imageId !== this.currentImageId).map(backend => backend.spawnResult.name)
+    const outdatedBackends = [...this.devBackends.values()].filter(backend => backend.imageId !== this.currentImageId).map(backend => backend.name)
     if (outdatedBackends.length > 0) {
       this.logger.log(['', 'Terminating outdated backends...'])
       await this.terminateBackends(outdatedBackends)
@@ -194,7 +194,7 @@ class DevServer {
   }
 
   async terminateAllDevbackends(): Promise<void> {
-    const backendNames = [...this.devBackends.values()].map(b => b.spawnResult.name)
+    const backendNames = [...this.devBackends.values()].map(b => b.name)
     if (backendNames.length > 0) {
       this.logger.log(['', 'Terminating development backends...'])
       await this.terminateBackends(backendNames)
@@ -355,11 +355,8 @@ class DevServer {
         return new HTTPError(500, 'Internal Error', 'jamsocket dev-server: Spawn with lock returned a running backend with an outdated version of the session backend code. Blocking spawn.')
       }
     } else if (result.spawned) {
-      // rewrite status_url to point back to this dev server
-      result.status_url = `http://localhost:${DEV_SERVER_PORT}/backend/${result.name}/status`
-
       this.devBackends.set(result.name, {
-        spawnResult: result,
+        name: result.name,
         imageId: imageId,
         spawnTime: Date.now(),
         lastStatus: null,
@@ -384,6 +381,12 @@ class DevServer {
       this.logger.refreshFooter()
     }
 
-    return result
+    // rewrite status_url to point back to this dev server
+    const transformedResult = {
+      ...result,
+      status_url: `http://localhost:${this.port}/backend/${result.name}/status`,
+    }
+
+    return transformedResult
   }
 }
