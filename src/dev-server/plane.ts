@@ -29,6 +29,7 @@ export type StreamHandle = {
 }
 
 const PLANE_IMAGE = 'plane/quickstart:sha-90eefde'
+const LAST_N_PLANE_LOGS = 20 // the number of plane logs to show if a Plane error is enountered
 
 // NOTE: this class works with a Plane2 interface, but its own interface is meant to be compatible with Jamsocket V1
 export class LocalPlane {
@@ -39,13 +40,20 @@ export class LocalPlane {
     private containerName: string,
     private logger: Logger,
   ) {
+    const planeLogs: string[] = []
+
     readline.createInterface({ input: this.process.stderr }).on('line', line => {
-      this.logger.log([chalk.red(`[plane stderr] ${line}`)])
+      planeLogs.push(chalk.red(`[plane stderr] ${line}`))
+      while (planeLogs.length > LAST_N_PLANE_LOGS) planeLogs.shift()
     })
     readline.createInterface({ input: this.process.stdout }).on('line', line => {
-      this.logger.log([`[plane stdout] ${line}`])
+      planeLogs.push(`[plane stdout] ${line}`)
+      while (planeLogs.length > LAST_N_PLANE_LOGS) planeLogs.shift()
     })
     this.process.on('exit', () => {
+      if (planeLogs.length > 0) {
+        this.logger.log(planeLogs)
+      }
       this.logger.log([`Plane process exited with code: ${this.process.exitCode ?? 'unknown'}`])
     })
   }
