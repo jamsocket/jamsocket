@@ -11,7 +11,7 @@ import { Logger } from './logger'
 import { LocalPlane, runPlane, ensurePlaneImage, isV1StatusAlive, type StatusV1 } from './plane'
 
 const CTRL_C = '\u0003'
-const DEV_SERVER_PORT = 8888
+const DEFAULT_DEV_SERVER_PORT = 8080
 
 type Backend = {
   spawnResult: SpawnResult
@@ -27,6 +27,7 @@ type Backend = {
 type Options = {
   dockerfile: string
   watch?: string[]
+  port?: number
 }
 
 export async function createDevServer({ dockerfile, watch }: Options): Promise<void> {
@@ -42,8 +43,10 @@ class DevServer {
   getColor = createColorGetter()
   logger: Logger
   plane: LocalPlane
+  port: number = DEFAULT_DEV_SERVER_PORT
 
   constructor(private opts: Options) {
+    if (opts.port) this.port = opts.port
     this.logger = new Logger(this.getFooter.bind(this))
     this.logger.log(['Starting plane'])
     const { url, process, containerName } = runPlane()
@@ -276,8 +279,8 @@ class DevServer {
       res.end()
     })
 
-    server.listen(DEV_SERVER_PORT, () => {
-      this.logger.log(['', `Jamsocket dev server running on http://localhost:${DEV_SERVER_PORT}`, ''])
+    server.listen(this.port, () => {
+      this.logger.log(['', `Jamsocket dev server running on http://localhost:${this.port}`, ''])
     })
 
     return server

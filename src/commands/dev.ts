@@ -8,18 +8,19 @@ export default class Dev extends Command {
   static examples = ['<%= config.bin %> <%= command.id %>']
 
   public async run(): Promise<void> {
-    const { dockerfile, watch } = loadProjectConfig()
-    await createDevServer({ dockerfile, watch })
+    const { dockerfile, watch, port } = loadProjectConfig()
+    await createDevServer({ dockerfile, watch, port })
   }
 }
 
 const PROJECT_CONFIG_PATH = path.resolve(process.cwd(), 'jamsocket.config.js')
 
-function loadProjectConfig(): { dockerfile: string, watch?: string[] } {
+function loadProjectConfig(): { dockerfile: string, watch?: string[], port?: number } {
   if (!existsSync(PROJECT_CONFIG_PATH)) throw new Error('No jamsocket.config.js found in current directory')
-  const { dockerfile, watch } = require(PROJECT_CONFIG_PATH)
+  const { dockerfile, watch, port } = require(PROJECT_CONFIG_PATH)
   return {
     dockerfile: path.resolve(process.cwd(), dockerfile),
     watch: typeof watch === 'string' ? [watch] : watch,
+    port,
   }
 }
