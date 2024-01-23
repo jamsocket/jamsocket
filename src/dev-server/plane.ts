@@ -198,13 +198,13 @@ export function isV1StatusAlive(v1Status: string): boolean {
 
 export function runPlane(): { url: string, process: ChildProcessWithoutNullStreams, containerName: string } {
   const containerName = `plane-quickstart-${Math.floor(Math.random() * 1_000_000)}`
-  // NOTE: for now, plane quickstart MUST be run port 8080
+  // NOTE: for now, plane quickstart MUST be run port 9191
   // and the cluster must be served on 9090 as these are
   // hardcoded in the quickstart image
   const process = spawn('docker', [
     'run',
     '-p',
-    '8080:8080',
+    '9191:8080',
     '-p',
     '9090:9090',
     '--name',
@@ -214,7 +214,7 @@ export function runPlane(): { url: string, process: ChildProcessWithoutNullStrea
     PLANE_IMAGE,
   ])
 
-  const url = 'http://localhost:8080'
+  const url = 'http://localhost:9191'
 
   return { url, process, containerName }
 }
