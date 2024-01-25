@@ -30,9 +30,9 @@ type Options = {
   port?: number
 }
 
-export async function createDevServer({ dockerfile, watch }: Options): Promise<void> {
+export async function createDevServer(opts: Options): Promise<void> {
   await ensurePlaneImage()
-  const devServer = new DevServer({ dockerfile, watch })
+  const devServer = new DevServer(opts)
   await devServer.start()
 }
 
@@ -176,7 +176,7 @@ class DevServer {
 
   async buildSessionBackend(): Promise<string> {
     const { dockerfile } = this.opts
-    this.logger.log(['Building image...'])
+    this.logger.log([`Building image with Dockerfile: ${dockerfile}`])
     this.logger.clearFooter()
     const imageId = buildImage(dockerfile)
     this.logger.log(['Image built.'])
