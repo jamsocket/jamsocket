@@ -127,20 +127,28 @@ EXAMPLES
 
 ## `jamsocket dev`
 
-(Experimental) Starts a jamsocket dev server.
+Starts a local jamsocket dev server. You may configure the dev server with a jamsocket.config.js file in the current directory or by passing flags. (Flags take precedence over jamsocket.config.js)
 
 ```
 USAGE
-  $ jamsocket dev
+  $ jamsocket dev [-d <value>] [-w <value>] [-p <value>]
+
+FLAGS
+  -d, --dockerfile=<value>  Path to the session backend's Dockerfile
+  -p, --port=<value>        The port to run the dev server on. (Defaults to 8080)
+  -w, --watch=<value>...    A file or directory to watch for changes
 
 DESCRIPTION
-  (Experimental) Starts a jamsocket dev server.
+  Starts a local jamsocket dev server. You may configure the dev server with a jamsocket.config.js file in the current
+  directory or by passing flags. (Flags take precedence over jamsocket.config.js)
 
 EXAMPLES
   $ jamsocket dev
+
+  $ jamsocket dev --dockerfile session-backend/Dockerfile --watch src --watch package.json --port 8080
 ```
 
-_See code: [src/commands/dev.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.8.0-beta/src/commands/dev.ts)_
+_See code: [src/commands/dev.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.8.0/src/commands/dev.ts)_
 
 ## `jamsocket help [COMMAND]`
 
@@ -198,7 +206,7 @@ EXAMPLES
   $ jamsocket login
 ```
 
-_See code: [src/commands/login.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.8.0-beta/src/commands/login.ts)_
+_See code: [src/commands/login.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.8.0/src/commands/login.ts)_
 
 ## `jamsocket logout`
 
@@ -215,7 +223,7 @@ EXAMPLES
   $ jamsocket logout
 ```
 
-_See code: [src/commands/logout.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.8.0-beta/src/commands/logout.ts)_
+_See code: [src/commands/logout.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.8.0/src/commands/logout.ts)_
 
 ## `jamsocket logs BACKEND`
 
@@ -262,7 +270,7 @@ EXAMPLES
   $ jamsocket push my-service my-image -t my-tag
 ```
 
-_See code: [src/commands/push.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.8.0-beta/src/commands/push.ts)_
+_See code: [src/commands/push.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.8.0/src/commands/push.ts)_
 
 ## `jamsocket service create NAME`
 
