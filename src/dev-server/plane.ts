@@ -85,7 +85,12 @@ export class LocalPlane {
     const containerName = `plane-${backend}`
     const logsProcess = spawn('docker', ['logs', containerName, '-f'])
     const stdout = readline.createInterface({ input: logsProcess.stdout }).on('line', callback)
-    const stderr = readline.createInterface({ input: logsProcess.stderr }).on('line', callback)
+
+    const errorLogs: string[] = []
+    const stderr = readline.createInterface({ input: logsProcess.stderr }).on('line', (line: string) => {
+      errorLogs.push(line)
+    })
+
     const close = () => {
       stdout.close()
       stderr.close()
@@ -96,7 +101,7 @@ export class LocalPlane {
         if (err.message.includes('ENOENT')) {
           reject(new Error('Docker command not found. Make sure Docker is installed and in your PATH.'))
         } else {
-          reject(err)
+          reject(new Error(`${err.toString()}\n${errorLogs.join('\n')}`))
         }
       })
 
@@ -157,7 +162,7 @@ export class LocalPlane {
         tag: image,
       } : undefined,
       spawn_config: {
-        executable: { image, env },
+        executable: { image, env, pull_policy: 'Never' },
         max_idle_seconds: gracePeriodSeconds,
       },
     }
