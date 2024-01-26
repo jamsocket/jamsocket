@@ -8,7 +8,8 @@ import { buildImage } from '../docker'
 import { SpawnResult, SpawnRequestBody, HTTPError } from '../api'
 import { readRequestBody, createColorGetter, type Color } from './util'
 import { Logger } from './logger'
-import { LocalPlane, runPlane, ensurePlaneImage, isV1StatusAlive, type StatusV1 } from './plane'
+import type { StreamHandle, StatusV1 } from './plane'
+import { LocalPlane, runPlane, ensurePlaneImage, isV1StatusAlive } from './plane'
 
 const CTRL_C = '\u0003'
 const DEFAULT_DEV_SERVER_PORT = 8080
@@ -19,9 +20,9 @@ type Backend = {
   spawnTime: number
   lastStatus: StatusV1 | null
   lock: string | null
-  isStreaming: boolean
   color: Color
-  closeStreams: (() => void) | null
+  logsStream: StreamHandle | null
+  statusStream: StreamHandle | null
 }
 
 type Options = {
@@ -121,7 +122,8 @@ class DevServer {
 
     // close any streams that are still open
     for (const [name, backend] of this.devBackends) {
-      if (backend.closeStreams) backend.closeStreams()
+      backend.statusStream?.close()
+      backend.logsStream?.close()
       this.devBackends.delete(name)
     }
 
@@ -211,39 +213,45 @@ class DevServer {
     // when the backend receives a terminal status, then we'll close the streams and remove it from devBackends
   }
 
-  async streamStatusAndLogs(backendName: string): Promise<void> {
-    const backend = this.devBackends.get(backendName)
-    if (!backend) throw new Error(`Backend ${backendName} not found in devBackends when attempting to stream status and logs`)
-
-    backend.isStreaming = true
-
-    const statusStream = this.plane.streamStatus(backendName, status => {
+  async streamStatus(backend: Backend): Promise<void> {
+    backend.statusStream = this.plane.streamStatus(backend.name, status => {
       backend.lastStatus = status
-      this.logger.log([chalk[backend.color](`[${backendName}] status: ${status.state}`)])
+      this.logger.log([`Status for ${chalk[backend.color](backend.name)}: ${status.state}`])
       if (!isV1StatusAlive(status.state)) {
-        if (backend?.closeStreams) {
-          backend.closeStreams()
-        }
-        this.devBackends.delete(backendName)
+        backend.statusStream?.close()
+        backend.logsStream?.close()
+        this.devBackends.delete(backend.name)
+      }
+      // once we hit Starting, we're safe to start listening to logs
+      if (status.state === 'Starting') {
+        this.streamLogs(backend)
       }
     })
+    this.logger.log([`Streaming status for ${chalk[backend.color](backend.name)}`])
 
-    const logsStream = this.plane.streamLogs(backendName, log => {
-      this.logger.log([chalk[backend.color](`[${backendName}] ${log}`)])
-    })
-
-    backend.closeStreams = () => {
-      statusStream.close()
-      logsStream.close()
+    try {
+      await backend.statusStream.closed
+    } catch (error) {
+      const msg = error instanceof Error ? error.toString() : 'Unknown error'
+      this.logger.log([chalk.red`Error streaming status: ${msg}`])
     }
 
-    await Promise.all([
-      statusStream.closed,
-      logsStream.closed,
-    ])
+    this.logger.log([`Status stream ended for ${chalk[backend.color](backend.name)}`])
+  }
 
-    this.logger.log([chalk[backend.color](`[${backendName}] streams ended`)])
-    backend.isStreaming = false
+  async streamLogs(backend: Backend): Promise<void> {
+    backend.logsStream = this.plane.streamLogs(backend.name, log => {
+      this.logger.log([chalk[backend.color](`[${backend.name}] ${log}`)])
+    })
+    this.logger.log([`Streaming logs for ${chalk[backend.color](backend.name)}`])
+    try {
+      await backend.logsStream.closed
+    } catch (error) {
+      const msg = error instanceof Error ? error.toString() : 'Unknown error'
+      this.logger.log([chalk.red`Error streaming logs: ${msg}`])
+    }
+
+    this.logger.log([`Logs stream ended for ${chalk[backend.color](backend.name)}`])
   }
 
   startServer(): http.Server {
@@ -345,40 +353,32 @@ class DevServer {
     const result = await this.plane.spawn(imageId, body.env, body.grace_period_seconds, body.lock)
     if (result instanceof HTTPError) return result
 
-    if (this.devBackends.has(result.name)) {
+    const existingBackend = this.devBackends.get(result.name)
+    if (existingBackend) {
       if (result.spawned) {
         return new HTTPError(500, 'Internal Error', `Spawned backend ${result.name} already exists in devBackends but "spawned=true" in spawn response. Some bug has occurred.`)
       }
-      const backend = this.devBackends.get(result.name)!
-      if (backend.imageId !== imageId) {
+      if (existingBackend.imageId !== imageId) {
         this.logger.log([chalk.red`Warning: Spawn with lock returned a running backend with an outdated version of the session backend code. Blocking spawn.`])
         return new HTTPError(500, 'Internal Error', 'jamsocket dev-server: Spawn with lock returned a running backend with an outdated version of the session backend code. Blocking spawn.')
       }
     } else if (result.spawned) {
-      this.devBackends.set(result.name, {
+      const backend = {
         name: result.name,
         imageId: imageId,
         spawnTime: Date.now(),
-        lastStatus: null,
         lock: body.lock ?? null,
-        isStreaming: false,
         color: this.getColor(),
-        closeStreams: null,
-      })
-      this.logger.log(['', `Spawned backend: ${result.name}`])
+        lastStatus: null,
+        statusStream: null,
+        logsStream: null,
+      }
+      this.devBackends.set(result.name, backend)
+      this.logger.log([`Spawned backend: ${chalk[backend.color](result.name)}`])
+      this.streamStatus(backend)
     } else {
-      this.logger.log([chalk.red`Warning: Spawn with lock returned a running backend that was not originally spawned by this dev server. This may be dangerous. Blocking spawn.`])
-      return new HTTPError(500, 'Internal Error', 'jamsocket dev-server: Spawn with lock returned a running backend that was not originally spawned by this dev server. This may be dangerous. Blocking spawn.')
-    }
-
-    const backend = this.devBackends.get(result.name)!
-    if (!backend.isStreaming) {
-      this.logger.log([`Streaming status and logs for ${result.name}`, ''])
-      this.streamStatusAndLogs(result.name)
-    }
-
-    if (result.spawned) {
-      this.logger.refreshFooter()
+      this.logger.log([chalk.red`Warning: Spawn with lock returned a running backend that was not originally spawned by this dev server. Blocking spawn.`])
+      return new HTTPError(500, 'Internal Error', 'jamsocket dev-server: Spawn with lock returned a running backend that was not originally spawned by this dev server. Blocking spawn.')
     }
 
     // rewrite status_url to point back to this dev server
