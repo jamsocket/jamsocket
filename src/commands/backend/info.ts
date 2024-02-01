@@ -18,10 +18,14 @@ export default class Info extends Command {
     const info = await jamsocket.backendInfo(args.backend)
 
     this.log(chalk.bold`Info for backend: ${lightMagenta(info.name)}`)
-    this.log(`created: ${blue(info.created_at)}`)
-    this.log(`service: ${blue(info.service_name)}`)
-    this.log(`account: ${blue(info.account_name)}`)
-    this.log(`cluster: ${blue(info.cluster_name)}`)
+    this.log(`created:      ${blue(info.created_at)}`)
+    this.log(`service:      ${blue(info.service_name)}`)
+    this.log(`account:      ${blue(info.account_name)}`)
+    this.log(`cluster:      ${blue(info.cluster_name)}`)
+    this.log(`image digest: ${blue(info.image_digest)}`)
+    if (info.lock) this.log(`lock:         ${blue(info.lock)}`)
+    if (info.environment_name) this.log(`environment:  ${blue(info.environment_name)}`)
+    if (info.max_mem_bytes) this.log(`mem usage:    ${blue(`${info.max_mem_bytes} bytes`)}`)
     this.log()
     this.log(chalk.bold`Statuses:`)
     if (info.statuses.length === 0) {
