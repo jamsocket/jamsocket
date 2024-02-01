@@ -77,14 +77,8 @@ class DevServer {
       }
       process.on('uncaughtException', exitOnError)
       process.on('uncaughtRejection', exitOnError)
-      process.on('SIGTERM', () => {
-        console.log('logmanager: received SIGTERM')
-        this.terminateAllDevbackends()
-      })
-      process.on('SIGHUP', () => {
-        console.log('logmanager: received SIGHUP')
-        this.terminateAllDevbackends()
-      })
+      process.on('SIGTERM', exitOnError)
+      process.on('SIGHUP', exitOnError)
 
       // listen for keyboard input
       process.stdin.setRawMode(true)
