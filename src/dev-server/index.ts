@@ -77,6 +77,8 @@ class DevServer {
       }
       process.on('uncaughtException', exitOnError)
       process.on('uncaughtRejection', exitOnError)
+      process.on('SIGTERM', exitOnError)
+      process.on('SIGHUP', exitOnError)
 
       // listen for keyboard input
       process.stdin.setRawMode(true)
