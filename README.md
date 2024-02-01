@@ -148,7 +148,7 @@ EXAMPLES
   $ jamsocket dev --dockerfile session-backend/Dockerfile --watch src --watch package.json --port 8080
 ```
 
-_See code: [src/commands/dev.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.8.0/src/commands/dev.ts)_
+_See code: [src/commands/dev.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.8.1/src/commands/dev.ts)_
 
 ## `jamsocket help [COMMAND]`
 
@@ -206,7 +206,7 @@ EXAMPLES
   $ jamsocket login
 ```
 
-_See code: [src/commands/login.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.8.0/src/commands/login.ts)_
+_See code: [src/commands/login.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.8.1/src/commands/login.ts)_
 
 ## `jamsocket logout`
 
@@ -223,7 +223,7 @@ EXAMPLES
   $ jamsocket logout
 ```
 
-_See code: [src/commands/logout.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.8.0/src/commands/logout.ts)_
+_See code: [src/commands/logout.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.8.1/src/commands/logout.ts)_
 
 ## `jamsocket logs BACKEND`
 
@@ -270,7 +270,7 @@ EXAMPLES
   $ jamsocket push my-service my-image -t my-tag
 ```
 
-_See code: [src/commands/push.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.8.0/src/commands/push.ts)_
+_See code: [src/commands/push.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.8.1/src/commands/push.ts)_
 
 ## `jamsocket service create NAME`
 
