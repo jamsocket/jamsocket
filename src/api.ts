@@ -121,6 +121,10 @@ export interface BackendInfoResult {
   cluster_name: string
   account_name: string
   statuses: BackendStatus[]
+  image_digest: string
+  lock?: string | null
+  environment_name?: string | null
+  max_mem_bytes?: number | null
 }
 
 export interface UserSessionRevokeResult {
