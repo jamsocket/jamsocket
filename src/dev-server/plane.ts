@@ -3,6 +3,7 @@ import readline from 'readline'
 import chalk from 'chalk'
 import EventSource from 'eventsource'
 import { SpawnResult, HTTPError } from '../api'
+import { capitalize } from './util'
 import type { Logger } from './logger'
 
 export type PlaneConnectResponse = {
@@ -14,10 +15,19 @@ export type PlaneConnectResponse = {
   status_url: string
   status: string
 }
-export type PlaneStatusMessage = {
-  status: string,
-  time: number,
-}
+
+type PlaneTerminationReason = 'swept' | 'external' | 'keyexpired'
+type PlaneTerminationKind = 'soft' | 'hard'
+
+export type PlaneStatusMessage =
+  | { status: 'scheduled', time: number }
+  | { status: 'loading', time: number }
+  | { status: 'starting', time: number }
+  | { status: 'waiting', time: number }
+  | { status: 'ready', time: number }
+  | { status: 'terminating', time: number, termination_reason: PlaneTerminationReason, termination_kind: PlaneTerminationKind }
+  | { status: 'terminated', time: number, termination_reason?: PlaneTerminationReason, termination_kind?: PlaneTerminationKind, exit_error?: boolean }
+
 export type StatusV1 = {
   state: string,
   time: string,
@@ -28,7 +38,7 @@ export type StreamHandle = {
   close: () => void
 }
 
-const PLANE_IMAGE = 'plane/quickstart:sha-90eefde'
+const PLANE_IMAGE = 'plane/quickstart:sha-8e867d5'
 const LAST_N_PLANE_LOGS = 20 // the number of plane logs to show if a Plane error is enountered
 
 // NOTE: this class works with a Plane2 interface, but its own interface is meant to be compatible with Jamsocket V1
@@ -124,13 +134,19 @@ export class LocalPlane {
   streamStatus(backend: string, callback: (statusMessage: StatusV1) => void): StreamHandle {
     const statusUrl = `${this.url}/pub/b/${backend}/status-stream`
     const es = new EventSource(statusUrl)
+    let lastAliveStatusMsg: PlaneStatusMessage | null = null
+
     es.addEventListener('message', (e: MessageEvent) => {
-      const val = JSON.parse(e.data) as PlaneStatusMessage
-      const v1Status = translateStatusToV1(val.status)
+      const msg = JSON.parse(e.data) as PlaneStatusMessage
+      const v1Status = translateStatusToV1(msg, lastAliveStatusMsg)
+      if (lastAliveStatusMsg === null || (msg.status !== 'terminating' && msg.time > lastAliveStatusMsg.time)) {
+        lastAliveStatusMsg = msg
+      }
+
       if (v1Status === null) return
       callback({
         state: v1Status,
-        time: (new Date(val.time)).toISOString(),
+        time: (new Date(msg.time)).toISOString(),
         backend,
       })
     })
@@ -192,16 +208,40 @@ export class LocalPlane {
   }
 }
 
-// Plane2 statuses: Scheduled, Loading, Starting, Waiting, Ready, Terminating, Terminated
+// Plane2 statuses: scheduled, loading, starting, waiting, ready, terminating, terminated
 // if this returns null, then ignore the status
-function translateStatusToV1(plane2Status: string): string | null {
-  switch (plane2Status) {
-  case 'Scheduled':
-  case 'Waiting':
-  case 'Terminating':
+function translateStatusToV1(
+  plane2StatusMsg: PlaneStatusMessage,
+  lastAliveStatusMsg: PlaneStatusMessage | null,
+): string | null {
+  switch (plane2StatusMsg.status) {
+  case 'scheduled':
+  case 'waiting':
+  case 'terminating':
     return null
+  case 'terminated':
+    if (plane2StatusMsg.termination_reason === 'external') {
+      return 'Terminated'
+    }
+    if (plane2StatusMsg.termination_reason && ['swept', 'keyexpired'].includes(plane2StatusMsg.termination_reason)) {
+      return 'Swept'
+    }
+    if (!lastAliveStatusMsg || ['scheduled', 'loading'].includes(lastAliveStatusMsg.status)) {
+      return 'ErrorLoading'
+    }
+    if (lastAliveStatusMsg.status === 'starting') {
+      return 'ErrorStarting'
+    }
+    if (lastAliveStatusMsg.status === 'waiting') {
+      if (plane2StatusMsg.termination_reason) return 'TimedOutBeforeReady'
+      return 'ErrorStarting'
+    }
+    // if we've gotten here, the last alive status was 'ready'
+    if (plane2StatusMsg.exit_error === undefined) return 'Terminated'
+    if (plane2StatusMsg.exit_error === false) return 'Exited'
+    return 'Failed'
   default:
-    return plane2Status
+    return capitalize(plane2StatusMsg.status)
   }
 }
 
