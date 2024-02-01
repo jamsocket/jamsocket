@@ -135,6 +135,7 @@ export class LocalPlane {
     const statusUrl = `${this.url}/pub/b/${backend}/status-stream`
     const es = new EventSource(statusUrl)
     let lastAliveStatusMsg: PlaneStatusMessage | null = null
+    let lastV1Status: string | null = null
 
     es.addEventListener('message', (e: MessageEvent) => {
       const msg = JSON.parse(e.data) as PlaneStatusMessage
@@ -143,7 +144,10 @@ export class LocalPlane {
         lastAliveStatusMsg = msg
       }
 
-      if (v1Status === null) return
+      const dontEmit = lastV1Status && v1Status === lastV1Status
+      lastV1Status = v1Status
+      if (dontEmit) return
+
       callback({
         state: v1Status,
         time: (new Date(msg.time)).toISOString(),
@@ -197,13 +201,17 @@ export class LocalPlane {
     }
 
     const bodyJson = JSON.parse(body) as PlaneConnectResponse
+
+    // NOTE: a bit hacky but we know the time is not used in determining the status
+    // all of this can go away when we switch away from v1 statuses
+    const v1Status = translateStatusToV1({ status: bodyJson.status, time: 0 } as PlaneStatusMessage, null)
     return {
       name: bodyJson.backend_id,
       spawned: bodyJson.spawned,
       url: bodyJson.url,
       status_url: bodyJson.status_url,
       ready_url: '',
-      status: bodyJson.status,
+      status: v1Status,
     }
   }
 }
@@ -213,12 +221,14 @@ export class LocalPlane {
 function translateStatusToV1(
   plane2StatusMsg: PlaneStatusMessage,
   lastAliveStatusMsg: PlaneStatusMessage | null,
-): string | null {
+): string {
   switch (plane2StatusMsg.status) {
   case 'scheduled':
+    return 'Loading'
   case 'waiting':
+    return 'Starting'
   case 'terminating':
-    return null
+    return 'Ready'
   case 'terminated':
     if (plane2StatusMsg.termination_reason === 'external') {
       return 'Terminated'
