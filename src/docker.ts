@@ -11,8 +11,17 @@ export function getImagePlatform(imageName: string): { os: string, arch: string 
   return { os, arch }
 }
 
-export function buildImage(dockerfilePath: string): string {
-  const buildProcess = spawnDockerSync(['build', '--quiet', '--platform', 'linux/amd64', '-f', dockerfilePath, '.'])
+export type BuildImageOptions = {
+  path?: string;
+}
+
+export function buildImage(dockerfilePath: string, options?: BuildImageOptions): string {
+  const optionsWithDefaults: Required<BuildImageOptions> = {
+    path: '.',
+    ...options,
+  }
+
+  const buildProcess = spawnDockerSync(['build', '--quiet', '--platform', 'linux/amd64', '-f', dockerfilePath, optionsWithDefaults.path])
   // eslint-disable-next-line unicorn/better-regex
   const match = /sha256:([a-f0-9]+)/.exec(buildProcess.stdout)
   const imageId = match?.[1] || null
