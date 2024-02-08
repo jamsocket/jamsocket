@@ -2,6 +2,7 @@ import { existsSync } from 'fs'
 import path from 'path'
 import { Command, Flags } from '@oclif/core'
 import { createDevServer } from '../dev-server'
+import type { BuildImageOptions } from '../docker'
 
 const PROJECT_CONFIG_PATH = path.resolve(process.cwd(), 'jamsocket.config.js')
 
@@ -9,6 +10,9 @@ type ProjectConfig = {
   dockerfile?: string,
   watch?: string | string[],
   port?: number
+  dockerOptions?: {
+    path?: string
+  }
 }
 
 function isProjectConfig(obj: any): obj is ProjectConfig {
@@ -16,6 +20,10 @@ function isProjectConfig(obj: any): obj is ProjectConfig {
   if (obj.dockerfile && typeof obj.dockerfile !== 'string') return false
   if (obj.watch && typeof obj.watch !== 'string' && !Array.isArray(obj.watch)) return false
   if (obj.port && typeof obj.port !== 'number') return false
+  if (obj.dockerOptions) {
+    if (typeof obj.dockerOptions !== 'object' || obj.dockerOptions === null) return false
+    if (obj.dockerOptions.path && typeof obj.dockerOptions.path !== 'string') return false;
+  }
   return true
 }
 
@@ -55,10 +63,16 @@ export default class Dev extends Command {
 
     const port = flags.port ?? projectConfig?.port ?? undefined
 
+    const dockerOptions: BuildImageOptions = {};
+    if (projectConfig?.dockerOptions?.path) {
+      dockerOptions.path = path.resolve(process.cwd(), projectConfig.dockerOptions.path);
+    }
+
     await createDevServer({
       dockerfile: path.resolve(process.cwd(), dockerfile),
       watch: watch?.map(w => path.resolve(process.cwd(), w)),
       port,
+      dockerOptions,
     })
   }
 }
