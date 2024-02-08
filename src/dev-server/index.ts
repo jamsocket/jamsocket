@@ -5,6 +5,7 @@ import chokidar from 'chokidar'
 import { formatDistanceToNow } from 'date-fns'
 import { CliUx } from '@oclif/core'
 import { buildImage } from '../docker'
+import type { BuildImageOptions } from '../docker'
 import { SpawnResult, SpawnRequestBody, HTTPError } from '../api'
 import { readRequestBody, createColorGetter, type Color } from './util'
 import { Logger } from './logger'
@@ -29,6 +30,7 @@ type Options = {
   dockerfile: string
   watch?: string[]
   port?: number
+  dockerOptions?: BuildImageOptions
 }
 
 export async function createDevServer(opts: Options): Promise<void> {
@@ -179,10 +181,10 @@ class DevServer {
   }
 
   async buildSessionBackend(): Promise<string> {
-    const { dockerfile } = this.opts
+    const { dockerfile, dockerOptions } = this.opts
     this.logger.log([`Building image with Dockerfile: ${dockerfile}`])
     this.logger.clearFooter()
-    const imageId = buildImage(dockerfile)
+    const imageId = buildImage(dockerfile, dockerOptions)
     this.logger.log(['Image built.'])
     return imageId
   }
