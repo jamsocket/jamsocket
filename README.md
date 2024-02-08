@@ -131,10 +131,11 @@ Starts a local jamsocket dev server. You may configure the dev server with a jam
 
 ```
 USAGE
-  $ jamsocket dev [-d <value>] [-w <value>] [-p <value>]
+  $ jamsocket dev [-d <value>] [-w <value>] [-p <value>] [-i]
 
 FLAGS
   -d, --dockerfile=<value>  Path to the session backend's Dockerfile
+  -i, --[no-]interactive    Enables/Disables TTY iteractivity. (Defaults to true)
   -p, --port=<value>        The port to run the dev server on. (Defaults to 8080)
   -w, --watch=<value>...    A file or directory to watch for changes
 
@@ -148,7 +149,7 @@ EXAMPLES
   $ jamsocket dev --dockerfile session-backend/Dockerfile --watch src --watch package.json --port 8080
 ```
 
-_See code: [src/commands/dev.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.8.3/src/commands/dev.ts)_
+_See code: [src/commands/dev.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.8.4/src/commands/dev.ts)_
 
 ## `jamsocket help [COMMAND]`
 
@@ -206,7 +207,7 @@ EXAMPLES
   $ jamsocket login
 ```
 
-_See code: [src/commands/login.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.8.3/src/commands/login.ts)_
+_See code: [src/commands/login.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.8.4/src/commands/login.ts)_
 
 ## `jamsocket logout`
 
@@ -223,7 +224,7 @@ EXAMPLES
   $ jamsocket logout
 ```
 
-_See code: [src/commands/logout.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.8.3/src/commands/logout.ts)_
+_See code: [src/commands/logout.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.8.4/src/commands/logout.ts)_
 
 ## `jamsocket logs BACKEND`
 
@@ -270,7 +271,7 @@ EXAMPLES
   $ jamsocket push my-service my-image -t my-tag
 ```
 
-_See code: [src/commands/push.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.8.3/src/commands/push.ts)_
+_See code: [src/commands/push.ts](https://github.com/drifting-in-space/jamsocket-cli/blob/v0.8.4/src/commands/push.ts)_
 
 ## `jamsocket service create NAME`
 
