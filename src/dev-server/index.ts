@@ -30,6 +30,7 @@ type Options = {
   dockerfile: string
   watch?: string[]
   port?: number
+  interactive?: boolean
   dockerOptions?: BuildImageOptions
 }
 
@@ -79,22 +80,27 @@ class DevServer {
       }
       process.on('uncaughtException', exitOnError)
       process.on('uncaughtRejection', exitOnError)
+      process.on('SIGINT', exitOnError)
       process.on('SIGTERM', exitOnError)
       process.on('SIGHUP', exitOnError)
 
       // listen for keyboard input
-      process.stdin.setRawMode(true)
-      process.stdin.resume()
-      process.stdin.setEncoding('utf8')
-      process.stdin.on('data', async (key: string) => {
-        try {
-          if (key === CTRL_C) resolve()
-          if (key === 'b') await this.rebuild()
-          if (key === 't') await this.terminateAllDevbackends()
-        } catch {
-          resolve()
+      if (this.opts.interactive !== false) {
+        if (process.stdin.isTTY) {
+          process.stdin.setRawMode(true)
         }
-      })
+        process.stdin.resume()
+        process.stdin.setEncoding('utf8')
+        process.stdin.on('data', async (key: string) => {
+          try {
+            if (key === CTRL_C) resolve()
+            if (key === 'b') await this.rebuild()
+            if (key === 't') await this.terminateAllDevbackends()
+          } catch {
+            resolve()
+          }
+        })
+      }
 
       if (watch) {
         this.logger.log([`Watching ${watch.join(', ')} for changes...`, ''])
@@ -109,17 +115,21 @@ class DevServer {
       }
     })
 
-    this.logger.footerOn()
+    if (this.opts.interactive !== false) {
+      this.logger.footerOn()
 
-    const interval = setInterval(() => {
-      this.logger.refreshFooter()
-    }, 5000)
+      const interval = setInterval(() => {
+        this.logger.refreshFooter()
+      }, 5000)
 
-    await timeToExit
+      await timeToExit
 
-    this.logger.footerOff()
+      this.logger.footerOff()
+      clearInterval(interval)
+    } else {
+      await timeToExit
+    }
 
-    clearInterval(interval)
     server.close()
 
     await this.terminateAllDevbackends()
@@ -135,7 +145,9 @@ class DevServer {
 
     this.fsWatcher?.close()
     process.stdin.removeAllListeners()
-    process.stdin.setRawMode(false)
+    if (process.stdin.isTTY) {
+      process.stdin.setRawMode(false)
+    }
     process.stdin.unref()
 
     // eslint-disable-next-line unicorn/no-process-exit, no-process-exit
