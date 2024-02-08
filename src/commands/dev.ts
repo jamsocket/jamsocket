@@ -24,7 +24,7 @@ function isProjectConfig(obj: any): obj is ProjectConfig {
   if (obj.interactive && typeof obj.interactive !== 'boolean') return false
   if (obj.dockerOptions) {
     if (typeof obj.dockerOptions !== 'object' || obj.dockerOptions === null) return false
-    if (obj.dockerOptions.path && typeof obj.dockerOptions.path !== 'string') return false;
+    if (obj.dockerOptions.path && typeof obj.dockerOptions.path !== 'string') return false
   }
   return true
 }
@@ -40,7 +40,7 @@ export default class Dev extends Command {
     dockerfile: Flags.string({ char: 'd', description: 'Path to the session backend\'s Dockerfile' }),
     watch: Flags.string({ char: 'w', multiple: true, description: 'A file or directory to watch for changes' }),
     port: Flags.integer({ char: 'p', description: 'The port to run the dev server on. (Defaults to 8080)' }),
-    interactive: Flags.boolean({ char: 'i', description: 'Enables/Disables TTY iteractivity. (Defaults to true)' }),
+    interactive: Flags.boolean({ char: 'i', description: 'Enables/Disables TTY iteractivity. (Defaults to true)', allowNo: true }),
   }
 
   public async run(): Promise<void> {
@@ -68,9 +68,9 @@ export default class Dev extends Command {
 
     const interactive = flags.interactive ?? projectConfig?.interactive ?? undefined
 
-    const dockerOptions: BuildImageOptions = {};
+    const dockerOptions: BuildImageOptions = {}
     if (projectConfig?.dockerOptions?.path) {
-      dockerOptions.path = path.resolve(process.cwd(), projectConfig.dockerOptions.path);
+      dockerOptions.path = path.resolve(process.cwd(), projectConfig.dockerOptions.path)
     }
 
     await createDevServer({

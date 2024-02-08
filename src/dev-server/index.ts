@@ -59,7 +59,7 @@ class DevServer {
 
   // returns a promise that resolves when the dev server is stopped
   async start(): Promise<void> {
-    const { watch } = this.opts
+    const { watch, interactive } = this.opts
 
     await this.plane.ready()
 
@@ -80,12 +80,12 @@ class DevServer {
       }
       process.on('uncaughtException', exitOnError)
       process.on('uncaughtRejection', exitOnError)
-      process.on('SIGINT', exitOnError)
-      process.on('SIGTERM', exitOnError)
-      process.on('SIGHUP', exitOnError)
+      process.on('SIGINT', resolve)
+      process.on('SIGTERM', resolve)
+      process.on('SIGHUP', resolve)
 
       // listen for keyboard input
-      if (this.opts.interactive !== false) {
+      if (interactive !== false) {
         if (process.stdin.isTTY) {
           process.stdin.setRawMode(true)
         }
@@ -115,7 +115,9 @@ class DevServer {
       }
     })
 
-    if (this.opts.interactive !== false) {
+    if (interactive === false) {
+      await timeToExit
+    } else {
       this.logger.footerOn()
 
       const interval = setInterval(() => {
@@ -126,8 +128,6 @@ class DevServer {
 
       this.logger.footerOff()
       clearInterval(interval)
-    } else {
-      await timeToExit
     }
 
     server.close()
