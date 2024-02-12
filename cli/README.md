@@ -3,6 +3,8 @@
 A CLI for the Jamsocket platform
 
 [![Version](https://img.shields.io/npm/v/jamsocket)](https://npmjs.org/package/jamsocket)
+[![Discord](https://img.shields.io/discord/939641163265232947)](https://discord.gg/N5sEpsuhh9)
+![License](https://img.shields.io/github/license/jamsocket/jamsocket)
 
 # Install
 

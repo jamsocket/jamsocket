@@ -23,5 +23,11 @@ jobs:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
         cache-dependency-path: cli/package-lock.json
-    - run: npm ci -C cli
-    - run: npm run build --if-present -C cli
+
+    - name: NPM install
+      working-directory: ./cli
+      run: npm ci
+
+    - name: Run Build
+      working-directory: ./cli
+      run: npm run build --if-present
