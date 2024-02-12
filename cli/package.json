@@ -6,10 +6,10 @@
   "bin": {
     "jamsocket": "./bin/run"
   },
-  "homepage": "https://github.com/drifting-in-space/jamsocket-cli",
+  "homepage": "https://github.com/jamsocket/jamsocket",
   "license": "MIT",
   "main": "lib/index.js",
-  "repository": "drifting-in-space/jamsocket-cli",
+  "repository": "jamsocket/jamsocket",
   "files": [
     "/bin",
     "/lib",
@@ -79,7 +79,7 @@
   "engines": {
     "node": ">=18.0.0"
   },
-  "bugs": "https://github.com/drifting-in-space/jamsocket-cli/issues",
+  "bugs": "https://github.com/jamsocket/jamsocket/issues",
   "keywords": [
     "jamsocket",
     "plane",
