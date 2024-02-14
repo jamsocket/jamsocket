@@ -16,8 +16,8 @@ jobs:
       with:
         node-version: '18'
         cache: 'npm'
-        cache-dependency-path: packages/package-lock.json
+        cache-dependency-path: packages/typescript/package-lock.json
 
     - name: Check formatting formatter
-      working-directory: ./packages
+      working-directory: ./packages/typescript
       run: npx prettier --check "src/**/*.{ts,tsx}"
