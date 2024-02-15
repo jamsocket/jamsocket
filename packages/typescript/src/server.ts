@@ -47,7 +47,15 @@ function validatePort(port: any): number {
   return port
 }
 
-export function init(opts: JamsocketInitOptions) {
+export type JamsocketInstance = {
+  /**
+   * @deprecated Calling a `JamsocketInstance` as a function is deprecated. Use the `spawn` method instead.
+   */
+  (opts: JamsocketSpawnOptions): Promise<SpawnResult>
+  spawn(opts: JamsocketSpawnOptions): Promise<SpawnResult>
+}
+
+export function init(opts: JamsocketInitOptions): JamsocketInstance {
   let account: string
   let token: string
   let service: string
@@ -66,7 +74,7 @@ export function init(opts: JamsocketInitOptions) {
     apiUrl = opts.apiUrl || JAMSOCKET_API
   }
 
-  const spawnInner = async function(spawnOpts: JamsocketSpawnOptions = {}): Promise<SpawnResult> {
+  const spawnInner = async function (spawnOpts: JamsocketSpawnOptions = {}): Promise<SpawnResult> {
     const reqBody: JamsocketApiSpawnBody = {}
     if (spawnOpts.lock) reqBody.lock = spawnOpts.lock
     if (spawnOpts.tag) reqBody.tag = spawnOpts.tag
@@ -94,8 +102,10 @@ export function init(opts: JamsocketInitOptions) {
     }
   }
 
-  const spawn = async function(spawnOpts: JamsocketSpawnOptions = {}): Promise<SpawnResult> {
-    console.warn('Calling the result of Jamsocket.init(...)() directly is deprecated, call Jamsocket.init().spawn(...) instead.')
+  const spawn = async function (spawnOpts: JamsocketSpawnOptions = {}): Promise<SpawnResult> {
+    console.warn(
+      'Calling the result of Jamsocket.init(...)() directly is deprecated, call Jamsocket.init().spawn(...) instead.',
+    )
     return spawnInner(spawnOpts)
   }
 
