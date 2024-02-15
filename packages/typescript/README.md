@@ -8,7 +8,7 @@ The `@jamsocket/javascript` library is composed of
 - `/react` uses the `client` library to give you the same functionality in simple React hooks
 - `/socketio` lets you connect to a socketio server in your session backend with React hooks
 
-[View the open source library on Github.](https://github.com/drifting-in-space/jamsocket-javascript)
+[View the open source library on Github.](https://github.com/jamsocket/jamsocket)
 
 ## Installation
 
@@ -21,16 +21,16 @@ npm install @jamsocket/javascript
 Here's an example of how different parts of the `@jamsocket/javscript` library work together.
 
 ```tsx filename="server.tsx"
-import { init } from '@jamsocket/javascript/server'
+import Jamsocket from '@jamsocket/javascript/server'
 
-const spawnBackend = init({
+const jamsocket = Jamsocket.init({
    account: '[YOUR ACCOUNT]',
    token: '[YOUR TOKEN]',
    service: '[YOUR SERVICE]',
    // during develpment, you can simply pass { dev: true }
 })
 
-const spawnResult = await spawnBackend()
+const spawnResult = await jamsocket.spawn()
 ```
 
 ```tsx filename="client.tsx"
@@ -71,7 +71,7 @@ function MyComponent() {
 
 ### `init()`
 
-Spawn backends using the `init` function from `@jamsocket/javascript/server` folder. `init` will return a `spawn` function that you can use to spawn a session backend.
+Create a Jamsocket instance using the `init` function from `@jamsocket/javascript/server` folder. The returned Jamsocket instance has a `spawn` function that you can use to spawn a session backend.
 
 <Callout>Backends should only be spawned server-side, since the Jamsocket Auth Token must be kept secret.</Callout>
 
@@ -80,25 +80,25 @@ Spawn backends using the `init` function from `@jamsocket/javascript/server` fol
 In local development, you can simply set `dev` to `true`.
 
 ```ts
-import { init } from '@jamsocket/javascript/server'
+import Jamsocket from '@jamsocket/javascript/server'
 
-const spawnBackend = init({ dev: true })
+const jamsocket = Jamsocket.init({ dev: true })
 
-const spawnResult = await spawnBackend()
+const spawnResult = await jamsocket.spawn()
 ```
 
 In production, provide your `account`, `token`, and `service` information.
 
 ```js
-import { init } from '@jamsocket/javascript/server'
+import Jamsocket from '@jamsocket/javascript/server'
 
-const spawnBackend = init({
+const jamsocket = Jamsocket.init({
   account: '[YOUR ACCOUNT]',
   token: '[YOUR TOKEN]',
   service: '[YOUR SERVICE]',
 })
 
-const spawnResult = await spawnBackend({
+const spawnResult = await jamsocket.spawn({
   lock: 'my-lock',
   env: { MY_ENV_VAR: 'foo' },
   gracePeriodSeconds: 300,
@@ -106,7 +106,7 @@ const spawnResult = await spawnBackend({
 ```
 
 ```js
-const spawnResult = await spawnBackend()
+const spawnResult = await jamsocket.spawn()
 ```
 
 #### Typescript
@@ -183,7 +183,7 @@ sessionBackend.destroy()
 ### `SessionBackendProvider`
 Wrap the root of your project with the `SessionBackendProvider` so that the children components can utilize the React hooks.
 
-<Callout>The `SessionBackendProvider` must be used in conjunction with `@jamsocket/javascript/server` in order to access the spawn result returned by the `init` function.</Callout>
+<Callout>The `SessionBackendProvider` must be used in conjunction with `@jamsocket/javascript/server` in order to access the spawn result returned by the `spawn` function.</Callout>
 
 ```tsx
 import { SessionBackendProvider } from '@jamsocket/javascript/react'
@@ -210,7 +210,7 @@ const isReady = useReady()
 
 ### `SocketIOProvider`
 
-The `SocketIOProvider` uses the url returned by spawning a backend to connect to a SocketIO server running in your session backend.
+The `SocketIOProvider` uses the url returned from the `spawn` function to connect to a SocketIO server running in your session backend.
 
 Using the `SocketIOProvider` lets you use the React hooks in `@jamsocket/javascript/socketio`. It must be used in conjunction with `@jamsocket/javascript/server` and `@jamsocket/javascript/react` in order to properly access the session backend.
 

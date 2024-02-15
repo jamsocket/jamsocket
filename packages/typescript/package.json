@@ -7,7 +7,7 @@
     "prepare": "npm run clean && npm run build",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx}\""
   },
-  "version": "0.1.5",
+  "version": "0.2.0",
   "description": "JavaScript/TypeScript, and React libraries for interacting with session backends and the Jamsocket platform.",
   "exports": {
     "./server": "./dist/server.js",
