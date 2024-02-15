@@ -8,7 +8,7 @@ The `@jamsocket/javascript` library is composed of
 - `/react` uses the `client` library to give you the same functionality in simple React hooks
 - `/socketio` lets you connect to a socketio server in your session backend with React hooks
 
-[View the open source library on Github.](https://github.com/jamsocket/jamsocket)
+[View the open source library on Github.](https://github.com/jamsocket/jamsocket/tree/main/packages/typescript)
 
 ## Installation
 
