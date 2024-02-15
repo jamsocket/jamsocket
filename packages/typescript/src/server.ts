@@ -112,3 +112,5 @@ export function init(opts: JamsocketInitOptions): JamsocketInstance {
   spawn.spawn = spawnInner
   return spawn
 }
+
+export default { init }
