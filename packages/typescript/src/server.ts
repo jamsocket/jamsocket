@@ -66,7 +66,7 @@ export function init(opts: JamsocketInitOptions) {
     apiUrl = opts.apiUrl || JAMSOCKET_API
   }
 
-  return async function spawn(spawnOpts: JamsocketSpawnOptions = {}): Promise<SpawnResult> {
+  const spawnInner = async function(spawnOpts: JamsocketSpawnOptions = {}): Promise<SpawnResult> {
     const reqBody: JamsocketApiSpawnBody = {}
     if (spawnOpts.lock) reqBody.lock = spawnOpts.lock
     if (spawnOpts.tag) reqBody.tag = spawnOpts.tag
@@ -93,4 +93,12 @@ export function init(opts: JamsocketInitOptions) {
       bearerToken: body.bearer_token,
     }
   }
+
+  const spawn = async function(spawnOpts: JamsocketSpawnOptions = {}): Promise<SpawnResult> {
+    console.warn('Calling the result of Jamsocket.init(...)() directly is deprecated, call Jamsocket.init().spawn(...) instead.')
+    return spawnInner(spawnOpts)
+  }
+
+  spawn.spawn = spawnInner
+  return spawn
 }
