@@ -96,8 +96,6 @@ export class LocalPlane {
     const logsProcess = spawn('docker', ['logs', containerName, '-f'])
     const stdout = readline.createInterface({ input: logsProcess.stdout }).on('line', callback)
 
-    const errorLogs: string[] = []
-    console.log(errorLogs)
     const stderr = readline.createInterface({ input: logsProcess.stderr }).on('line', callback)
 
     const close = () => {
@@ -109,8 +107,6 @@ export class LocalPlane {
       logsProcess.on('error', err => {
         if (err.message.includes('ENOENT')) {
           reject(new Error('Docker command not found. Make sure Docker is installed and in your PATH.'))
-        } else {
-          reject(new Error(`${err.toString()}\n${errorLogs.join('\n')}`))
         }
       })
 
