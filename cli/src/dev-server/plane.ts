@@ -97,9 +97,8 @@ export class LocalPlane {
     const stdout = readline.createInterface({ input: logsProcess.stdout }).on('line', callback)
 
     const errorLogs: string[] = []
-    const stderr = readline.createInterface({ input: logsProcess.stderr }).on('line', (line: string) => {
-      errorLogs.push(line)
-    })
+    console.log(errorLogs)
+    const stderr = readline.createInterface({ input: logsProcess.stderr }).on('line', callback)
 
     const close = () => {
       stdout.close()
