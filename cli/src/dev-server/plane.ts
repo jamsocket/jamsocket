@@ -106,6 +106,8 @@ export class LocalPlane {
       logsProcess.on('error', err => {
         if (err.message.includes('ENOENT')) {
           reject(new Error('Docker command not found. Make sure Docker is installed and in your PATH.'))
+        } else {
+          reject(err)
         }
       })
 
