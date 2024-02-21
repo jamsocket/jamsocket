@@ -95,7 +95,6 @@ export class LocalPlane {
     const containerName = `plane-${backend}`
     const logsProcess = spawn('docker', ['logs', containerName, '-f'])
     const stdout = readline.createInterface({ input: logsProcess.stdout }).on('line', callback)
-
     const stderr = readline.createInterface({ input: logsProcess.stderr }).on('line', callback)
 
     const close = () => {
