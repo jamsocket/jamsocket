@@ -1,0 +1,39 @@
+{
+  "name": "@jamsocket/client",
+  "scripts": {
+    "build": "tsup",
+    "clean": "rm -rf dist",
+    "dev": "tsup --watch",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx}\""
+  },
+  "version": "0.2.0",
+  "description": "JavaScript/TypeScript libraries for interacting with session backends and the Jamsocket platform.",
+  "main": "./dist/main.js",
+  "types": "./dist/main.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/main.d.mts",
+        "default": "./dist/main.mjs"
+      },
+      "require": {
+        "types": "./dist/main.d.ts",
+        "module": "./dist/main.mjs",
+        "default": "./dist/main.js"
+      }
+    }
+  },
+  "files": [
+    "dist/**/*"
+  ],
+  "author": "Taylor Baldwin <taylor@driftingin.space>",
+  "homepage": "https://github.com/jamsocket/jamsocket",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jamsocket/jamsocket.git"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jamsocket/jamsocket/issues"
+  }
+}
