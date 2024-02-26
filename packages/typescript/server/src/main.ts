@@ -1,6 +1,14 @@
 import 'server-only'
 import 'isomorphic-fetch' // fetch polyfill for older versions of Node
-import { SpawnResult } from './types'
+
+export type SpawnResult = {
+  url: string
+  name: string
+  readyUrl: string
+  statusUrl: string
+  spawned: boolean
+  bearerToken?: string
+}
 
 export type JamsocketDevInitOptions = {
   dev: true

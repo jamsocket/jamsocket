@@ -1,0 +1,109 @@
+# @jamsocket/socketio
+
+[![GitHub Repo stars](https://img.shields.io/github/stars/jamsocket/jamsocket?style=social)](https://github.com/jamsocket/jamsocket)
+[![Chat on Discord](https://img.shields.io/discord/939641163265232947)](https://discord.gg/N5sEpsuhh9)
+[![npm](https://img.shields.io/npm/v/@jamsocket/socketio)](https://www.npmjs.com/package/@jamsocket/socketio)
+
+React hooks for interacting with socket.io servers in Jamsocket session backends.
+
+Read the [docs here](https://docs.jamsocket.com)
+
+## Installation
+```bash copy
+npm install @jamsocket/socketio
+```
+
+## Example
+
+Here's an example of how different parts of Jamsocket's client libraries work together.
+
+```tsx filename="server.tsx"
+import Jamsocket from '@jamsocket/server'
+
+const jamsocket = Jamsocket.init({
+   account: '[YOUR ACCOUNT]',
+   token: '[YOUR TOKEN]',
+   service: '[YOUR SERVICE]',
+   // during develpment, you can simply pass { dev: true }
+})
+
+const spawnResult = await jamsocket.spawn()
+```
+
+```tsx filename="client.tsx"
+import { SessionBackendProvider, useReady, type SpawnResult } from '@jamsocket/react'
+import { SocketIOProvider, useEventListener, useSend } from '@jamsocket/socketio'
+
+function Root() {
+  return(
+    <SessionBackendProvider spawnResult={spawnResult}>
+      <SocketIOProvider url={spawnResult.url}>
+        <MyComponent />
+      </SocketIOProvider>
+    </SessionBackendProvider>
+  )
+}
+
+function MyComponent() {
+  const ready = useReady()
+  const sendEvent = useSend()
+
+  useEffect(() => {
+    if (ready) {
+      sendEvent('some-event', someValue)
+    }
+  }, [ready])
+
+  useEventListener('another-event', (args) => {
+    // do something when receiving an event message from your session backend...
+  })
+  //...
+}
+```
+
+# Library Reference
+
+## @jamsocket/socketio
+
+### `SocketIOProvider`
+
+The `SocketIOProvider` uses the url returned from the `spawn` function to connect to a SocketIO server running in your session backend.
+
+Using the `SocketIOProvider` lets you use the React hooks in `@jamsocket/socketio`. It must be used in conjunction with `@jamsocket/server` and `@jamsocket/react` in order to properly access the session backend.
+
+<Callout>The `SocketIOProvider` must be a child of the `SessionBackendProvider` because it depends on the SessionBackendProvider's context.</Callout>
+
+```tsx
+import { SessionBackendProvider, type SpawnResult } from '@jamsocket/react'
+import { SocketIOProvider } from '@jamsocket/socketio'
+
+export default function HomeContainer({ spawnResult }: { spawnResult: SpawnResult }) {
+  return (
+    <SessionBackendProvider spawnResult={spawnResult}>
+      <SocketIOProvider url={spawnResult.url}>
+          <Home />
+      </SocketIOProvider>
+    </SessionBackendProvider>
+  )
+}
+```
+
+#### `useSend`
+`useSend` lets you send events to the SocketIO server.
+```tsx
+import { sendEvent } from '@jamsocket/socketio'
+
+const sendEvent = useSend()
+
+sendEvent('new-event', eventMessage)
+```
+
+#### `useEventListener`
+`useEventListener` lets you listen to events coming from the SocketIO server.
+```tsx
+import { useEventListener } from '@jamsocket/socketio'
+
+useEventListener<T>('event', (data: T) => {
+    // do something when a new event appears
+})
+```

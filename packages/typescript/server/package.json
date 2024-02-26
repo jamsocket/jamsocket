@@ -1,0 +1,43 @@
+{
+  "name": "@jamsocket/server",
+  "scripts": {
+    "build": "tsup",
+    "clean": "rm -rf dist",
+    "dev": "tsup --watch",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx}\""
+  },
+  "version": "0.2.0",
+  "description": "JavaScript/TypeScript libraries for spawning session backends server-side.",
+  "main": "./dist/main.js",
+  "types": "./dist/main.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/main.d.mts",
+        "default": "./dist/main.mjs"
+      },
+      "require": {
+        "types": "./dist/main.d.ts",
+        "module": "./dist/main.mjs",
+        "default": "./dist/main.js"
+      }
+    }
+  },
+  "files": [
+    "dist/**/*"
+  ],
+  "author": "Taylor Baldwin <taylor@driftingin.space>",
+  "homepage": "https://github.com/jamsocket/jamsocket",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jamsocket/jamsocket.git"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jamsocket/jamsocket/issues"
+  },
+  "dependencies": {
+    "isomorphic-fetch": "^3.0.0",
+    "server-only": "^0.0.1"
+  }
+}

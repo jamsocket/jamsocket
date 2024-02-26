@@ -1,5 +1,13 @@
 export type Status = string
 export type StatusStreamEvent = { state: Status; time: string }
+export type SpawnResult = {
+  url: string
+  name: string
+  readyUrl: string
+  statusUrl: string
+  spawned: boolean
+  bearerToken?: string
+}
 
 export class SessionBackend {
   private streamReader: ReadableStreamDefaultReader | null = null
