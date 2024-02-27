@@ -16,8 +16,20 @@ jobs:
       with:
         node-version: '18'
         cache: 'npm'
-        cache-dependency-path: packages/typescript/package-lock.json
+        cache-dependency-path: package-lock.json
 
-    - name: Check formatting formatter
-      working-directory: ./packages/typescript
+    - name: Check Formatting of Server lib
       run: npx prettier --check "src/**/*.{ts,tsx}"
+      working-directory: packages/typescript/server/
+
+    - name: Check Formatting of Client lib
+      run: npx prettier --check "src/**/*.{ts,tsx}"
+      working-directory: packages/typescript/client/
+
+    - name: Check Formatting of React lib
+      run: npx prettier --check "src/**/*.{ts,tsx}"
+      working-directory: packages/typescript/react/
+
+    - name: Check Formatting of Socket.io lib
+      run: npx prettier --check "src/**/*.{ts,tsx}"
+      working-directory: packages/typescript/socketio/
