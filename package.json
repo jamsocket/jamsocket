@@ -4,6 +4,7 @@
   "private": true,
   "description": "The monorepo for Jamsocket",
   "workspaces": [
+    "examples/multiplayer-editor",
     "packages/typescript/client",
     "packages/typescript/server",
     "packages/typescript/react",
