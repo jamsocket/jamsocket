@@ -13,7 +13,8 @@
     "clean": "npm run clean -w packages/typescript/client -w packages/typescript/server -w packages/typescript/react -w packages/typescript/socketio",
     "postinstall": "npm run build",
     "build": "npm run build -w packages/typescript/client -w packages/typescript/server -w packages/typescript/react -w packages/typescript/socketio",
-    "format": "npm run format -w packages/typescript/client -w packages/typescript/server -w packages/typescript/react -w packages/typescript/socketio"
+    "format": "npm run format -w packages/typescript/client -w packages/typescript/server -w packages/typescript/react -w packages/typescript/socketio",
+    "set-js-versions": "ts-node packages/scripts/set-js-versions.ts"
   },
   "license": "MIT",
   "engines": {
@@ -21,6 +22,7 @@
   },
   "devDependencies": {
     "prettier": "^3.2.5",
+    "ts-node": "^10.9.2",
     "tsup": "^8.0.2",
     "typescript": "^5.3.3"
   }
