@@ -1,14 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react'
-import { SessionBackend } from '@jamsocket/client'
-
-export type SpawnResult = {
-  url: string
-  name: string
-  readyUrl: string
-  statusUrl: string
-  spawned: boolean
-  bearerToken?: string
-}
+import { type SpawnResult, SessionBackend } from '@jamsocket/client'
+export * from '@jamsocket/client'
 
 export const SessionBackendContext = createContext<SessionBackend | null>(null)
 

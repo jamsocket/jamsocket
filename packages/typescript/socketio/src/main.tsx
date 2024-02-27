@@ -1,15 +1,7 @@
 import { useContext, useEffect, useState, createContext, Dispatch, SetStateAction } from 'react'
 import { io, Socket } from 'socket.io-client'
 import { useReady } from '@jamsocket/react'
-
-export type SpawnResult = {
-  url: string
-  name: string
-  readyUrl: string
-  statusUrl: string
-  spawned: boolean
-  bearerToken?: string
-}
+export * from '@jamsocket/react'
 
 export type Event = {
   event: string
