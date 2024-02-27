@@ -6,7 +6,7 @@
     "dev": "tsup --watch",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx}\""
   },
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "JavaScript/TypeScript libraries for interacting with session backends and the Jamsocket platform.",
   "main": "./dist/main.js",
   "types": "./dist/main.d.ts",
