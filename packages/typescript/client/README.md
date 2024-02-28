@@ -4,7 +4,7 @@
 [![Chat on Discord](https://img.shields.io/discord/939641163265232947)](https://discord.gg/N5sEpsuhh9)
 [![npm](https://img.shields.io/npm/v/@jamsocket/client)](https://www.npmjs.com/package/@jamsocket/client)
 
-JavaScript/TypeScript libraries for interacting with session backends and the Jamsocket platform.
+JavaScript/TypeScript library for interacting with session backends and the Jamsocket platform.
 
 Read the [docs here](https://docs.jamsocket.com)
 
