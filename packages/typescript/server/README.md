@@ -27,12 +27,14 @@ const jamsocket = Jamsocket.init({
    // during develpment, you can simply pass { dev: true }
 })
 
-const spawnResult = await jamsocket.spawn()
+const spawnResult = await jamsocket.spawn() // returns an instance of SpawnResult
 ```
 
 ```tsx filename="client.tsx"
-import { SessionBackendProvider, useReady, type SpawnResult } from '@jamsocket/react'
-import { SocketIOProvider, useEventListener, useSend } from '@jamsocket/socketio'
+import {
+  SessionBackendProvider, SocketIOProvider,
+  useEventListener, useSend, useReady
+} from '@jamsocket/socketio'
 
 function Root() {
   return(
@@ -57,7 +59,6 @@ function MyComponent() {
   useEventListener('another-event', (args) => {
     // do something when receiving an event message from your session backend...
   })
-  //...
 }
 ```
 
@@ -69,9 +70,7 @@ function MyComponent() {
 
 Create a Jamsocket instance using the `init` function from `@jamsocket/server` folder. The returned Jamsocket instance has a `spawn` function that you can use to spawn a session backend.
 
-<Callout>Backends should only be spawned server-side, since the Jamsocket Auth Token must be kept secret.</Callout>
-
-#### Usage
+Backends should only be spawned server-side, since the Jamsocket Auth Token must be kept secret.
 
 In local development, you can simply set `dev` to `true`.
 
@@ -85,7 +84,7 @@ const spawnResult = await jamsocket.spawn()
 
 In production, provide your `account`, `token`, and `service` information.
 
-```js
+```ts
 import Jamsocket from '@jamsocket/server'
 
 const jamsocket = Jamsocket.init({
@@ -101,29 +100,38 @@ const spawnResult = await jamsocket.spawn({
 })
 ```
 
-```js
+```ts
 const spawnResult = await jamsocket.spawn()
 ```
 
-#### Typescript
+## Types
 
 ```ts
-export type JamsocketDevInitOptions = {
-  dev: true
-  port?: number
-}
-
-export type JamsocketInitOptions =
+type JamsocketInitOptions =
   | {
       account: string
       token: string
       service: string
+      apiUrl?: string
     }
-  | JamsocketDevInitOptions
+  | {
+      dev: true
+      port?: number
+    }
 
-export type JamsocketSpawnOptions = {
+type JamsocketSpawnOptions = {
+  tag?: string
   lock?: string
   env?: Record<string, string>
   gracePeriodSeconds?: number
+  requireBearerToken?: boolean
+}
+
+type SpawnResult = {
+  url: string
+  name: string
+  readyUrl: string
+  statusUrl: string
+  spawned: boolean
 }
 ```
