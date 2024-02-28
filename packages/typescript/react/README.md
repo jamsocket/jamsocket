@@ -27,37 +27,31 @@ const jamsocket = Jamsocket.init({
    // during develpment, you can simply pass { dev: true }
 })
 
-const spawnResult = await jamsocket.spawn()
+const spawnResult = await jamsocket.spawn() // returns an instance of SpawnResult
 ```
 
 ```tsx filename="client.tsx"
-import { SessionBackendProvider, useReady, type SpawnResult } from '@jamsocket/react'
-import { SocketIOProvider, useEventListener, useSend } from '@jamsocket/socketio'
+import { type SpawnResult, SessionBackendProvider, useReady } from '@jamsocket/react'
 
 function Root() {
   return(
     <SessionBackendProvider spawnResult={spawnResult}>
-      <SocketIOProvider url={spawnResult.url}>
-        <MyComponent />
-      </SocketIOProvider>
+      <MyComponent sessionBackendUrl={spawnResult.url} />
     </SessionBackendProvider>
   )
 }
 
-function MyComponent() {
+function MyComponent({ sessionBackendUrl }) {
   const ready = useReady()
-  const sendEvent = useSend()
 
   useEffect(() => {
     if (ready) {
-      sendEvent('some-event', someValue)
+      // make a request to your session backend
+      fetch(sessionBackendUrl)
     }
   }, [ready])
 
-  useEventListener('another-event', (args) => {
-    // do something when receiving an event message from your session backend...
-  })
-  //...
+  return ready ? <MyChildren /> : <Spinner />
 }
 ```
 
@@ -67,7 +61,7 @@ function MyComponent() {
 ### `SessionBackendProvider`
 Wrap the root of your project with the `SessionBackendProvider` so that the children components can utilize the React hooks.
 
-<Callout>The `SessionBackendProvider` must be used in conjunction with `@jamsocket/server` in order to access the spawn result returned by the `spawn` function.</Callout>
+The `SessionBackendProvider` must be used in conjunction with `@jamsocket/server` in order to access the spawn result returned by the `spawn` function.
 
 ```tsx
 import { SessionBackendProvider, type SpawnResult } from '@jamsocket/react'
@@ -88,3 +82,7 @@ import { useReady } from '@jamsocket/react'
 
 const isReady = useReady()
 ```
+
+### Other exports
+
+The `@jamsocket/react` package also re-exports all of the `@jamsocket/client` package's exports, including classes and types.

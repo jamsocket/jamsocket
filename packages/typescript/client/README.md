@@ -27,38 +27,18 @@ const jamsocket = Jamsocket.init({
    // during develpment, you can simply pass { dev: true }
 })
 
-const spawnResult = await jamsocket.spawn()
+const spawnResult = await jamsocket.spawn() // returns an instance of SpawnResult
 ```
 
-```tsx filename="client.tsx"
-import { SessionBackendProvider, useReady, type SpawnResult } from '@jamsocket/react'
-import { SocketIOProvider, useEventListener, useSend } from '@jamsocket/socketio'
+```tsx filename="client.ts"
+import { SessionBackend } from '@jamsocket/client'
 
-function Root() {
-  return(
-    <SessionBackendProvider spawnResult={spawnResult}>
-      <SocketIOProvider url={spawnResult.url}>
-        <MyComponent />
-      </SocketIOProvider>
-    </SessionBackendProvider>
-  )
-}
+const sessionBackend = new SessionBackend(spawnResult.url, spawnResult.statusUrl)
 
-function MyComponent() {
-  const ready = useReady()
-  const sendEvent = useSend()
-
-  useEffect(() => {
-    if (ready) {
-      sendEvent('some-event', someValue)
-    }
-  }, [ready])
-
-  useEventListener('another-event', (args) => {
-    // do something when receiving an event message from your session backend...
-  })
-  //...
-}
+sessionBackend.isReady() // returns a boolean indicating if the session backend has started and is ready to receive connections
+sessionBackend.onReady(() => {
+    // do something here once the session backend has reached a Ready status
+})
 ```
 
 # Library Reference
@@ -107,4 +87,16 @@ import { SessionBackend } from '@jamsocket/client'
 const sessionBackend = new SessionBackend(spawnResultUrl, statusUrl)
 
 sessionBackend.destroy()
+```
+
+## Types
+
+```ts
+type SpawnResult = {
+  url: string
+  name: string
+  readyUrl: string
+  statusUrl: string
+  spawned: boolean
+}
 ```

@@ -27,12 +27,15 @@ const jamsocket = Jamsocket.init({
    // during develpment, you can simply pass { dev: true }
 })
 
-const spawnResult = await jamsocket.spawn()
+const spawnResult = await jamsocket.spawn() // returns an instance of SpawnResult
 ```
 
 ```tsx filename="client.tsx"
-import { SessionBackendProvider, useReady, type SpawnResult } from '@jamsocket/react'
-import { SocketIOProvider, useEventListener, useSend } from '@jamsocket/socketio'
+import {
+  type SpawnResult,
+  SessionBackendProvider, SocketIOProvider,
+  useEventListener, useSend, useReady
+} from '@jamsocket/socketio'
 
 function Root() {
   return(
@@ -57,7 +60,6 @@ function MyComponent() {
   useEventListener('another-event', (args) => {
     // do something when receiving an event message from your session backend...
   })
-  //...
 }
 ```
 
@@ -71,7 +73,7 @@ The `SocketIOProvider` uses the url returned from the `spawn` function to connec
 
 Using the `SocketIOProvider` lets you use the React hooks in `@jamsocket/socketio`. It must be used in conjunction with `@jamsocket/server` and `@jamsocket/react` in order to properly access the session backend.
 
-<Callout>The `SocketIOProvider` must be a child of the `SessionBackendProvider` because it depends on the SessionBackendProvider's context.</Callout>
+The `SocketIOProvider` must be a child of the `SessionBackendProvider` because it depends on the SessionBackendProvider's context.
 
 ```tsx
 import { SessionBackendProvider, type SpawnResult } from '@jamsocket/react'
@@ -107,3 +109,7 @@ useEventListener<T>('event', (data: T) => {
     // do something when a new event appears
 })
 ```
+
+### Other exports
+
+The `@jamsocket/socketio` package also re-exports all of the `@jamsocket/client` and `@jamsocket/react` packages' exports, including their React providers, hooks, classes, and types.
