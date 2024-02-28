@@ -4,7 +4,7 @@
 [![Chat on Discord](https://img.shields.io/discord/939641163265232947)](https://discord.gg/N5sEpsuhh9)
 [![npm](https://img.shields.io/npm/v/@jamsocket/server)](https://www.npmjs.com/package/@jamsocket/server)
 
-JavaScript/TypeScript libraries for spawning session backends server-side.
+JavaScript/TypeScript library for spawning session backends server-side.
 
 Read the [docs here](https://docs.jamsocket.com)
 

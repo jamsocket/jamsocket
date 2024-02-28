@@ -67,7 +67,7 @@ function MyComponent() {
 ### `SessionBackendProvider`
 Wrap the root of your project with the `SessionBackendProvider` so that the children components can utilize the React hooks.
 
-<Callout>The `SessionBackendProvider` must be used in conjunction with `@jamsocket/javascript/server` in order to access the spawn result returned by the `spawn` function.</Callout>
+<Callout>The `SessionBackendProvider` must be used in conjunction with `@jamsocket/server` in order to access the spawn result returned by the `spawn` function.</Callout>
 
 ```tsx
 import { SessionBackendProvider, type SpawnResult } from '@jamsocket/react'
