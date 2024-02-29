@@ -16,9 +16,6 @@ export type CheckAuthResult = {
 export type SpawnRequestBody = {
   env?: Record<string, string>; // env vars always map strings to strings
   grace_period_seconds?: number;
-  port?: number;
-  tag?: string;
-  require_bearer_token?: boolean;
   lock?: string;
   service_environment?: string;
 }
@@ -85,7 +82,6 @@ export interface SpawnResult {
   name: string,
   ready_url: string,
   status_url: string,
-  bearer_token?: string,
   spawned: boolean,
   status: string | null
 }

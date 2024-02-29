@@ -49,9 +49,6 @@ export default class Spawn extends Command {
     this.log(chalk.bold`backend url:    `, blue(responseBody.url))
     this.log(chalk.bold`status url:     `, blue(responseBody.status_url))
     this.log(chalk.bold`ready url:      `, blue(responseBody.ready_url))
-    if (responseBody.bearer_token) {
-      this.log(chalk.bold`bearer token:   `, blue(responseBody.bearer_token))
-    }
     if (flags.lock) {
       this.log(chalk.bold`spawned:        `, blue(responseBody.spawned.toString()))
     }
