@@ -7,7 +7,7 @@ export type SpawnResult = {
   readyUrl: string
   statusUrl: string
   spawned: boolean
-  bearerToken?: string
+  status: string
 }
 
 export type JamsocketDevInitOptions = {
@@ -25,20 +25,15 @@ export type JamsocketInitOptions =
   | JamsocketDevInitOptions
 
 export type JamsocketSpawnOptions = {
-  tag?: string
   lock?: string
   env?: Record<string, string>
   gracePeriodSeconds?: number
-  requireBearerToken?: boolean
 }
 
 type JamsocketApiSpawnBody = {
-  tag?: string
   lock?: string
   env?: Record<string, string>
   grace_period_seconds?: number
-  require_bearer_token?: boolean
-  port?: number
 }
 
 const JAMSOCKET_DEV_PORT = 8080
