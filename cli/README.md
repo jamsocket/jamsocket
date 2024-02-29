@@ -359,20 +359,17 @@ Spawns a session backend with the provided service/environment's docker image.
 
 ```
 USAGE
-  $ jamsocket service spawn [SERVICE] [-e <value>] [-g <value>] [-t <value>] [-r] [-l <value>]
+  $ jamsocket service spawn [SERVICE] [-e <value>] [-g <value>] [-l <value>]
 
 ARGUMENTS
   SERVICE  Name of service/environment to spawn. (Providing the environment is optional if service only has one
            environment, otherwise it is required)
 
 FLAGS
-  -e, --env=<value>...        optional environment variables to pass to the container
-  -g, --grace=<value>         optional grace period (in seconds) to wait after last connection is closed before shutting
-                              down container (default is 300)
-  -l, --lock=<value>          optional lock to spawn the service with
-  -r, --require-bearer-token  require a bearer token to access the service. A random bearer token will be generated and
-                              returned in the result.
-  -t, --tag=<value>           optional image tag or digest for the service to spawn
+  -e, --env=<value>...  optional environment variables to pass to the container
+  -g, --grace=<value>   optional grace period (in seconds) to wait after last connection is closed before shutting down
+                        container (default is 300)
+  -l, --lock=<value>    optional lock to spawn the service with
 
 DESCRIPTION
   Spawns a session backend with the provided service/environment's docker image.
@@ -388,8 +385,6 @@ EXAMPLES
   $ jamsocket service spawn my-service -e SOME_ENV_VAR=foo -e ANOTHER_ENV_VAR=bar
 
   $ jamsocket service spawn my-service -g 60
-
-  $ jamsocket service spawn my-service -t latest
 ```
 
 ## `jamsocket service use-image SERVICE`
@@ -423,20 +418,17 @@ Spawns a session backend with the provided service/environment's docker image.
 
 ```
 USAGE
-  $ jamsocket spawn [SERVICE] [-e <value>] [-g <value>] [-t <value>] [-r] [-l <value>]
+  $ jamsocket spawn [SERVICE] [-e <value>] [-g <value>] [-l <value>]
 
 ARGUMENTS
   SERVICE  Name of service/environment to spawn. (Providing the environment is optional if service only has one
            environment, otherwise it is required)
 
 FLAGS
-  -e, --env=<value>...        optional environment variables to pass to the container
-  -g, --grace=<value>         optional grace period (in seconds) to wait after last connection is closed before shutting
-                              down container (default is 300)
-  -l, --lock=<value>          optional lock to spawn the service with
-  -r, --require-bearer-token  require a bearer token to access the service. A random bearer token will be generated and
-                              returned in the result.
-  -t, --tag=<value>           optional image tag or digest for the service to spawn
+  -e, --env=<value>...  optional environment variables to pass to the container
+  -g, --grace=<value>   optional grace period (in seconds) to wait after last connection is closed before shutting down
+                        container (default is 300)
+  -l, --lock=<value>    optional lock to spawn the service with
 
 DESCRIPTION
   Spawns a session backend with the provided service/environment's docker image.
@@ -452,8 +444,6 @@ EXAMPLES
   $ jamsocket spawn my-service -e SOME_ENV_VAR=foo -e ANOTHER_ENV_VAR=bar
 
   $ jamsocket spawn my-service -g 60
-
-  $ jamsocket spawn my-service -t latest
 ```
 
 ## `jamsocket terminate BACKENDS`
