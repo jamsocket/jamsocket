@@ -45,15 +45,12 @@ export class Jamsocket {
   }
 
   // eslint-ignore-next-line max-params
-  public spawn(service: string, serviceEnvironment?: string, env?: Record<string, string>, grace?: number, port?: number, tag?: string, requireBearerToken?: boolean, lock?: string): Promise<SpawnResult> {
+  public spawn(service: string, serviceEnvironment?: string, env?: Record<string, string>, grace?: number, lock?: string): Promise<SpawnResult> {
     const config = this.expectAuthorized()
 
     const body: SpawnRequestBody = {
       env,
       grace_period_seconds: grace,
-      port,
-      tag,
-      require_bearer_token: requireBearerToken,
       lock,
       service_environment: serviceEnvironment,
     }
