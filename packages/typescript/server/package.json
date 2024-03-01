@@ -37,7 +37,6 @@
     "url": "https://github.com/jamsocket/jamsocket/issues"
   },
   "dependencies": {
-    "isomorphic-fetch": "^3.0.0",
-    "server-only": "^0.0.1"
+    "isomorphic-fetch": "^3.0.0"
   }
 }
