@@ -68,25 +68,34 @@ function MyComponent() {
 
 ### `init()`
 
-Create a Jamsocket instance using the `init` function from `@jamsocket/server` folder. The returned Jamsocket instance has a `spawn` function that you can use to spawn a session backend.
-
-Backends should only be spawned server-side, since the Jamsocket Auth Token must be kept secret.
+Create a Jamsocket instance using the `init` function from `@jamsocket/server` folder.
 
 In local development, you can simply set `dev` to `true`.
 
 ```ts
 import Jamsocket from '@jamsocket/server'
-
 const jamsocket = Jamsocket.init({ dev: true })
-
-const spawnResult = await jamsocket.spawn()
 ```
 
 In production, provide your `account`, `token`, and `service` information.
 
 ```ts
 import Jamsocket from '@jamsocket/server'
+const jamsocket = Jamsocket.init({
+  account: '[YOUR ACCOUNT]',
+  token: '[YOUR TOKEN]',
+  service: '[YOUR SERVICE]',
+})
+```
 
+### `spawn()`
+
+The returned Jamsocket instance from `init` includes a `spawn` function that you can use to spawn a session backend. You can optionally include a [`lock`](/concepts/locks), environment variables, and a grace period when you spawn.
+
+<Callout>Backends should only be spawned server-side, since the Jamsocket Auth Token must be kept secret.</Callout>
+
+```ts {8-12}
+import Jamsocket from '@jamsocket/server'
 const jamsocket = Jamsocket.init({
   account: '[YOUR ACCOUNT]',
   token: '[YOUR TOKEN]',
@@ -94,14 +103,10 @@ const jamsocket = Jamsocket.init({
 })
 
 const spawnResult = await jamsocket.spawn({
-  lock: 'my-lock',
-  env: { MY_ENV_VAR: 'foo' },
-  gracePeriodSeconds: 300,
+  lock: 'my-lock', // optional
+  env: { MY_ENV_VAR: 'foo' }, // optional
+  gracePeriodSeconds: 300, // optional
 })
-```
-
-```ts
-const spawnResult = await jamsocket.spawn()
 ```
 
 ## Types
@@ -120,11 +125,9 @@ type JamsocketInitOptions =
     }
 
 type JamsocketSpawnOptions = {
-  tag?: string
   lock?: string
   env?: Record<string, string>
   gracePeriodSeconds?: number
-  requireBearerToken?: boolean
 }
 
 type SpawnResult = {
