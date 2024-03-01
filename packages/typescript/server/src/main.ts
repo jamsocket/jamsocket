@@ -1,4 +1,3 @@
-import 'server-only'
 import 'isomorphic-fetch' // fetch polyfill for older versions of Node
 
 export type SpawnResult = {
