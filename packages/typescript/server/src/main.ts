@@ -79,10 +79,8 @@ export function init(opts: JamsocketInitOptions): JamsocketInstance {
   const spawnInner = async function (spawnOpts: JamsocketSpawnOptions = {}): Promise<SpawnResult> {
     const reqBody: JamsocketApiSpawnBody = {}
     if (spawnOpts.lock) reqBody.lock = spawnOpts.lock
-    if (spawnOpts.tag) reqBody.tag = spawnOpts.tag
     if (spawnOpts.env) reqBody.env = spawnOpts.env
     if (spawnOpts.gracePeriodSeconds) reqBody.grace_period_seconds = spawnOpts.gracePeriodSeconds
-    if (spawnOpts.requireBearerToken) reqBody.require_bearer_token = spawnOpts.requireBearerToken
 
     const response = await fetch(`${apiUrl}/user/${account}/service/${service}/spawn`, {
       method: 'POST',
@@ -100,7 +98,7 @@ export function init(opts: JamsocketInitOptions): JamsocketInstance {
       readyUrl: body.ready_url,
       statusUrl: body.status_url,
       spawned: body.spawned,
-      bearerToken: body.bearer_token,
+      status: body.status,
     }
   }
 
