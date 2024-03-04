@@ -36,8 +36,27 @@ type Options = {
 
 export async function createDevServer(opts: Options): Promise<void> {
   await ensurePlaneImage()
-  const devServer = new DevServer(opts)
-  await devServer.start()
+
+  let devServer: DevServer | null = null
+  try {
+    devServer = new DevServer(opts)
+
+    process.on('SIGINT', () => devServer?.exit())
+    process.on('SIGTERM', () => devServer?.exit())
+    process.on('SIGHUP', () => devServer?.exit())
+    process.on('uncaughtException', (err: Error) => devServer?.exit(err))
+    process.on('uncaughtRejection', (reason: Error | any) => {
+      const err = reason instanceof Error ? reason : new Error('Uncaught rejection')
+      devServer?.exit(err)
+    })
+
+    await devServer.start()
+  } catch (error) {
+    if (devServer) {
+      const err = error instanceof Error ? error : new Error('Unknown error')
+      devServer.exit(err)
+    }
+  }
 }
 
 class DevServer {
@@ -47,6 +66,7 @@ class DevServer {
   getColor = createColorGetter()
   logger: Logger
   plane: LocalPlane
+  server: http.Server | null = null
   port: number = DEFAULT_DEV_SERVER_PORT
 
   constructor(private opts: Options) {
@@ -57,81 +77,70 @@ class DevServer {
     this.plane = new LocalPlane(url, process, containerName, this.logger)
   }
 
-  // returns a promise that resolves when the dev server is stopped
-  async start(): Promise<void> {
+  async start() {
     const { watch, interactive } = this.opts
+
+    // listen for keyboard input
+    if (interactive !== false) {
+      if (process.stdin.isTTY) {
+        process.stdin.setRawMode(true)
+      }
+      process.stdin.resume()
+      process.stdin.setEncoding('utf8')
+      process.stdin.on('data', async (key: string) => {
+        try {
+          if (key === CTRL_C) await this.exit()
+          if (key === 'b') await this.rebuild()
+          if (key === 't') await this.terminateAllDevbackends()
+        } catch (error) {
+          const err = error instanceof Error ? error : new Error('Unknown error')
+          await this.exit(err)
+        }
+      })
+    }
+
+    if (watch) {
+      this.logger.log([`Watching ${watch.join(', ')} for changes...`, ''])
+      const watchPaths = watch.map(w => path.resolve(process.cwd(), w))
+      this.fsWatcher = chokidar.watch(watchPaths).on('change', async () => {
+        try {
+          await this.rebuild()
+        } catch (error) {
+          const err = error instanceof Error ? error : new Error('Error rebuilding session backend')
+          await this.exit(err)
+        }
+      })
+    }
 
     await this.plane.ready()
 
-    this.logger.log(['Starting dev server...'])
-
     await this.buildSessionBackend()
 
-    const server = this.startServer()
+    this.logger.log(['Starting dev server...'])
+    this.server = this.startServer()
 
-    const timeToExit = new Promise<void>(resolve => {
-      const exitOnError = (err: Error) => {
-        this.logger.log([
-          '------------- ERROR -------------',
-          err.toString(),
-          '---------------------------------',
-        ])
-        resolve()
-      }
-      process.on('uncaughtException', exitOnError)
-      process.on('uncaughtRejection', exitOnError)
-      process.on('SIGINT', resolve)
-      process.on('SIGTERM', resolve)
-      process.on('SIGHUP', resolve)
-
-      // listen for keyboard input
-      if (interactive !== false) {
-        if (process.stdin.isTTY) {
-          process.stdin.setRawMode(true)
-        }
-        process.stdin.resume()
-        process.stdin.setEncoding('utf8')
-        process.stdin.on('data', async (key: string) => {
-          try {
-            if (key === CTRL_C) resolve()
-            if (key === 'b') await this.rebuild()
-            if (key === 't') await this.terminateAllDevbackends()
-          } catch {
-            resolve()
-          }
-        })
-      }
-
-      if (watch) {
-        this.logger.log([`Watching ${watch.join(', ')} for changes...`, ''])
-        const watchPaths = watch.map(w => path.resolve(process.cwd(), w))
-        this.fsWatcher = chokidar.watch(watchPaths).on('change', async () => {
-          try {
-            await this.rebuild()
-          } catch {
-            resolve()
-          }
-        })
-      }
-    })
-
-    if (interactive === false) {
-      await timeToExit
-    } else {
+    if (interactive !== false) {
       this.logger.footerOn()
+    }
+  }
 
-      const interval = setInterval(() => {
-        this.logger.refreshFooter()
-      }, 5000)
-
-      await timeToExit
-
-      this.logger.footerOff()
-      clearInterval(interval)
+  async exit(error?: Error) {
+    if (error) {
+      this.logger.log([
+        chalk.red('------------- ERROR -------------'),
+        chalk.red(error.toString()),
+        chalk.red('---------------------------------'),
+      ])
     }
 
-    server.close()
+    this.logger.footerOff()
 
+    if (this.server) {
+      this.logger.log(['Shutting down dev server...'])
+      this.server.close()
+    }
+
+    this.logger.log(['Terminating session backends...'])
     await this.terminateAllDevbackends()
 
     // close any streams that are still open
@@ -141,6 +150,7 @@ class DevServer {
       this.devBackends.delete(name)
     }
 
+    this.logger.log(['Stopping Plane...'])
     this.plane.kill()
 
     this.fsWatcher?.close()
@@ -150,8 +160,9 @@ class DevServer {
     }
     process.stdin.unref()
 
+    this.logger.log(['Goodbye!'])
     // eslint-disable-next-line unicorn/no-process-exit, no-process-exit
-    process.exit(0)
+    process.exit(error ? 1 : 0)
   }
 
   getFooter(): string[] {
