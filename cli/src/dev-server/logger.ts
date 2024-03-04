@@ -5,17 +5,25 @@ import { termwidth } from './util'
 export class Logger {
   curFooterLength = 0
   displayFooter = false
+  intervalId: NodeJS.Timer | null = null
 
   constructor(private _getFooter: () => string[]) {}
 
   footerOff(): void {
     this.displayFooter = false
+    if (this.intervalId) {
+      clearInterval(this.intervalId)
+      this.intervalId = null
+    }
     this.clearFooter()
   }
 
   footerOn(): void {
     this.displayFooter = true
     this.refreshFooter()
+    this.intervalId = setInterval(() => {
+      this.refreshFooter()
+    }, 5000)
   }
 
   log(logLines: string[] = []): void {
