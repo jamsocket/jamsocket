@@ -9,7 +9,11 @@
   "homepage": "https://github.com/jamsocket/jamsocket",
   "license": "MIT",
   "main": "lib/index.js",
-  "repository": "jamsocket/jamsocket",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jamsocket/jamsocket.git",
+    "directory": "cli"
+  },
   "files": [
     "/bin",
     "/lib",

@@ -30,7 +30,8 @@
   "homepage": "https://github.com/jamsocket/jamsocket",
   "repository": {
     "type": "git",
-    "url": "https://github.com/jamsocket/jamsocket.git"
+    "url": "https://github.com/jamsocket/jamsocket.git",
+    "directory": "packages/typescript/socketio"
   },
   "license": "MIT",
   "bugs": {
