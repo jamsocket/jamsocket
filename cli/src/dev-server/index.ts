@@ -239,10 +239,10 @@ class DevServer {
   async terminateAllDevbackends(): Promise<void> {
     const backendNames = [...this.devBackends.values()].map(b => b.name)
     if (backendNames.length > 0) {
-      this.logger.log(['', 'Terminating development backends...'])
+      this.logger.log(['', 'Terminating session backends...'])
       await this.terminateBackends(backendNames)
     } else {
-      this.logger.log(['', 'No development backends to terminate'])
+      this.logger.log(['', 'No session backends to terminate'])
     }
   }
 
