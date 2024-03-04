@@ -65,7 +65,7 @@ class DevServer {
 
     this.logger.log(['Starting dev server...'])
 
-    this.currentImageId = await this.buildSessionBackend()
+    await this.buildSessionBackend()
 
     const server = this.startServer()
 
@@ -181,8 +181,10 @@ class DevServer {
       }, {
         printLine: line => footer.push(line),
       })
+    } else if (this.currentImageId === null) {
+      footer.push(chalk.red` No running backends (Not ready to spawn - the session backend is still building or has failed to build)`)
     } else {
-      footer.push(chalk.bold` No running backends`)
+      footer.push(chalk.bold` No running backends. Ready to spawn!`)
     }
     footer.push(
       '',
@@ -192,22 +194,34 @@ class DevServer {
     return footer
   }
 
-  async buildSessionBackend(): Promise<string> {
+  async buildSessionBackend(): Promise<void> {
+    this.currentImageId = null
     const { dockerfile, dockerOptions } = this.opts
     this.logger.log([`Building image with Dockerfile: ${dockerfile}`])
     this.logger.clearFooter()
-    const imageId = buildImage(dockerfile, dockerOptions)
-    this.logger.log(['Image built.'])
-    return imageId
+    let imageId: string
+    try {
+      imageId = buildImage(dockerfile, dockerOptions)
+    } catch (error) {
+      this.currentImageId = null
+      const msg = error instanceof Error ? error.toString() : 'Unknown error'
+      this.logger.log([chalk.red`Error building image: ${msg}`])
+      return
+    }
+    this.currentImageId = imageId
+    this.logger.log([chalk.blue`Successfully built image`])
   }
 
   async rebuild(): Promise<void> {
-    this.currentImageId = await this.buildSessionBackend()
+    await this.buildSessionBackend()
 
-    const outdatedBackends = [...this.devBackends.values()].filter(backend => backend.imageId !== this.currentImageId).map(backend => backend.name)
-    if (outdatedBackends.length > 0) {
+    const curBackends = [...this.devBackends.values()]
+    // if the current image is null, the session backend failed to build, let's terminate all backends
+    const outdatedBackends = this.currentImageId === null ? curBackends : curBackends.filter(backend => backend.imageId !== this.currentImageId)
+    const outdatedBackendNames = outdatedBackends.map(b => b.name)
+    if (outdatedBackendNames.length > 0) {
       this.logger.log(['', 'Terminating outdated backends...'])
-      await this.terminateBackends(outdatedBackends)
+      await this.terminateBackends(outdatedBackendNames)
     }
   }
 
@@ -364,7 +378,10 @@ class DevServer {
 
   async spawnBackend(body: SpawnRequestBody): Promise<SpawnResult | HTTPError> {
     const imageId = this.currentImageId
-    if (!imageId) return new HTTPError(500, 'Internal Error', 'spawnBackend called before currentImageId was set. This is a bug.')
+    if (!imageId) {
+      this.logger.log([chalk.red`Error spawning backend: the latest build of your session backend's Dockerfile has either failed or is still ongoing. Check the logs above and make sure there are no docker build errors before spawning.`])
+      return new HTTPError(500, 'Internal Error', 'Error spawning backend: the latest build of your session backend\'s Dockerfile has either failed or has not yet completed. Make sure all docker build errors are resolved and a new image is built before spawning.')
+    }
 
     const result = await this.plane.spawn(imageId, body.env, body.grace_period_seconds, body.lock)
     if (result instanceof HTTPError) return result
