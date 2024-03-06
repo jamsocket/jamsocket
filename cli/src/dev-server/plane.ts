@@ -217,6 +217,12 @@ export class LocalPlane {
   }
 }
 
+export function dockerKillPlaneBackends(backendNames: string[]): void {
+  for (const backendName of backendNames) {
+    spawnSync('docker', ['kill', `plane-${backendName}`])
+  }
+}
+
 // Plane2 statuses: scheduled, loading, starting, waiting, ready, terminating, terminated
 // if this returns null, then ignore the status
 function translateStatusToV1(
