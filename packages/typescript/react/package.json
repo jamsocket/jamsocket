@@ -6,7 +6,7 @@
     "dev": "tsup --watch",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx}\""
   },
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "React hooks for interacting with session backends and the Jamsocket platform.",
   "main": "./dist/main.js",
   "types": "./dist/main.d.ts",
@@ -38,7 +38,7 @@
     "url": "https://github.com/jamsocket/jamsocket/issues"
   },
   "dependencies": {
-    "@jamsocket/client": "0.2.2"
+    "@jamsocket/client": "0.2.3"
   },
   "peerDependencies": {
     "react": "^16.8.0 || ^17.0.0 || ^18.0.0"
