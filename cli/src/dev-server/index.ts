@@ -75,6 +75,7 @@ class DevServer {
     this.logger.log(['Starting plane'])
     const { url, process, containerName } = runPlane()
     this.plane = new LocalPlane(url, process, containerName, this.logger)
+    this.plane.onExit.then(() => this.exit(new Error('Plane exited unexpectedly')))
   }
 
   async start() {
