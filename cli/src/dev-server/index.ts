@@ -10,7 +10,7 @@ import { SpawnResult, SpawnRequestBody, HTTPError } from '../api'
 import { readRequestBody, createColorGetter, type Color } from './util'
 import { Logger } from './logger'
 import type { StreamHandle, StatusV1 } from './plane'
-import { LocalPlane, runPlane, ensurePlaneImage, isV1StatusAlive } from './plane'
+import { LocalPlane, runPlane, ensurePlaneImage, isV1StatusAlive, dockerKillPlaneBackends } from './plane'
 
 const CTRL_C = '\u0003'
 const DEFAULT_DEV_SERVER_PORT = 8080
@@ -258,7 +258,16 @@ class DevServer {
   async terminateBackends(backends: string[]): Promise<void> {
     const terminationPromises = backends.map(name => this.plane.terminate(name))
     this.logger.log([`Terminating ${backends.length} backend(s): ${backends.map(name => name).join(', ')}`])
-    await Promise.all(terminationPromises)
+    try {
+      await Promise.all(terminationPromises)
+    } catch (error) {
+      this.logger.log([
+        chalk.red`Error terminating backends: ${error instanceof Error ? error.toString() : 'Unknown error'}`,
+        chalk.red`Attempting to kill backends with docker...`,
+      ])
+      dockerKillPlaneBackends(backends)
+    }
+
     // we don't delete the backends from devBackends here because we want to let any last status updates and logs come through
     // when the backend receives a terminal status, then we'll close the streams and remove it from devBackends
   }
