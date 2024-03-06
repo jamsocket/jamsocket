@@ -128,6 +128,7 @@ type JamsocketSpawnOptions = {
   lock?: string
   env?: Record<string, string>
   gracePeriodSeconds?: number
+  serviceEnvironment?: string
 }
 
 type SpawnResult = {
