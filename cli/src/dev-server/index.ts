@@ -125,44 +125,52 @@ class DevServer {
   }
 
   async exit(error?: Error) {
-    if (error) {
-      this.logger.log([
-        chalk.red('------------- ERROR -------------'),
-        chalk.red(error.toString()),
-        chalk.red('---------------------------------'),
-      ])
+    // make sure no errors are thrown during shutdown
+    // which can cause a fail loop that never exits
+    try {
+      if (error) {
+        this.logger.log([
+          chalk.red('------------- ERROR -------------'),
+          chalk.red(error.toString()),
+          chalk.red('---------------------------------'),
+        ])
+      }
+
+      this.logger.footerOff()
+
+      if (this.server) {
+        this.logger.log(['Shutting down dev server...'])
+        this.server.close()
+      }
+
+      this.logger.log(['Terminating session backends...'])
+      await this.terminateAllDevbackends()
+
+      // close any streams that are still open
+      for (const [name, backend] of this.devBackends) {
+        backend.statusStream?.close()
+        backend.logsStream?.close()
+        this.devBackends.delete(name)
+      }
+
+      this.logger.log(['Stopping Plane...'])
+      this.plane.kill()
+
+      this.fsWatcher?.close()
+      process.stdin.removeAllListeners()
+      if (process.stdin.isTTY) {
+        process.stdin.setRawMode(false)
+      }
+      process.stdin.unref()
+
+      this.logger.log(['Goodbye!'])
+      // eslint-disable-next-line unicorn/no-process-exit, no-process-exit
+      process.exit(error ? 1 : 0)
+    } catch (error) {
+      this.logger.log([chalk.red`Error during shutdown: ${error instanceof Error ? error.toString() : 'Unknown error'}`])
+      // eslint-disable-next-line unicorn/no-process-exit, no-process-exit
+      process.exit(1)
     }
-
-    this.logger.footerOff()
-
-    if (this.server) {
-      this.logger.log(['Shutting down dev server...'])
-      this.server.close()
-    }
-
-    this.logger.log(['Terminating session backends...'])
-    await this.terminateAllDevbackends()
-
-    // close any streams that are still open
-    for (const [name, backend] of this.devBackends) {
-      backend.statusStream?.close()
-      backend.logsStream?.close()
-      this.devBackends.delete(name)
-    }
-
-    this.logger.log(['Stopping Plane...'])
-    this.plane.kill()
-
-    this.fsWatcher?.close()
-    process.stdin.removeAllListeners()
-    if (process.stdin.isTTY) {
-      process.stdin.setRawMode(false)
-    }
-    process.stdin.unref()
-
-    this.logger.log(['Goodbye!'])
-    // eslint-disable-next-line unicorn/no-process-exit, no-process-exit
-    process.exit(error ? 1 : 0)
   }
 
   getFooter(): string[] {
