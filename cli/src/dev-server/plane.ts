@@ -44,6 +44,7 @@ const LAST_N_PLANE_LOGS = 20 // the number of plane logs to show if a Plane erro
 // NOTE: this class works with a Plane2 interface, but its own interface is meant to be compatible with Jamsocket V1
 export class LocalPlane {
   private _readyPromise: Promise<void> | null = null
+  onExit: Promise<void>
   constructor(
     private url: string,
     private process: ChildProcessWithoutNullStreams,
@@ -60,11 +61,15 @@ export class LocalPlane {
       planeLogs.push(`[plane stdout] ${line}`)
       while (planeLogs.length > LAST_N_PLANE_LOGS) planeLogs.shift()
     })
-    this.process.on('exit', () => {
-      if (planeLogs.length > 0) {
-        this.logger.log(planeLogs)
-      }
-      this.logger.log([`Plane process exited with code: ${this.process.exitCode ?? 'unknown'}`])
+
+    this.onExit = new Promise(resolve => {
+      this.process.on('exit', () => {
+        if (planeLogs.length > 0) {
+          this.logger.log(planeLogs)
+        }
+        this.logger.log([`Plane process exited with code: ${this.process.exitCode ?? 'unknown'}`])
+        resolve()
+      })
     })
   }
 
