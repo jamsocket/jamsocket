@@ -27,12 +27,14 @@ export type JamsocketSpawnOptions = {
   lock?: string
   env?: Record<string, string>
   gracePeriodSeconds?: number
+  serviceEnvironment?: string
 }
 
 type JamsocketApiSpawnBody = {
   lock?: string
   env?: Record<string, string>
   grace_period_seconds?: number
+  service_environment?: string
 }
 
 const JAMSOCKET_DEV_PORT = 8080
@@ -81,6 +83,7 @@ export function init(opts: JamsocketInitOptions): JamsocketInstance {
     if (spawnOpts.lock) reqBody.lock = spawnOpts.lock
     if (spawnOpts.env) reqBody.env = spawnOpts.env
     if (spawnOpts.gracePeriodSeconds) reqBody.grace_period_seconds = spawnOpts.gracePeriodSeconds
+    if (spawnOpts.serviceEnvironment) reqBody.service_environment = spawnOpts.serviceEnvironment
 
     const response = await fetch(`${apiUrl}/user/${account}/service/${service}/spawn`, {
       method: 'POST',
