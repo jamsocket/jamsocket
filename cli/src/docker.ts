@@ -46,13 +46,16 @@ export async function push(imageName: string, auth: string): Promise<void> {
   writeFileSync(configPath, JSON.stringify(config))
 
   await new Promise<void>((resolve, reject) => {
-    const pushProcess = spawn('docker', ['--config', dockerConfigDir, 'push', imageName], { stdio: 'inherit' })
+    const pushProcess = spawn('docker', ['--config', dockerConfigDir, 'push', imageName], { stdio: ['inherit', 'inherit', 'pipe'] })
+    pushProcess.stderr.on('data', data => {
+      console.error(data.toString())
+      const errMsg = getDockerErrorMsg(data.toString()) ?? data.toString()
+      reject(new Error(errMsg))
+    })
+
     pushProcess.on('error', err => {
-      if (err.message.includes('ENOENT')) {
-        reject(new Error('Docker command not found. Make sure Docker is installed and in your PATH.'))
-      } else {
-        reject(err)
-      }
+      const errMsg = getDockerErrorMsg(err.message) ?? err.message
+      reject(new Error(errMsg))
     })
 
     pushProcess.on('close', code => {
@@ -77,17 +80,24 @@ function spawnDockerSync(args: string[], options?: { stdio?: StdioOptions }): Sp
     (exitCode !== null && exitCode !== 0) ||
     result.error !== undefined
   ) {
-    if (result.stderr?.includes('No such image')) {
-      throw new Error('Docker failed to find image. Make sure you have built the image and it\'s listed in the `docker images` command output before running this command.')
-    }
-    if (result.stderr?.includes('Cannot connect to the Docker daemon')) {
-      throw new Error('Docker failed to connect to the Docker daemon. Make sure Docker is running and you have permission to access it.')
-    }
-    if (result.error?.message.includes('ENOENT')) {
-      throw new Error('Docker command not found. Make sure Docker is installed and in your PATH.')
-    }
+    const errorLine = result.stderr ?? result.error?.message
+    const errorMsg = getDockerErrorMsg(errorLine) ?? `Process "docker ${args.join(' ')}" exited with a non-zero code: ${exitCode} ${result.error} ${result.stderr}`
 
-    throw new Error(`Process "docker ${args.join(' ')}" exited with a non-zero code: ${exitCode} ${result.error} ${result.stderr}`)
+    throw new Error(errorMsg)
   }
   return result
+}
+
+function getDockerErrorMsg(errorLine?: string): string | null {
+  if (!errorLine) return null
+  if (errorLine.includes('No such image')) {
+    return 'Docker failed to find image. Make sure you have built the image and it\'s listed in the `docker images` command output before running this command.'
+  }
+  if (errorLine.includes('Cannot connect to the Docker daemon')) {
+    return 'Docker failed to connect to the Docker daemon. Make sure Docker is running and you have permission to access it. If Docker is running, then you may need to check "Allow the default Docker socket to be used" in Docker\'s settings.'
+  }
+  if (errorLine.includes('ENOENT')) {
+    return 'Docker command not found. Make sure Docker is installed and in your PATH.'
+  }
+  return null
 }
