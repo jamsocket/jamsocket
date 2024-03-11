@@ -10,7 +10,7 @@ import { SpawnResult, SpawnRequestBody, HTTPError } from '../api'
 import { readRequestBody, createColorGetter, type Color } from './util'
 import { Logger } from './logger'
 import type { StreamHandle, StatusV1 } from './plane'
-import { LocalPlane, runPlane, ensurePlaneImage, isV1StatusAlive, dockerKillPlaneBackends } from './plane'
+import { LocalPlane, runPlane, ensurePlaneImage, isV1StatusAlive, isV1ErrorStatus, dockerKillPlaneBackends } from './plane'
 
 const CTRL_C = '\u0003'
 const DEFAULT_DEV_SERVER_PORT = 8080
@@ -280,6 +280,9 @@ class DevServer {
         backend.statusStream?.close()
         backend.logsStream?.close()
         this.devBackends.delete(backend.name)
+        if (isV1ErrorStatus(status.state)) {
+          this.logger.log([chalk.yellow`See https://docs.jamsocket.com/platform/troubleshooting for help on troubleshooting ${status.state} statuses`])
+        }
       }
       // once we hit Starting, we're safe to start listening to logs
       if (status.state === 'Starting') {

@@ -266,6 +266,10 @@ export function isV1StatusAlive(v1Status: string): boolean {
   return ['Loading', 'Starting', 'Ready'].includes(v1Status)
 }
 
+export function isV1ErrorStatus(v1Status: string): boolean {
+  return ['ErrorLoading', 'ErrorStarting', 'TimedOutBeforeReady', 'Failed'].includes(v1Status)
+}
+
 export function runPlane(): { url: string, process: ChildProcessWithoutNullStreams, containerName: string } {
   const containerName = `plane-quickstart-${Math.floor(Math.random() * 1_000_000)}`
   // NOTE: for now, plane quickstart MUST be run port 9191
