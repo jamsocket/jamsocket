@@ -117,12 +117,10 @@ export class Jamsocket {
   }
 
   public streamStatus(backend: string, callback: (v: StatusMessage) => void): EventStreamReturn {
-    const config = this.expectAuthorized()
-    return this.api.streamStatus(backend, config.getAccessToken(), callback)
+    return this.api.streamStatus(backend, callback)
   }
 
   public status(backend: string): Promise<StatusMessage> {
-    const config = this.expectAuthorized()
-    return this.api.status(backend, config.getAccessToken())
+    return this.api.status(backend)
   }
 }
