@@ -244,13 +244,18 @@ export class JamsocketApi {
     }
   }
 
-  private makeAuthenticatedStreamRequest(endpoint: string, authToken: string, callback: (line: string) => void): EventStreamReturn {
+  private makeStreamRequest(endpoint: string, headers: Headers | null, callback: (line: string) => void): EventStreamReturn {
     const url = `${this.apiBase}${endpoint}`
     return eventStream(url, {
       ...this.options,
       method: HttpMethod.Get,
-      headers: { 'Authorization': `Bearer ${authToken}` },
+      headers: { ...headers },
     }, callback)
+  }
+
+  private makeAuthenticatedStreamRequest(endpoint: string, authToken: string, callback: (line: string) => void): EventStreamReturn {
+    const headers = { 'Authorization': `Bearer ${authToken}` }
+    return this.makeStreamRequest(endpoint, headers, callback)
   }
 
   public checkAuth(authToken: string): Promise<CheckAuthResult> {
@@ -315,7 +320,7 @@ export class JamsocketApi {
     return this.makeAuthenticatedStreamRequest(url, authToken, callback)
   }
 
-  public streamStatus(backend: string, authToken: string, callback: (statusMessage: StatusMessage) => void): EventStreamReturn {
+  public streamStatus(backend: string, callback: (statusMessage: StatusMessage) => void): EventStreamReturn {
     const url = `/backend/${backend}/status/stream`
     const wrappedCallback = (line: string) => {
       const val = JSON.parse(line)
@@ -324,12 +329,12 @@ export class JamsocketApi {
         time: new Date(val.time),
       })
     }
-    return this.makeAuthenticatedStreamRequest(url, authToken, wrappedCallback)
+    return this.makeStreamRequest(url, null, wrappedCallback)
   }
 
-  public async status(backend: string, authToken: string): Promise<StatusMessage> {
+  public async status(backend: string): Promise<StatusMessage> {
     const url = `/backend/${backend}/status`
-    return this.makeAuthenticatedRequest<StatusMessage>(url, HttpMethod.Get, authToken)
+    return this.makeRequest<StatusMessage>(url, HttpMethod.Get)
   }
 
   public async terminate(backend: string, authToken: string): Promise<TerminateResult> {
