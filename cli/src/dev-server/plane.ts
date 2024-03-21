@@ -16,7 +16,7 @@ export type PlaneConnectResponse = {
   status: string
 }
 
-type PlaneTerminationReason = 'swept' | 'external' | 'keyexpired'
+type PlaneTerminationReason = 'swept' | 'external' | 'key_expired' | 'lost' | 'startup_timeout'
 type PlaneTerminationKind = 'soft' | 'hard'
 
 export type PlaneStatusMessage =
@@ -240,7 +240,7 @@ function translateStatusToV1(
     if (plane2StatusMsg.termination_reason === 'external') {
       return 'Terminated'
     }
-    if (plane2StatusMsg.termination_reason && ['swept', 'keyexpired'].includes(plane2StatusMsg.termination_reason)) {
+    if (plane2StatusMsg.termination_reason && ['swept', 'key_expired'].includes(plane2StatusMsg.termination_reason)) {
       return 'Swept'
     }
     if (!lastAliveStatusMsg || ['scheduled', 'loading'].includes(lastAliveStatusMsg.status)) {
@@ -250,7 +250,7 @@ function translateStatusToV1(
       return 'ErrorStarting'
     }
     if (lastAliveStatusMsg.status === 'waiting') {
-      if (plane2StatusMsg.termination_reason) return 'TimedOutBeforeReady'
+      if (plane2StatusMsg.termination_reason === 'startup_timeout') return 'TimedOutBeforeReady'
       return 'ErrorStarting'
     }
     // if we've gotten here, the last alive status was 'ready'
