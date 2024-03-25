@@ -4,6 +4,7 @@ import chalk from 'chalk'
 import EventSource from 'eventsource'
 import { SpawnResult, HTTPError } from '../api'
 import { capitalize } from './util'
+import { spawnDockerSync } from '../docker'
 import type { Logger } from './logger'
 
 export type PlaneConnectResponse = {
@@ -300,19 +301,11 @@ export function ensurePlaneImage(): Promise<void> {
   if (result.status === 0) return Promise.resolve()
   return new Promise((resolve, reject) => {
     console.log('Downloading plane/quickstart image...')
-    const pullProcess = spawn('docker', ['pull', PLANE_IMAGE])
-    pullProcess.stdout.on('data', data => {
-      process.stdout.write(data)
-    })
-    pullProcess.stderr.on('data', data => {
-      process.stdout.write(data)
-    })
-    pullProcess.on('exit', () => {
-      if (pullProcess.exitCode === 0) {
-        resolve()
-      } else {
-        reject()
-      }
-    })
+    const result = spawnDockerSync(['pull', PLANE_IMAGE], { stdio: 'inherit' })
+    if (result.status === 0) {
+      resolve()
+    } else {
+      reject(new Error('Failed to pull plane/quickstart image'))
+    }
   })
 }

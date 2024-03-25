@@ -72,7 +72,7 @@ export function tag(existingImageName: string, newImageName: string): void {
   spawnDockerSync(['tag', existingImageName, newImageName], { stdio: 'inherit' })
 }
 
-function spawnDockerSync(args: string[], options?: { stdio?: StdioOptions }): SpawnSyncReturns<string> {
+export function spawnDockerSync(args: string[], options?: { stdio?: StdioOptions }): SpawnSyncReturns<string> {
   const opts: SpawnSyncOptionsWithStringEncoding = { encoding: 'utf-8', ...options }
   const result = spawnSync('docker', args, opts)
   const exitCode = result.status
