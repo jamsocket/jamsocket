@@ -15,20 +15,45 @@ export type BuildImageOptions = {
   path?: string;
 }
 
-export function buildImage(dockerfilePath: string, options?: BuildImageOptions): string {
+export async function buildImage(dockerfilePath: string, options?: BuildImageOptions): Promise<string> {
   const optionsWithDefaults: Required<BuildImageOptions> = {
     path: '.',
     ...options,
   }
 
-  const buildProcess = spawnDockerSync(['build', '--quiet', '--platform', 'linux/amd64', '-f', dockerfilePath, optionsWithDefaults.path])
-  // eslint-disable-next-line unicorn/better-regex
-  const match = /sha256:([a-f0-9]+)/.exec(buildProcess.stdout)
-  const imageId = match?.[1] || null
-  if (imageId === null) {
-    throw new Error("Docker exited without errors but couldn't extract image id from output.")
-  }
-  return imageId
+  return new Promise<string>((resolve, reject) => {
+    const buildProcess = spawn('docker', ['build', '--platform', 'linux/amd64', '-f', dockerfilePath, optionsWithDefaults.path], { stdio: ['inherit', 'pipe', 'pipe'] })
+
+    let output = ''
+    buildProcess.stdout.on('data', data => {
+      process.stdout.write(data)
+      output += data.toString()
+    })
+
+    buildProcess.stderr.on('data', data => {
+      process.stderr.write(data)
+      output += data.toString()
+    })
+
+    buildProcess.on('error', err => {
+      const errMsg = getDockerErrorMsg(err.message) ?? err.message
+      reject(new Error(errMsg))
+    })
+
+    buildProcess.on('close', code => {
+      if (code === 0) {
+        // eslint-disable-next-line unicorn/better-regex
+        const match = /writing image sha256:([a-f0-9]+)/.exec(output)
+        const imageId = match?.[1] || null
+        if (imageId === null) {
+          throw new Error("Docker exited without errors but couldn't extract image id from output.")
+        }
+        resolve(imageId)
+      } else {
+        reject(new Error('Error building image'))
+      }
+    })
+  })
 }
 
 export async function push(imageName: string, auth: string): Promise<void> {
