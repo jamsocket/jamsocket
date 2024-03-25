@@ -1,5 +1,6 @@
 import { Command } from '@oclif/core'
 import { Jamsocket } from '../../jamsocket'
+import { blue } from '../../formatting'
 
 export default class Logs extends Command {
     static description = 'Stream logs from a running backend.'
@@ -15,6 +16,9 @@ export default class Logs extends Command {
     public async run(): Promise<void> {
       const jamsocket = Jamsocket.fromEnvironment()
       const { args } = await this.parse(Logs)
+
+      console.log(blue('Reminder: you can find help troubleshooting common issues at https://docs.jamsocket.com/platform/troubleshooting'))
+      console.log()
 
       const logsStream = jamsocket.streamLogs(args.backend, line => {
         this.log(line)
