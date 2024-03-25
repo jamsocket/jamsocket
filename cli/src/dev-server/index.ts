@@ -221,7 +221,7 @@ class DevServer {
     this.logger.clearFooter()
     let imageId: string
     try {
-      imageId = buildImage(dockerfile, dockerOptions)
+      imageId = await buildImage(dockerfile, dockerOptions)
     } catch (error) {
       this.currentImageId = null
       const msg = error instanceof Error ? error.toString() : 'Unknown error'
