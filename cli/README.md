@@ -29,7 +29,7 @@ If you want to use the Jamsocket CLI from an automated environment (e.g. a CI/CD
 * [`jamsocket login`](#jamsocket-login)
 * [`jamsocket logout`](#jamsocket-logout)
 * [`jamsocket logs BACKEND`](#jamsocket-logs-backend)
-* [`jamsocket push SERVICE IMAGE`](#jamsocket-push-service-image)
+* [`jamsocket push SERVICE [IMAGE]`](#jamsocket-push-service-image)
 * [`jamsocket service create NAME`](#jamsocket-service-create-name)
 * [`jamsocket service delete NAME`](#jamsocket-service-delete-name)
 * [`jamsocket service images SERVICE`](#jamsocket-service-images-service)
@@ -243,26 +243,30 @@ EXAMPLES
   $ jamsocket logs f7em2
 ```
 
-## `jamsocket push SERVICE IMAGE`
+## `jamsocket push SERVICE [IMAGE]`
 
-Pushes a docker image to the jamcr.io container registry under your logged in user's name.
+Builds and pushes an image to Jamsocket's container registry using the provided Dockerfile.
 
 ```
 USAGE
-  $ jamsocket push [SERVICE] [IMAGE] [-t <value>]
+  $ jamsocket push [SERVICE] [IMAGE] [-f <value>] [-c <value>] [-t <value>]
 
 ARGUMENTS
   SERVICE  Jamsocket service to push the image to
-  IMAGE    Docker image to push
+  IMAGE    Optionally, provide an image to push instead of a Dockerfile
 
 FLAGS
-  -t, --tag=<value>  optional tag to apply to the image in the jamsocket registry
+  -c, --context=<value>     path to the build context for the Dockerfile (defaults to current working directory)
+  -f, --dockerfile=<value>  path to the Dockerfile to build the image from
+  -t, --tag=<value>         optional tag to apply to the image in the jamsocket registry
 
 DESCRIPTION
-  Pushes a docker image to the jamcr.io container registry under your logged in user's name.
+  Builds and pushes an image to Jamsocket's container registry using the provided Dockerfile.
 
 EXAMPLES
-  $ jamsocket push my-service my-image
+  $ jamsocket push my-service -f path/to/Dockerfile
+
+  $ jamsocket push my-service -f path/to/Dockerfile -c .
 
   $ jamsocket push my-service my-image -t my-tag
 ```
