@@ -1,0 +1,4 @@
+{
+  "dockerfile": "./src/session-backend/Dockerfile.jamsocket",
+  "watch": ["./src/session-backend"]
+}
