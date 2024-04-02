@@ -302,7 +302,7 @@ class DevServer {
   }
 
   async streamLogs(backend: Backend): Promise<void> {
-    backend.logsStream = this.plane.streamLogs(backend.name, log => {
+    backend.logsStream = await this.plane.streamLogs(backend.name, log => {
       this.logger.log([chalk[backend.color](`[${backend.name}] ${log}`)])
     })
     this.logger.log([`Streaming logs for ${chalk[backend.color](backend.name)}`])

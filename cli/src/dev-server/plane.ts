@@ -3,7 +3,7 @@ import readline from 'readline'
 import chalk from 'chalk'
 import EventSource from 'eventsource'
 import { SpawnResult, HTTPError } from '../api'
-import { capitalize } from './util'
+import { capitalize, sleep } from './util'
 import { spawnDockerSync } from '../docker'
 import type { Logger } from './logger'
 
@@ -97,8 +97,18 @@ export class LocalPlane {
     return this._readyPromise
   }
 
-  streamLogs(backend: string, callback: (logLine: string) => void): StreamHandle {
+  async streamLogs(backend: string, callback: (logLine: string) => void): Promise<StreamHandle> {
     const containerName = `plane-${backend}`
+
+    // there can be race conditions where the container is not yet available, so let's retry a few times
+    let retries = 0
+    while (retries < 3) {
+      const result = spawnDockerSync(['container', 'inspect', containerName])
+      if (result.status === 0) break
+      await sleep(500)
+      retries += 1
+    }
+
     const logsProcess = spawn('docker', ['logs', containerName, '-f'])
     const stdout = readline.createInterface({ input: logsProcess.stdout }).on('line', callback)
     const stderr = readline.createInterface({ input: logsProcess.stderr }).on('line', callback)
