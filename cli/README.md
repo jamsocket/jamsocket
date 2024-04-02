@@ -133,10 +133,11 @@ Starts a local jamsocket dev server. You may configure the dev server with a jam
 
 ```
 USAGE
-  $ jamsocket dev [-d <value>] [-w <value>] [-p <value>] [-i]
+  $ jamsocket dev [-f <value>] [-c <value>] [-w <value>] [-p <value>] [-i]
 
 FLAGS
-  -d, --dockerfile=<value>  Path to the session backend's Dockerfile
+  -c, --context=<value>     Path to the build context for the Dockerfile (defaults to current working directory)
+  -f, --dockerfile=<value>  Path to the session backend's Dockerfile
   -i, --[no-]interactive    Enables/Disables TTY iteractivity. (Defaults to true)
   -p, --port=<value>        The port to run the dev server on. (Defaults to 8080)
   -w, --watch=<value>...    A file or directory to watch for changes
