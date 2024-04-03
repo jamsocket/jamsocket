@@ -1,4 +1,7 @@
 {
-  "dockerfile": "./src/session-backend/Dockerfile.jamsocket",
-  "watch": ["./src/session-backend"]
+  "dockerfile": "./src/session-backend/Dockerfile",
+  "watch": ["./src/session-backend"],
+  "dockerOptions": {
+    "path": "."
+  }
 }
