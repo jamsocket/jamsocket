@@ -129,7 +129,7 @@ EXAMPLES
 
 ## `jamsocket dev`
 
-Starts a local jamsocket dev server. You may configure the dev server with a jamsocket.config.js file in the current directory or by passing flags. (Flags take precedence over jamsocket.config.js)
+Starts a local jamsocket dev server. You may configure the dev server with a jamsocket.config.json file in the current directory or by passing flags. (Flags take precedence over jamsocket.config.json)
 
 ```
 USAGE
@@ -143,8 +143,8 @@ FLAGS
   -w, --watch=<value>...    A file or directory to watch for changes
 
 DESCRIPTION
-  Starts a local jamsocket dev server. You may configure the dev server with a jamsocket.config.js file in the current
-  directory or by passing flags. (Flags take precedence over jamsocket.config.js)
+  Starts a local jamsocket dev server. You may configure the dev server with a jamsocket.config.json file in the current
+  directory or by passing flags. (Flags take precedence over jamsocket.config.json)
 
 EXAMPLES
   $ jamsocket dev

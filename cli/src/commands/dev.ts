@@ -57,7 +57,7 @@ function getProjectConfig(): ProjectConfig | null {
 }
 
 export default class Dev extends Command {
-  static description = 'Starts a local jamsocket dev server. You may configure the dev server with a jamsocket.config.js file in the current directory or by passing flags. (Flags take precedence over jamsocket.config.js)'
+  static description = 'Starts a local jamsocket dev server. You may configure the dev server with a jamsocket.config.json file in the current directory or by passing flags. (Flags take precedence over jamsocket.config.json)'
   static examples = [
     '<%= config.bin %> <%= command.id %>',
     '<%= config.bin %> <%= command.id %> --dockerfile session-backend/Dockerfile --watch src --watch package.json --port 8080',
