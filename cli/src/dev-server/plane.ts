@@ -103,7 +103,7 @@ export class LocalPlane {
     // there can be race conditions where the container is not yet available, so let's retry a few times
     let retries = 0
     while (retries < 3) {
-      const result = spawnDockerSync(['container', 'inspect', containerName])
+      const result = spawnSync('docker', ['container', 'inspect', containerName])
       if (result.status === 0) break
       await sleep(500)
       retries += 1
