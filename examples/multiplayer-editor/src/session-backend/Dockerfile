@@ -1,4 +1,4 @@
-FROM node:16-alpine
+FROM node:18-alpine
 WORKDIR /app
 COPY src/session-backend/package.json src/session-backend/package-lock.json ./
 RUN npm install
