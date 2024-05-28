@@ -2,7 +2,7 @@ import { Command } from '@oclif/core'
 import chalk from 'chalk'
 import { formatDistanceToNow } from 'date-fns'
 import { Jamsocket } from '../../jamsocket'
-import { blue, gray, lightBlue, lightMagenta } from '../../formatting'
+import { blue, gray, lightBlue, lightMagenta, lightGreen } from '../../formatting'
 
 export default class Create extends Command {
   static description = 'Gets some information about a service'
@@ -19,6 +19,8 @@ export default class Create extends Command {
     const jamsocket = Jamsocket.fromEnvironment()
     const info = await jamsocket.serviceInfo(args.name)
 
+    const appBaseUrl = jamsocket.api.getAppBaseUrl()
+
     const lastSpawn = info.last_spawned_at ? blue(`${formatDistanceToNow(new Date(info.last_spawned_at))} ago`) : '-'
     let lastPush = '-'
     if (info.last_image_upload_time) {
@@ -33,6 +35,7 @@ export default class Create extends Command {
     this.log(`  created: ${blue(`${formatDistanceToNow(new Date(info.created_at))} ago`)}`)
     this.log(`  last spawn: ${lastSpawn}`)
     this.log(`  last image push: ${lastPush}`)
+    this.log(`  dashboard: ${lightGreen(`${appBaseUrl}/service/${info.name}`)}`)
 
     if (info.environments.length > 1) {
       this.log()

@@ -2,7 +2,7 @@ import { Command, Flags } from '@oclif/core'
 import chalk from 'chalk'
 import { Jamsocket } from '../../jamsocket'
 import * as customFlags from '../../flags'
-import { blue, lightBlue } from '../../formatting'
+import { blue, lightBlue, lightGreen } from '../../formatting'
 
 export default class Spawn extends Command {
   static aliases = ['spawn']
@@ -43,6 +43,8 @@ export default class Spawn extends Command {
     const jamsocket = Jamsocket.fromEnvironment()
     const responseBody = await jamsocket.spawn(service, environment, env, flags.grace, flags.lock)
 
+    const appBaseUrl = jamsocket.api.getAppBaseUrl()
+
     this.log(lightBlue('Backend spawned!'))
     this.log(chalk.bold`backend name:   `, blue(responseBody.name))
     this.log(chalk.bold`backend status: `, blue(responseBody.status ?? '-'))
@@ -52,5 +54,6 @@ export default class Spawn extends Command {
     if (flags.lock) {
       this.log(chalk.bold`spawned:        `, blue(responseBody.spawned.toString()))
     }
+    this.log(chalk.bold`dashboard:      `, lightGreen(`${appBaseUrl}/backend/${responseBody.name}`))
   }
 }

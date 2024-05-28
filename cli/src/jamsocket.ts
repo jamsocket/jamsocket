@@ -5,7 +5,7 @@ import { tag as dockerTag, push as dockerPush } from './docker'
 import type { EventStreamReturn } from './request'
 
 export class Jamsocket {
-  constructor(public config: JamsocketConfig | null, private api: JamsocketApi) {}
+  constructor(public config: JamsocketConfig | null, public api: JamsocketApi) {}
 
   public static fromEnvironment(): Jamsocket {
     const config = JamsocketConfig.fromSaved()
