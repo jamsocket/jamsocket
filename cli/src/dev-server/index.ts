@@ -32,6 +32,7 @@ type Options = {
   port?: number
   interactive?: boolean
   dockerOptions?: BuildImageOptions
+  useStaticToken?: boolean
 }
 
 export async function createDevServer(opts: Options): Promise<void> {
@@ -68,9 +69,11 @@ class DevServer {
   plane: LocalPlane
   server: http.Server | null = null
   port: number = DEFAULT_DEV_SERVER_PORT
+  useStaticToken = false
 
   constructor(private opts: Options) {
     if (opts.port) this.port = opts.port
+    if (opts.useStaticToken) this.useStaticToken = opts.useStaticToken
     this.logger = new Logger(this.getFooter.bind(this))
     this.logger.log(['Starting plane'])
     const { url, process, containerName } = runPlane()
@@ -437,7 +440,7 @@ class DevServer {
       return new HTTPError(500, 'Internal Error', 'Error spawning backend: the latest build of your session backend\'s Dockerfile has either failed or has not yet completed. Make sure all docker build errors are resolved and a new image is built before spawning.')
     }
 
-    const result = await this.plane.spawn(imageId, body.env, body.grace_period_seconds, body.lock)
+    const result = await this.plane.spawn(imageId, body.env, body.grace_period_seconds, body.lock, this.useStaticToken)
     if (result instanceof HTTPError) return result
 
     const existingBackend = this.devBackends.get(result.name)

@@ -12,6 +12,7 @@ type ProjectConfig = {
   watch?: string | string[],
   port?: number
   interactive?: boolean,
+  useStaticToken?: boolean,
   dockerOptions?: {
     path?: string
   }
@@ -23,6 +24,7 @@ function isProjectConfig(obj: any): obj is ProjectConfig {
   if (obj.watch && typeof obj.watch !== 'string' && !Array.isArray(obj.watch)) return false
   if (obj.port && typeof obj.port !== 'number') return false
   if (obj.interactive && typeof obj.interactive !== 'boolean') return false
+  if (obj.useStaticToken && typeof obj.useStaticToken !== 'boolean') return false
   if (obj.dockerOptions) {
     if (typeof obj.dockerOptions !== 'object' || obj.dockerOptions === null) return false
     if (obj.dockerOptions.path && typeof obj.dockerOptions.path !== 'string') return false
@@ -71,6 +73,7 @@ export default class Dev extends Command {
     watch: Flags.string({ char: 'w', multiple: true, description: 'A file or directory to watch for changes' }),
     port: Flags.integer({ char: 'p', description: 'The port to run the dev server on. (Defaults to 8080)' }),
     interactive: Flags.boolean({ char: 'i', description: 'Enables/Disables TTY iteractivity. (Defaults to true)', allowNo: true }),
+    'use-static-token': Flags.boolean({ char: 's', hidden: true, description: 'Makes session backends use a static connection token instead of generating a new one with each spawn/connect request. (Defaults to false)', allowNo: false }),
   }
 
   public async run(): Promise<void> {
@@ -97,12 +100,15 @@ export default class Dev extends Command {
       dockerOptions.path = path.resolve(process.cwd(), dockerContext)
     }
 
+    const useStaticToken = flags['use-static-token'] ?? projectConfig?.useStaticToken ?? undefined
+
     await createDevServer({
       dockerfile: path.resolve(process.cwd(), dockerfile),
       watch: watch?.map(w => path.resolve(process.cwd(), w)),
       port,
       interactive,
       dockerOptions,
+      useStaticToken,
     })
   }
 }

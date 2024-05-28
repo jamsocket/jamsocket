@@ -186,17 +186,22 @@ export class LocalPlane {
     env?: Record<string, string>,
     gracePeriodSeconds?: number,
     lock?: string,
+    useStaticToken?: boolean,
   ): Promise<SpawnResult | HTTPError> {
     const spawnUrl = `${this.url}/ctrl/connect`
+    const spawnConfig: Record<string, any> = {
+      executable: { image, env, pull_policy: 'Never' },
+      max_idle_seconds: gracePeriodSeconds,
+    }
+    if (useStaticToken) {
+      spawnConfig.use_static_token = true
+    }
     const spawnBody = {
       key: lock ? {
         name: lock,
         tag: image,
       } : undefined,
-      spawn_config: {
-        executable: { image, env, pull_policy: 'Never' },
-        max_idle_seconds: gracePeriodSeconds,
-      },
+      spawn_config: spawnConfig,
     }
     const response = await fetch(spawnUrl, {
       method: 'POST',
