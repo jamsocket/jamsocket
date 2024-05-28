@@ -345,6 +345,13 @@ class DevServer {
         return
       }
 
+      const terminateMatch = /^\/backend\/([^/]+)\/terminate/.exec(req.url ?? '')
+      if (req.method === 'POST' && terminateMatch !== null) {
+        const backendName = terminateMatch[1]
+        await this.handleTerminateRequest(backendName, res)
+        return
+      }
+
       res.writeHead(404)
       res.end()
     })
@@ -385,6 +392,21 @@ class DevServer {
     res.setHeader('Content-Type', 'application/json')
     res.writeHead(200)
     res.end(JSON.stringify(data))
+  }
+
+  async handleTerminateRequest(backendName: string, res: http.ServerResponse): Promise<void> {
+    const b = this.devBackends.get(backendName)
+    // if the dev CLI doesn't know about this backend, then 404
+    if (!b || b.lastStatus === null) {
+      res.writeHead(404)
+      res.end()
+      return
+    }
+
+    await this.terminateBackends([backendName])
+    res.setHeader('Content-Type', 'application/json')
+    res.writeHead(200)
+    res.end('{"status":"ok"}')
   }
 
   async handleSpawnRequest(req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
