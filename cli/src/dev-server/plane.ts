@@ -39,7 +39,7 @@ export type StreamHandle = {
   close: () => void
 }
 
-const PLANE_IMAGE = 'plane/quickstart:sha-924ab05'
+const PLANE_IMAGE = 'plane/quickstart:sha-82ab7a9'
 const LAST_N_PLANE_LOGS = 20 // the number of plane logs to show if a Plane error is enountered
 
 // NOTE: this class works with a Plane2 interface, but its own interface is meant to be compatible with Jamsocket V1
