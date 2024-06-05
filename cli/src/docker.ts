@@ -97,6 +97,11 @@ export function tag(existingImageName: string, newImageName: string): void {
   spawnDockerSync(['tag', existingImageName, newImageName], { stdio: 'inherit' })
 }
 
+export function getDockerNetworks(): string[] {
+  const result = spawnDockerSync(['network', 'ls', '--format', '{{.Name}}'])
+  return result.stdout.split('\n').filter(Boolean)
+}
+
 export function spawnDockerSync(args: string[], options?: { stdio?: StdioOptions }): SpawnSyncReturns<string> {
   const opts: SpawnSyncOptionsWithStringEncoding = { encoding: 'utf-8', ...options }
   const result = spawnSync('docker', args, opts)

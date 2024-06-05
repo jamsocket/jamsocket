@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from 'fs'
 import path from 'path'
 import { Command, Flags } from '@oclif/core'
 import { createDevServer } from '../dev-server'
-import type { BuildImageOptions } from '../docker'
+import { type BuildImageOptions, getDockerNetworks } from '../docker'
 
 const PROJECT_CONFIG_PATH_JS = path.resolve(process.cwd(), 'jamsocket.config.js')
 const PROJECT_CONFIG_PATH_JSON = path.resolve(process.cwd(), 'jamsocket.config.json')
@@ -104,6 +104,13 @@ export default class Dev extends Command {
     }
 
     const dockerNetwork = flags['docker-network'] ?? projectConfig?.dockerOptions?.network ?? undefined
+
+    if (dockerNetwork) {
+      const availableDockerNetworks = getDockerNetworks()
+      if (!availableDockerNetworks.includes(dockerNetwork)) {
+        throw new Error(`Docker network "${dockerNetwork}" not found. Available networks: ${availableDockerNetworks.join(', ')}`)
+      }
+    }
 
     const useStaticToken = flags['use-static-token'] ?? projectConfig?.useStaticToken ?? undefined
 
