@@ -39,7 +39,7 @@ export type StreamHandle = {
   close: () => void
 }
 
-const PLANE_IMAGE = 'plane/quickstart:sha-8a0f9b6'
+const PLANE_IMAGE = 'plane/quickstart:sha-7b65d54'
 const LAST_N_PLANE_LOGS = 20 // the number of plane logs to show if a Plane error is enountered
 
 // NOTE: this class works with a Plane2 interface, but its own interface is meant to be compatible with Jamsocket V1
@@ -187,6 +187,7 @@ export class LocalPlane {
     gracePeriodSeconds?: number,
     lock?: string,
     useStaticToken?: boolean,
+    dockerNetwork?: string,
   ): Promise<SpawnResult | HTTPError> {
     const spawnUrl = `${this.url}/ctrl/connect`
     const spawnConfig: Record<string, any> = {
@@ -195,6 +196,9 @@ export class LocalPlane {
     }
     if (useStaticToken) {
       spawnConfig.use_static_token = true
+    }
+    if (dockerNetwork) {
+      spawnConfig.executable.network_name = dockerNetwork
     }
     const spawnBody = {
       key: lock ? {

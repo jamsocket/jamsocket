@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from 'fs'
 import path from 'path'
 import { Command, Flags } from '@oclif/core'
 import { createDevServer } from '../dev-server'
-import type { BuildImageOptions } from '../docker'
+import { type BuildImageOptions, getDockerNetworks } from '../docker'
 
 const PROJECT_CONFIG_PATH_JS = path.resolve(process.cwd(), 'jamsocket.config.js')
 const PROJECT_CONFIG_PATH_JSON = path.resolve(process.cwd(), 'jamsocket.config.json')
@@ -14,7 +14,8 @@ type ProjectConfig = {
   interactive?: boolean,
   useStaticToken?: boolean,
   dockerOptions?: {
-    path?: string
+    path?: string,
+    network?: string,
   }
 }
 
@@ -28,6 +29,7 @@ function isProjectConfig(obj: any): obj is ProjectConfig {
   if (obj.dockerOptions) {
     if (typeof obj.dockerOptions !== 'object' || obj.dockerOptions === null) return false
     if (obj.dockerOptions.path && typeof obj.dockerOptions.path !== 'string') return false
+    if (obj.dockerOptions.network && typeof obj.dockerOptions.network !== 'string') return false
   }
   return true
 }
@@ -70,6 +72,7 @@ export default class Dev extends Command {
     dockerfileold: Flags.string({ char: 'd', description: 'Path to the session backend\'s Dockerfile', hidden: true }),
     dockerfile: Flags.string({ char: 'f', description: 'Path to the session backend\'s Dockerfile' }),
     context: Flags.string({ char: 'c', description: 'Path to the build context for the Dockerfile (defaults to current working directory)' }),
+    'docker-network': Flags.string({ char: 'n', hidden: true, description: 'The Docker network to use for the session backend (only for development)' }),
     watch: Flags.string({ char: 'w', multiple: true, description: 'A file or directory to watch for changes' }),
     port: Flags.integer({ char: 'p', description: 'The port to run the dev server on. (Defaults to 8080)' }),
     interactive: Flags.boolean({ char: 'i', description: 'Enables/Disables TTY iteractivity. (Defaults to true)', allowNo: true }),
@@ -100,6 +103,15 @@ export default class Dev extends Command {
       dockerOptions.path = path.resolve(process.cwd(), dockerContext)
     }
 
+    const dockerNetwork = flags['docker-network'] ?? projectConfig?.dockerOptions?.network ?? undefined
+
+    if (dockerNetwork) {
+      const availableDockerNetworks = getDockerNetworks()
+      if (!availableDockerNetworks.includes(dockerNetwork)) {
+        throw new Error(`Docker network "${dockerNetwork}" not found. Available networks: ${availableDockerNetworks.join(', ')}`)
+      }
+    }
+
     const useStaticToken = flags['use-static-token'] ?? projectConfig?.useStaticToken ?? undefined
 
     await createDevServer({
@@ -109,6 +121,7 @@ export default class Dev extends Command {
       interactive,
       dockerOptions,
       useStaticToken,
+      dockerNetwork,
     })
   }
 }
