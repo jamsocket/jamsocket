@@ -9,7 +9,7 @@ enum HttpMethod {
 
 export type CheckAuthResult = {
   status: 'ok';
-  account: string | null;
+  // account: string | null; // this is now deprecated
   accounts: string[];
 }
 
