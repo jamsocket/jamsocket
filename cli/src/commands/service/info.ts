@@ -35,7 +35,7 @@ export default class Create extends Command {
     this.log(`  created: ${blue(`${formatDistanceToNow(new Date(info.created_at))} ago`)}`)
     this.log(`  last spawn: ${lastSpawn}`)
     this.log(`  last image push: ${lastPush}`)
-    this.log(`  dashboard: ${lightGreen(`${appBaseUrl}/service/${info.name}`)}`)
+    this.log(`  dashboard: ${lightGreen(`${appBaseUrl}/service/${info.account_name}/${info.name}`)}`)
 
     if (info.environments.length > 1) {
       this.log()

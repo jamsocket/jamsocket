@@ -5,12 +5,14 @@ import { existsSync, readFileSync, mkdirSync, writeFileSync, unlinkSync } from '
 export const JAMSOCKET_CONFIG_DIR = resolve(homedir(), '.jamsocket')
 const JAMSOCKET_CONFIG_PATH = resolve(JAMSOCKET_CONFIG_DIR, 'config.json')
 
+type LoggedInType = 'user_session' | 'api_token'
+
 export type UserSessionConfig = {
   user_session: {
     uuid: string
     token: string
     user_id: string
-    primary_account: string
+    selected_account: string
   }
 }
 
@@ -28,7 +30,7 @@ export function isUserSessionConfig(config: any): config is UserSessionConfig {
     config.user_session.uuid !== undefined &&
     config.user_session.token !== undefined &&
     config.user_session.user_id !== undefined &&
-    config.user_session.primary_account !== undefined
+    config.user_session.selected_account !== undefined
   )
 }
 
@@ -71,6 +73,19 @@ export class JamsocketConfig {
 
   constructor(private config: UserSessionConfig | ApiTokenConfig) {}
 
+  loggedInType(): LoggedInType {
+    if (isUserSessionConfig(this.config)) return 'user_session'
+    return 'api_token'
+  }
+
+  updateSelectedAccount(selectedAccount: string): void {
+    if (isUserSessionConfig(this.config)) {
+      this.config.user_session.selected_account = selectedAccount
+    } else {
+      throw new Error('Cannot update selected account for API token config. This is a bug with the Jamsocket CLI.')
+    }
+  }
+
   save(): void {
     const dir = dirname(JAMSOCKET_CONFIG_PATH)
     mkdirSync(dir, { recursive: true })
@@ -90,7 +105,7 @@ export class JamsocketConfig {
 
   getAccount(): string {
     if (isApiTokenConfig(this.config)) return this.config.api_token.account
-    return this.config.user_session.primary_account
+    return this.config.user_session.selected_account
   }
 
   getRegistryAuth(): string {

@@ -26,7 +26,7 @@ If you want to use the Jamsocket CLI from an automated environment (e.g. a CI/CD
 * [`jamsocket dev`](#jamsocket-dev)
 * [`jamsocket help [COMMAND]`](#jamsocket-help-command)
 * [`jamsocket images SERVICE`](#jamsocket-images-service)
-* [`jamsocket login`](#jamsocket-login)
+* [`jamsocket login [ACCOUNT]`](#jamsocket-login-account)
 * [`jamsocket logout`](#jamsocket-logout)
 * [`jamsocket logs BACKEND`](#jamsocket-logs-backend)
 * [`jamsocket push SERVICE [IMAGE]`](#jamsocket-push-service-image)
@@ -190,13 +190,16 @@ EXAMPLES
   $ jamsocket images my-service
 ```
 
-## `jamsocket login`
+## `jamsocket login [ACCOUNT]`
 
 Authenticates user to the Jamsocket API.
 
 ```
 USAGE
-  $ jamsocket login [-t <value>]
+  $ jamsocket login [ACCOUNT] [-t <value>]
+
+ARGUMENTS
+  ACCOUNT  Account to use when logging in. (Only necessary for users with multiple accounts.)
 
 FLAGS
   -t, --token=<value>  for automated environments, optional API token to log into the CLI with

@@ -9,7 +9,7 @@ enum HttpMethod {
 
 export type CheckAuthResult = {
   status: 'ok';
-  account: string | null;
+  // account: string | null; // this is now deprecated
   accounts: string[];
 }
 
@@ -263,65 +263,65 @@ export class JamsocketApi {
     return this.makeAuthenticatedRequest<CheckAuthResult>(url, HttpMethod.Get, authToken)
   }
 
-  public serviceImage(username: string, serviceName: string, authToken: string): Promise<ServiceImageResult> {
-    const url = `/user/${username}/service/${serviceName}/image`
+  public serviceImage(accountName: string, serviceName: string, authToken: string): Promise<ServiceImageResult> {
+    const url = `/v2/service/${accountName}/${serviceName}/image-name`
     return this.makeAuthenticatedRequest<ServiceImageResult>(url, HttpMethod.Get, authToken)
   }
 
-  public serviceCreate(username: string, name: string, authToken: string): Promise<ServiceCreateResult> {
-    const url = `/user/${username}/service`
+  public serviceCreate(accountName: string, name: string, authToken: string): Promise<ServiceCreateResult> {
+    const url = `/v2/account/${accountName}/service`
     return this.makeAuthenticatedRequest<ServiceCreateResult>(url, HttpMethod.Post, authToken, {
       name,
     })
   }
 
-  public serviceDelete(username: string, serviceName: string, authToken: string): Promise<ServiceDeleteResult> {
-    const url = `/user/${username}/service/${serviceName}/delete`
+  public serviceDelete(accountName: string, serviceName: string, authToken: string): Promise<ServiceDeleteResult> {
+    const url = `/v2/service/${accountName}/${serviceName}/delete`
     return this.makeAuthenticatedRequest<ServiceDeleteResult>(url, HttpMethod.Post, authToken)
   }
 
-  public serviceInfo(username: string, serviceName: string, authToken: string): Promise<ServiceInfoResult> {
-    const url = `/user/${username}/service/${serviceName}`
+  public serviceInfo(accountName: string, serviceName: string, authToken: string): Promise<ServiceInfoResult> {
+    const url = `/v2/service/${accountName}/${serviceName}`
     return this.makeAuthenticatedRequest<ServiceInfoResult>(url, HttpMethod.Get, authToken)
   }
 
-  public serviceList(username: string, authToken: string): Promise<ServiceListResult> {
-    const url = `/user/${username}/services`
+  public serviceList(accountName: string, authToken: string): Promise<ServiceListResult> {
+    const url = `/v2/account/${accountName}/services`
     return this.makeAuthenticatedRequest<ServiceListResult>(url, HttpMethod.Get, authToken)
   }
 
-  public updateEnvironment(account: string, service: string, environment: string, authToken: string, body: UpdateEnvironmentBody): Promise<EnvironmentUpdateResult> {
-    const url = `/env/${account}/${service}/${environment}/update`
+  public updateEnvironment(accountName: string, service: string, environment: string, authToken: string, body: UpdateEnvironmentBody): Promise<EnvironmentUpdateResult> {
+    const url = `/v2/service-env/${accountName}/${service}/${environment}/update`
     return this.makeAuthenticatedRequest<EnvironmentUpdateResult>(url, HttpMethod.Post, authToken, body)
   }
 
-  public spawn(username: string, serviceName: string, authToken: string, body: SpawnRequestBody): Promise<SpawnResult> {
-    const url = `/user/${username}/service/${serviceName}/spawn`
+  public spawn(accountName: string, serviceName: string, authToken: string, body: SpawnRequestBody): Promise<SpawnResult> {
+    const url = `/v1/user/${accountName}/service/${serviceName}/spawn`
     return this.makeAuthenticatedRequest<SpawnResult>(url, HttpMethod.Post, authToken, body)
   }
 
-  public listRunningBackends(username: string, authToken: string): Promise<RunningBackendsResult> {
-    const url = `/user/${username}/backends`
+  public listRunningBackends(accountName: string, authToken: string): Promise<RunningBackendsResult> {
+    const url = `/v2/account/${accountName}/backends`
     return this.makeAuthenticatedRequest<RunningBackendsResult>(url, HttpMethod.Get, authToken)
   }
 
-  public imagesList(account: string, serviceName: string, authToken: string): Promise<ServiceImagesResult> {
-    const url = `/user/${account}/service/${serviceName}/images`
+  public imagesList(accountName: string, serviceName: string, authToken: string): Promise<ServiceImagesResult> {
+    const url = `/v2/service/${accountName}/${serviceName}/images`
     return this.makeAuthenticatedRequest<ServiceImagesResult>(url, HttpMethod.Get, authToken)
   }
 
   public streamLogs(backend: string, authToken: string, callback: (line: string) => void): EventStreamReturn {
-    const url = `/backend/${backend}/logs`
+    const url = `/v2/backend/${backend}/logs`
     return this.makeAuthenticatedStreamRequest(url, authToken, callback)
   }
 
   public streamMetrics(backend: string, authToken: string, callback: (line: string) => void): EventStreamReturn {
-    const url = `/backend/${backend}/metrics/stream`
+    const url = `/v2/backend/${backend}/metrics/stream`
     return this.makeAuthenticatedStreamRequest(url, authToken, callback)
   }
 
   public streamStatus(backend: string, callback: (statusMessage: StatusMessage) => void): EventStreamReturn {
-    const url = `/backend/${backend}/status/stream`
+    const url = `/v1/backend/${backend}/status/stream`
     const wrappedCallback = (line: string) => {
       const val = JSON.parse(line)
       callback({
@@ -333,37 +333,37 @@ export class JamsocketApi {
   }
 
   public async status(backend: string): Promise<StatusMessage> {
-    const url = `/backend/${backend}/status`
+    const url = `/v1/backend/${backend}/status`
     return this.makeRequest<StatusMessage>(url, HttpMethod.Get)
   }
 
   public async terminate(backend: string, authToken: string): Promise<TerminateResult> {
-    const url = `/backend/${backend}/terminate`
+    const url = `/v2/backend/${backend}/terminate`
     return this.makeAuthenticatedRequest<TerminateResult>(url, HttpMethod.Post, authToken)
   }
 
   public async backendInfo(backend: string, authToken: string): Promise<BackendInfoResult> {
-    const url = `/backend/${backend}`
+    const url = `/v1/backend/${backend}`
     return this.makeAuthenticatedRequest<BackendInfoResult>(url, HttpMethod.Get, authToken)
   }
 
   public async startLoginAttempt(): Promise<CliLoginAttemptResult> {
-    const url = '/cli_login'
+    const url = '/cli-login'
     return this.makeRequest<CliLoginAttemptResult>(url, HttpMethod.Post, {})
   }
 
   public async completeLoginAttempt(token: string, code: string): Promise<CompleteCliLoginResult> {
-    const url = `/cli_login/${token}/complete`
+    const url = `/cli-login/${token}/complete`
     return this.makeRequest<CompleteCliLoginResult>(url, HttpMethod.Post, { code })
   }
 
   public async revokeUserSession(userSessionId: string, authToken: string): Promise<UserSessionRevokeResult> {
-    const url = `/user_session/${userSessionId}`
-    return this.makeAuthenticatedRequest<UserSessionRevokeResult>(url, HttpMethod.Delete, authToken)
+    const url = `/user-session/${userSessionId}/delete`
+    return this.makeAuthenticatedRequest<UserSessionRevokeResult>(url, HttpMethod.Post, authToken)
   }
 
   public streamLoginStatus(loginToken: string): Promise<boolean> {
-    const endpoint = `/cli_login/${loginToken}/status/stream`
+    const endpoint = `/cli-login/${loginToken}/status/stream`
     const url = `${this.apiBase}${endpoint}`
     // right now, this stream only returns a single message and then closes
     return new Promise(resolve => {
