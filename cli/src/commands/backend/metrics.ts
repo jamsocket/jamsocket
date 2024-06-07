@@ -1,6 +1,7 @@
 import { Command } from '@oclif/core'
 import { Jamsocket } from '../../jamsocket'
 import chalk from 'chalk'
+import { blue, lightGreen } from '../../formatting'
 
 function prettifyBytes(bytes: number) {
   const suffixes = ['B', 'KiB', 'MiB', 'GiB', 'TiB']
@@ -31,6 +32,11 @@ export default class Metrics extends Command {
   public async run(): Promise<void> {
     const jamsocket = Jamsocket.fromEnvironment()
     const { args } = await this.parse(Metrics)
+
+    const appBaseUrl = jamsocket.api.getAppBaseUrl()
+    this.log()
+    this.log(blue(`Note: you can see more detailed metrics for this backend at ${lightGreen(`${appBaseUrl}/backend/${args.backend}`)}\n`))
+
     const headers = ['cpu util', 'mem used', 'mem avail']
     function formatRow(values: string[]) {
       const output = values.map((val, i) => val.padEnd(headers[i].length, ' '))
