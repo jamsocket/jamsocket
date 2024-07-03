@@ -24,6 +24,7 @@ export type JamsocketInitOptions =
   | JamsocketDevInitOptions
 
 export type JamsocketSpawnOptions = {
+  tag?: string
   lock?: string
   env?: Record<string, string>
   gracePeriodSeconds?: number
@@ -31,6 +32,7 @@ export type JamsocketSpawnOptions = {
 }
 
 type JamsocketApiSpawnBody = {
+  tag?: string
   lock?: string
   env?: Record<string, string>
   grace_period_seconds?: number
@@ -80,6 +82,7 @@ export function init(opts: JamsocketInitOptions): JamsocketInstance {
 
   const spawnInner = async function (spawnOpts: JamsocketSpawnOptions = {}): Promise<SpawnResult> {
     const reqBody: JamsocketApiSpawnBody = {}
+    if (spawnOpts.tag) reqBody.tag = spawnOpts.tag
     if (spawnOpts.lock) reqBody.lock = spawnOpts.lock
     if (spawnOpts.env) reqBody.env = spawnOpts.env
     if (spawnOpts.gracePeriodSeconds) reqBody.grace_period_seconds = spawnOpts.gracePeriodSeconds

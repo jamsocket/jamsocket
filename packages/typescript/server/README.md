@@ -24,7 +24,7 @@ const jamsocket = Jamsocket.init({
    account: '[YOUR ACCOUNT]',
    token: '[YOUR TOKEN]',
    service: '[YOUR SERVICE]',
-   // during develpment, you can simply pass { dev: true }
+   // during development, you can simply pass { dev: true }
 })
 
 const spawnResult = await jamsocket.spawn() // returns an instance of SpawnResult
@@ -103,6 +103,7 @@ const jamsocket = Jamsocket.init({
 })
 
 const spawnResult = await jamsocket.spawn({
+  tag: 'latest', // optional
   lock: 'my-lock', // optional
   env: { MY_ENV_VAR: 'foo' }, // optional
   gracePeriodSeconds: 300, // optional
@@ -125,6 +126,7 @@ type JamsocketInitOptions =
     }
 
 type JamsocketSpawnOptions = {
+  tag?: string
   lock?: string
   env?: Record<string, string>
   gracePeriodSeconds?: number
