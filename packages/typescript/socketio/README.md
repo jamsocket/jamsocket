@@ -24,7 +24,7 @@ const jamsocket = Jamsocket.init({
    account: '[YOUR ACCOUNT]',
    token: '[YOUR TOKEN]',
    service: '[YOUR SERVICE]',
-   // during develpment, you can simply pass { dev: true }
+   // during development, you can simply pass { dev: true }
 })
 
 const spawnResult = await jamsocket.spawn() // returns an instance of SpawnResult
