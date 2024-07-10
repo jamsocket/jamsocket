@@ -72,6 +72,7 @@ class DevServer {
   port: number = DEFAULT_DEV_SERVER_PORT
   useStaticToken = false
   dockerNetwork: string | undefined
+  imagesBuilding = 0
 
   constructor(private opts: Options) {
     if (opts.port) this.port = opts.port
@@ -182,7 +183,9 @@ class DevServer {
 
   getFooter(): string[] {
     const footer = ['']
-    if (this.devBackends.size > 0) {
+    if (this.imagesBuilding > 0) {
+      footer.push(chalk.yellow` Rebuilding session backend image... Not ready to spawn`)
+    } else if (this.devBackends.size > 0) {
       CliUx.ux.table<Backend>([...this.devBackends.values()], {
         name: {
           header: 'Name',
@@ -222,33 +225,31 @@ class DevServer {
 
   async buildSessionBackend(): Promise<void> {
     this.currentImageId = null
+    this.imagesBuilding += 1
     const { dockerfile, dockerOptions } = this.opts
     this.logger.log([`Building image with Dockerfile: ${dockerfile}`])
-    this.logger.clearFooter()
+
+    /* eslint-disable unicorn/consistent-function-scoping */
+    const stdioWrite = (val: string) => this.logger.log([val])
+
     let imageId: string
     try {
-      imageId = await buildImage(dockerfile, dockerOptions)
+      imageId = await buildImage(dockerfile, dockerOptions, stdioWrite, stdioWrite)
     } catch (error) {
       this.currentImageId = null
+      this.imagesBuilding -= 1
       const msg = error instanceof Error ? error.toString() : 'Unknown error'
       this.logger.log([chalk.red`Error building image: ${msg}`])
       return
     }
     this.currentImageId = imageId
+    this.imagesBuilding -= 1
     this.logger.log([chalk.blue`Successfully built image`])
   }
 
   async rebuild(): Promise<void> {
+    this.terminateAllDevbackends()
     await this.buildSessionBackend()
-
-    const curBackends = [...this.devBackends.values()]
-    // if the current image is null, the session backend failed to build, let's terminate all backends
-    const outdatedBackends = this.currentImageId === null ? curBackends : curBackends.filter(backend => backend.imageId !== this.currentImageId)
-    const outdatedBackendNames = outdatedBackends.map(b => b.name)
-    if (outdatedBackendNames.length > 0) {
-      this.logger.log(['', 'Terminating outdated backends...'])
-      await this.terminateBackends(outdatedBackendNames)
-    }
   }
 
   async terminateAllDevbackends(): Promise<void> {

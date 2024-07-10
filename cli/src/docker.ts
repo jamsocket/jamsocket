@@ -15,7 +15,15 @@ export type BuildImageOptions = {
   path?: string;
 }
 
-export async function buildImage(dockerfilePath: string, options?: BuildImageOptions): Promise<string> {
+type StdioWriteFn = (val: string) => void
+export async function buildImage(
+  dockerfilePath: string,
+  options?: BuildImageOptions,
+  stdoutWrite?: StdioWriteFn,
+  stderrWrite?: StdioWriteFn,
+): Promise<string> {
+  const outWrite = stdoutWrite ?? process.stdout.write.bind(process.stdout)
+  const errWrite = stderrWrite ?? process.stderr.write.bind(process.stderr)
   const optionsWithDefaults: Required<BuildImageOptions> = {
     path: '.',
     ...options,
@@ -26,12 +34,12 @@ export async function buildImage(dockerfilePath: string, options?: BuildImageOpt
 
     let output = ''
     buildProcess.stdout.on('data', data => {
-      process.stdout.write(data)
+      outWrite(data.toString())
       output += data.toString()
     })
 
     buildProcess.stderr.on('data', data => {
-      process.stderr.write(data)
+      errWrite(data.toString())
       output += data.toString()
     })
 
