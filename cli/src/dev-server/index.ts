@@ -7,7 +7,7 @@ import { CliUx } from '@oclif/core'
 import { buildImage } from '../docker'
 import type { BuildImageOptions } from '../docker'
 import { SpawnResult, SpawnRequestBody, HTTPError } from '../api'
-import { readRequestBody, createColorGetter, type Color } from './util'
+import { readRequestBody, createColorGetter, sleep, type Color } from './util'
 import { Logger } from './logger'
 import type { StreamHandle, StatusV1 } from './plane'
 import { LocalPlane, runPlane, ensurePlaneImage, isV1StatusAlive, isV1ErrorStatus, dockerKillPlaneBackends } from './plane'
@@ -393,8 +393,15 @@ class DevServer {
   }
 
   async handleStatusRequest(backendName: string, res: http.ServerResponse): Promise<void> {
-    const b = this.devBackends.get(backendName)
-    // if the dev CLI doesn't know about this backend, then 404
+    let b = this.devBackends.get(backendName)
+    // if the dev CLI doesn't know about this backend yet, it may just need to sleep for a bit
+    // and then try again one more time
+    if (!b) {
+      await sleep(500)
+      b = this.devBackends.get(backendName)
+    }
+
+    // if the dev CLI still doesn't know about this backend, then 404
     if (!b || b.lastStatus === null) {
       res.writeHead(404)
       res.end()
@@ -446,7 +453,7 @@ class DevServer {
   }
 
   async spawnBackend(body: SpawnRequestBody): Promise<SpawnResult | HTTPError> {
-    const imageId = this.currentImageId
+    const imageId = await this.waitUntilImageIsReady(60_000) // wait up to 60 seconds for the image to be ready
     if (!imageId) {
       this.logger.log([chalk.red`Error spawning backend: the latest build of your session backend's Dockerfile has either failed or is still ongoing. Check the logs above and make sure there are no docker build errors before spawning.`])
       return new HTTPError(500, 'Internal Error', 'Error spawning backend: the latest build of your session backend\'s Dockerfile has either failed or has not yet completed. Make sure all docker build errors are resolved and a new image is built before spawning.')
@@ -490,5 +497,18 @@ class DevServer {
     }
 
     return transformedResult
+  }
+
+  // resolves with the image ID when the image is ready
+  // or null if the image fails to build or the timeout is reached
+  async waitUntilImageIsReady(timeoutMs: number): Promise<string | null> {
+    const start = Date.now()
+    while (start + timeoutMs > Date.now()) {
+      if (this.imagesBuilding === 0) {
+        return this.currentImageId
+      }
+      await sleep(500)
+    }
+    return null
   }
 }
