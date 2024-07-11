@@ -20,7 +20,7 @@ export default class Logout extends Command {
       const sessionUuid = savedConfig.getSessionUuid()
       if (sessionUuid !== null) {
         try {
-          await api.revokeUserSession(sessionUuid, savedConfig.getAccessToken())
+          await api.revokeUserSession(sessionUuid, savedConfig)
         } catch (error) {
           const isAuthError = error instanceof AuthenticationError
           if (!isAuthError) throw error

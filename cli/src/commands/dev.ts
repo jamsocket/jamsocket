@@ -3,6 +3,8 @@ import path from 'path'
 import { Command, Flags } from '@oclif/core'
 import { createDevServer } from '../dev-server'
 import { type BuildImageOptions, getDockerNetworks } from '../docker'
+import { JamsocketApi } from '../api'
+import { JamsocketConfig } from '../jamsocket-config'
 
 const PROJECT_CONFIG_PATH_JS = path.resolve(process.cwd(), 'jamsocket.config.js')
 const PROJECT_CONFIG_PATH_JSON = path.resolve(process.cwd(), 'jamsocket.config.json')
@@ -51,6 +53,7 @@ function getProjectConfig(): ProjectConfig | null {
 
   // TODO: phase out JS support?
   if (hasJs) {
+    // eslint-disable-next-line unicorn/prefer-module
     const projectConfig = require(PROJECT_CONFIG_PATH_JS)
     if (!isProjectConfig(projectConfig)) {
       throw new Error('Invalid jamsocket.config.js file. Please see https://docs.jamsocket.com/platform/dev-cli for more information.')
@@ -81,6 +84,8 @@ export default class Dev extends Command {
 
   public async run(): Promise<void> {
     const { flags } = await this.parse(Dev)
+
+    pingAuth()
 
     const projectConfig = getProjectConfig()
     const dockerfile = flags.dockerfile ?? flags.dockerfileold ?? projectConfig?.dockerfile ?? null
@@ -123,5 +128,16 @@ export default class Dev extends Command {
       useStaticToken,
       dockerNetwork,
     })
+  }
+}
+
+async function pingAuth() {
+  const api = JamsocketApi.fromEnvironment()
+  const savedConfig = JamsocketConfig.fromSaved()
+
+  if (savedConfig !== null) {
+    try {
+      await api.checkAuthConfig(savedConfig)
+    } catch {}
   }
 }

@@ -13,6 +13,8 @@ export type UserSessionConfig = {
     token: string
     user_id: string
     selected_account: string
+    user_is_admin: boolean
+    user_email?: string
   }
 }
 
@@ -23,6 +25,7 @@ export type ApiTokenConfig = {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function isUserSessionConfig(config: any): config is UserSessionConfig {
   return (
     config !== undefined &&
@@ -34,6 +37,7 @@ export function isUserSessionConfig(config: any): config is UserSessionConfig {
   )
 }
 
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function isApiTokenConfig(config: any): config is ApiTokenConfig {
   return (
     config !== undefined &&
@@ -98,14 +102,34 @@ export class JamsocketConfig {
   }
 
   // returns a token that can access our API endpoints (either a user session token or api token)
-  getAccessToken(): string {
+  private getAccessToken(): string {
     if (isApiTokenConfig(this.config)) return this.config.api_token.token
     return this.config.user_session.token
+  }
+
+  getAuthHeaders(): Record<string, string> {
+    const headers: Record<string, string> = {
+      Authorization: `Bearer ${this.getAccessToken()}`,
+    }
+    if (this.isAdmin()) {
+      headers['X-Jamsocket-Admin-As-Account'] = this.getAccount()
+    }
+    return headers
   }
 
   getAccount(): string {
     if (isApiTokenConfig(this.config)) return this.config.api_token.account
     return this.config.user_session.selected_account
+  }
+
+  getUserEmail(): string | null {
+    if (isUserSessionConfig(this.config)) return this.config.user_session.user_email ?? null
+    return null
+  }
+
+  isAdmin(): boolean {
+    if (isUserSessionConfig(this.config)) return this.config.user_session.user_is_admin
+    return false
   }
 
   getRegistryAuth(): string {
