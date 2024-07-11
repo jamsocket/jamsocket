@@ -31,6 +31,7 @@ type Options = {
   watch?: string[]
   port?: number
   interactive?: boolean
+  styleLogOutput?: boolean
   dockerOptions?: BuildImageOptions
   useStaticToken?: boolean
   dockerNetwork?: string
@@ -73,11 +74,13 @@ class DevServer {
   useStaticToken = false
   dockerNetwork: string | undefined
   imagesBuilding = 0
+  styleLogOutput = true
 
   constructor(private opts: Options) {
     if (opts.port) this.port = opts.port
     if (opts.useStaticToken) this.useStaticToken = opts.useStaticToken
     if (opts.dockerNetwork) this.dockerNetwork = opts.dockerNetwork
+    if (opts.styleLogOutput !== undefined) this.styleLogOutput = opts.styleLogOutput
     this.logger = new Logger(this.getFooter.bind(this))
     this.logger.log(['Starting plane'])
     const { url, process, containerName } = runPlane()
@@ -282,7 +285,7 @@ class DevServer {
   async streamStatus(backend: Backend): Promise<void> {
     backend.statusStream = this.plane.streamStatus(backend.name, status => {
       backend.lastStatus = status
-      this.logger.log([`Status for ${chalk[backend.color](backend.name)}: ${status.state}`])
+      this.logger.log([`Status for ${this.applyBackendStyle(backend, backend.name)}: ${status.state}`])
       if (!isV1StatusAlive(status.state)) {
         backend.statusStream?.close()
         backend.logsStream?.close()
@@ -296,7 +299,7 @@ class DevServer {
         this.streamLogs(backend)
       }
     })
-    this.logger.log([`Streaming status for ${chalk[backend.color](backend.name)}`])
+    this.logger.log([`Streaming status for ${this.applyBackendStyle(backend, backend.name)}`])
 
     try {
       await backend.statusStream.closed
@@ -305,14 +308,19 @@ class DevServer {
       this.logger.log([chalk.red`Error streaming status: ${msg}`])
     }
 
-    this.logger.log([`Status stream ended for ${chalk[backend.color](backend.name)}`])
+    this.logger.log([`Status stream ended for ${this.applyBackendStyle(backend, backend.name)}`])
+  }
+
+  applyBackendStyle(backend: Backend, text: string) {
+    if (!this.styleLogOutput) return text
+    return chalk[backend.color](text)
   }
 
   async streamLogs(backend: Backend): Promise<void> {
     backend.logsStream = await this.plane.streamLogs(backend.name, log => {
-      this.logger.log([chalk[backend.color](`[${backend.name}] ${log}`)])
+      this.logger.log([this.applyBackendStyle(backend, `[${backend.name}] ${log}`)])
     })
-    this.logger.log([`Streaming logs for ${chalk[backend.color](backend.name)}`])
+    this.logger.log([`Streaming logs for ${this.applyBackendStyle(backend, backend.name)}`])
     try {
       await backend.logsStream.closed
     } catch (error) {
@@ -320,7 +328,7 @@ class DevServer {
       this.logger.log([chalk.red`Error streaming logs: ${msg}`])
     }
 
-    this.logger.log([`Logs stream ended for ${chalk[backend.color](backend.name)}`])
+    this.logger.log([`Logs stream ended for ${this.applyBackendStyle(backend, backend.name)}`])
   }
 
   startServer(): http.Server {
@@ -468,7 +476,7 @@ class DevServer {
         logsStream: null,
       }
       this.devBackends.set(result.name, backend)
-      this.logger.log([`Spawned backend: ${chalk[backend.color](result.name)}`])
+      this.logger.log([`Spawned backend: ${this.applyBackendStyle(backend, result.name)}`])
       this.streamStatus(backend)
     } else {
       this.logger.log([chalk.red`Warning: Spawn with lock returned a running backend that was not originally spawned by this dev server. Blocking spawn.`])
