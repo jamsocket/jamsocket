@@ -307,6 +307,7 @@ export function runPlane(): { url: string, process: ChildProcessWithoutNullStrea
     'host.docker.internal:host-gateway',
     '-v',
     '/var/run/docker.sock:/var/run/docker.sock',
+    '--rm',
     PLANE_IMAGE,
   ])
 
