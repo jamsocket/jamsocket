@@ -165,16 +165,11 @@ export function eventStream(
       res.on('data', (chunk: Buffer) => {
         const lines = chunk.toString().trim().split(/\n\n/)
         for (const line of lines) {
+          // only passes along lines that start with "data:"
+          // otherwise, it will just ignore the line
           const match = line.match(/data: ?(.*)/)
           if (match) {
             callback(match[1])
-          } else {
-            try {
-              const parsed = JSON.parse(line)
-              reject(new Error(parsed.error.message))
-            } catch {
-              reject(new Error(`Expected line to start with data:, got ${line}`))
-            }
           }
         }
       })
