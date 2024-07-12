@@ -28,9 +28,8 @@ export default class Login extends Command {
     const requestedAccount = args.account
 
     if (savedConfig !== null) {
-      const token = savedConfig.getAccessToken()
       try {
-        const result = await api.checkAuth(token)
+        const result = await api.checkAuthConfig(savedConfig)
         this.log()
         if (result.accounts.length === 0) throw new Error(`No account found for logged in user. You may need to log in to ${api.getAppBaseUrl()} to finish setting up your account.`)
 
@@ -55,7 +54,7 @@ export default class Login extends Command {
 
         // if requested an account, check that the account is in the list of accounts
         // if it is, update the primary account and say "You are now logged in as account"
-        if (result.accounts.includes(requestedAccount)) {
+        if (result.accounts.includes(requestedAccount) || result.is_admin) {
           savedConfig.updateSelectedAccount(requestedAccount)
           savedConfig.save()
           this.log(`You're logged in as ${lightBlue(requestedAccount)}\n`)
@@ -80,7 +79,7 @@ export default class Login extends Command {
         throw new Error('Invalid token. Token must contain a period.')
       }
 
-      const { accounts } = await api.checkAuth(token)
+      const { accounts } = await api.checkAuthToken(token)
       this.log()
       if (accounts.length === 0) throw new Error(`No account found for user. You may need to log in to ${api.getAppBaseUrl()} to finish setting up your account.`)
       // an api token can only be used for one account, so this should be the only account in the list
@@ -113,13 +112,13 @@ export default class Login extends Command {
     const code = (await CliUx.ux.prompt(`Paste the ${lightGreen('4-digit code')} you received at login here`)).trim()
 
     const userSession = await api.completeLoginAttempt(loginAttempt.token, code)
-    const authResult = await api.checkAuth(userSession.token)
+    const authResult = await api.checkAuthToken(userSession.token)
 
     if (authResult.accounts.length === 0) throw new Error(`No account found for user. You may need to ${lightMagenta(`log in to ${api.getAppBaseUrl()}`)} to finish setting up your account.`)
 
     // if they requested an account, check if that account is in the list of accounts
     if (requestedAccount) {
-      if (authResult.accounts.includes(requestedAccount)) {
+      if (authResult.accounts.includes(requestedAccount) || authResult.is_admin) {
         this.finalizeUserSessionLogin(userSession, requestedAccount)
         return
       }
@@ -161,6 +160,8 @@ export default class Login extends Command {
         user_id: userSession.user_id,
         token: userSession.token,
         selected_account: selectedAccount,
+        user_is_admin: userSession.user_is_admin ?? false,
+        user_email: userSession.user_email,
       },
     })
     config.save()

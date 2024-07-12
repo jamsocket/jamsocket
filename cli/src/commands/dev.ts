@@ -3,6 +3,8 @@ import path from 'path'
 import { Command, Flags } from '@oclif/core'
 import { createDevServer } from '../dev-server'
 import { type BuildImageOptions, getDockerNetworks } from '../docker'
+import { JamsocketApi } from '../api'
+import { JamsocketConfig } from '../jamsocket-config'
 
 const PROJECT_CONFIG_PATH_JS = path.resolve(process.cwd(), 'jamsocket.config.js')
 const PROJECT_CONFIG_PATH_JSON = path.resolve(process.cwd(), 'jamsocket.config.json')
@@ -13,6 +15,7 @@ type ProjectConfig = {
   port?: number
   interactive?: boolean,
   useStaticToken?: boolean,
+  styleLogOutput?: boolean,
   dockerOptions?: {
     path?: string,
     network?: string,
@@ -26,6 +29,7 @@ function isProjectConfig(obj: any): obj is ProjectConfig {
   if (obj.port && typeof obj.port !== 'number') return false
   if (obj.interactive && typeof obj.interactive !== 'boolean') return false
   if (obj.useStaticToken && typeof obj.useStaticToken !== 'boolean') return false
+  if (obj.styleLogOutput && typeof obj.styleLogOutput !== 'boolean') return false
   if (obj.dockerOptions) {
     if (typeof obj.dockerOptions !== 'object' || obj.dockerOptions === null) return false
     if (obj.dockerOptions.path && typeof obj.dockerOptions.path !== 'string') return false
@@ -51,6 +55,7 @@ function getProjectConfig(): ProjectConfig | null {
 
   // TODO: phase out JS support?
   if (hasJs) {
+    // eslint-disable-next-line unicorn/prefer-module
     const projectConfig = require(PROJECT_CONFIG_PATH_JS)
     if (!isProjectConfig(projectConfig)) {
       throw new Error('Invalid jamsocket.config.js file. Please see https://docs.jamsocket.com/platform/dev-cli for more information.')
@@ -77,10 +82,13 @@ export default class Dev extends Command {
     port: Flags.integer({ char: 'p', description: 'The port to run the dev server on. (Defaults to 8080)' }),
     interactive: Flags.boolean({ char: 'i', description: 'Enables/Disables TTY iteractivity. (Defaults to true)', allowNo: true }),
     'use-static-token': Flags.boolean({ char: 's', hidden: true, description: 'Makes session backends use a static connection token instead of generating a new one with each spawn/connect request. (Defaults to false)', allowNo: false }),
+    'style-log-output': Flags.boolean({ description: 'Styles log output from session backends for better readability. (Defaults to true)', allowNo: true }),
   }
 
   public async run(): Promise<void> {
     const { flags } = await this.parse(Dev)
+
+    pingAuth()
 
     const projectConfig = getProjectConfig()
     const dockerfile = flags.dockerfile ?? flags.dockerfileold ?? projectConfig?.dockerfile ?? null
@@ -113,6 +121,7 @@ export default class Dev extends Command {
     }
 
     const useStaticToken = flags['use-static-token'] ?? projectConfig?.useStaticToken ?? undefined
+    const styleLogOutput = flags['style-log-output'] ?? projectConfig?.styleLogOutput ?? undefined
 
     await createDevServer({
       dockerfile: path.resolve(process.cwd(), dockerfile),
@@ -122,6 +131,18 @@ export default class Dev extends Command {
       dockerOptions,
       useStaticToken,
       dockerNetwork,
+      styleLogOutput,
     })
+  }
+}
+
+async function pingAuth() {
+  const api = JamsocketApi.fromEnvironment()
+  const savedConfig = JamsocketConfig.fromSaved()
+
+  if (savedConfig !== null) {
+    try {
+      await api.checkAuthConfig(savedConfig)
+    } catch {}
   }
 }

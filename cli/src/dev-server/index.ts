@@ -7,7 +7,7 @@ import { CliUx } from '@oclif/core'
 import { buildImage } from '../docker'
 import type { BuildImageOptions } from '../docker'
 import { SpawnResult, SpawnRequestBody, HTTPError } from '../api'
-import { readRequestBody, createColorGetter, type Color } from './util'
+import { readRequestBody, createColorGetter, sleep, type Color } from './util'
 import { Logger } from './logger'
 import type { StreamHandle, StatusV1 } from './plane'
 import { LocalPlane, runPlane, ensurePlaneImage, isV1StatusAlive, isV1ErrorStatus, dockerKillPlaneBackends } from './plane'
@@ -31,6 +31,7 @@ type Options = {
   watch?: string[]
   port?: number
   interactive?: boolean
+  styleLogOutput?: boolean
   dockerOptions?: BuildImageOptions
   useStaticToken?: boolean
   dockerNetwork?: string
@@ -72,11 +73,14 @@ class DevServer {
   port: number = DEFAULT_DEV_SERVER_PORT
   useStaticToken = false
   dockerNetwork: string | undefined
+  imagesBuilding = 0
+  styleLogOutput = true
 
   constructor(private opts: Options) {
     if (opts.port) this.port = opts.port
     if (opts.useStaticToken) this.useStaticToken = opts.useStaticToken
     if (opts.dockerNetwork) this.dockerNetwork = opts.dockerNetwork
+    if (opts.styleLogOutput !== undefined) this.styleLogOutput = opts.styleLogOutput
     this.logger = new Logger(this.getFooter.bind(this))
     this.logger.log(['Starting plane'])
     const { url, process, containerName } = runPlane()
@@ -182,7 +186,9 @@ class DevServer {
 
   getFooter(): string[] {
     const footer = ['']
-    if (this.devBackends.size > 0) {
+    if (this.imagesBuilding > 0) {
+      footer.push(chalk.yellow` Rebuilding session backend image... Not ready to spawn`)
+    } else if (this.devBackends.size > 0) {
       CliUx.ux.table<Backend>([...this.devBackends.values()], {
         name: {
           header: 'Name',
@@ -222,33 +228,31 @@ class DevServer {
 
   async buildSessionBackend(): Promise<void> {
     this.currentImageId = null
+    this.imagesBuilding += 1
     const { dockerfile, dockerOptions } = this.opts
     this.logger.log([`Building image with Dockerfile: ${dockerfile}`])
-    this.logger.clearFooter()
+
+    /* eslint-disable unicorn/consistent-function-scoping */
+    const stdioWrite = (val: string) => this.logger.log([val])
+
     let imageId: string
     try {
-      imageId = await buildImage(dockerfile, dockerOptions)
+      imageId = await buildImage(dockerfile, dockerOptions, stdioWrite, stdioWrite)
     } catch (error) {
       this.currentImageId = null
+      this.imagesBuilding -= 1
       const msg = error instanceof Error ? error.toString() : 'Unknown error'
       this.logger.log([chalk.red`Error building image: ${msg}`])
       return
     }
     this.currentImageId = imageId
+    this.imagesBuilding -= 1
     this.logger.log([chalk.blue`Successfully built image`])
   }
 
   async rebuild(): Promise<void> {
+    this.terminateAllDevbackends()
     await this.buildSessionBackend()
-
-    const curBackends = [...this.devBackends.values()]
-    // if the current image is null, the session backend failed to build, let's terminate all backends
-    const outdatedBackends = this.currentImageId === null ? curBackends : curBackends.filter(backend => backend.imageId !== this.currentImageId)
-    const outdatedBackendNames = outdatedBackends.map(b => b.name)
-    if (outdatedBackendNames.length > 0) {
-      this.logger.log(['', 'Terminating outdated backends...'])
-      await this.terminateBackends(outdatedBackendNames)
-    }
   }
 
   async terminateAllDevbackends(): Promise<void> {
@@ -281,7 +285,7 @@ class DevServer {
   async streamStatus(backend: Backend): Promise<void> {
     backend.statusStream = this.plane.streamStatus(backend.name, status => {
       backend.lastStatus = status
-      this.logger.log([`Status for ${chalk[backend.color](backend.name)}: ${status.state}`])
+      this.logger.log([`Status for ${this.applyBackendStyle(backend, backend.name)}: ${status.state}`])
       if (!isV1StatusAlive(status.state)) {
         backend.statusStream?.close()
         backend.logsStream?.close()
@@ -295,7 +299,7 @@ class DevServer {
         this.streamLogs(backend)
       }
     })
-    this.logger.log([`Streaming status for ${chalk[backend.color](backend.name)}`])
+    this.logger.log([`Streaming status for ${this.applyBackendStyle(backend, backend.name)}`])
 
     try {
       await backend.statusStream.closed
@@ -304,14 +308,19 @@ class DevServer {
       this.logger.log([chalk.red`Error streaming status: ${msg}`])
     }
 
-    this.logger.log([`Status stream ended for ${chalk[backend.color](backend.name)}`])
+    this.logger.log([`Status stream ended for ${this.applyBackendStyle(backend, backend.name)}`])
+  }
+
+  applyBackendStyle(backend: Backend, text: string) {
+    if (!this.styleLogOutput) return text
+    return chalk[backend.color](text)
   }
 
   async streamLogs(backend: Backend): Promise<void> {
     backend.logsStream = await this.plane.streamLogs(backend.name, log => {
-      this.logger.log([chalk[backend.color](`[${backend.name}] ${log}`)])
+      this.logger.log([this.applyBackendStyle(backend, `[${backend.name}] ${log}`)])
     })
-    this.logger.log([`Streaming logs for ${chalk[backend.color](backend.name)}`])
+    this.logger.log([`Streaming logs for ${this.applyBackendStyle(backend, backend.name)}`])
     try {
       await backend.logsStream.closed
     } catch (error) {
@@ -319,7 +328,7 @@ class DevServer {
       this.logger.log([chalk.red`Error streaming logs: ${msg}`])
     }
 
-    this.logger.log([`Logs stream ended for ${chalk[backend.color](backend.name)}`])
+    this.logger.log([`Logs stream ended for ${this.applyBackendStyle(backend, backend.name)}`])
   }
 
   startServer(): http.Server {
@@ -384,8 +393,15 @@ class DevServer {
   }
 
   async handleStatusRequest(backendName: string, res: http.ServerResponse): Promise<void> {
-    const b = this.devBackends.get(backendName)
-    // if the dev CLI doesn't know about this backend, then 404
+    let b = this.devBackends.get(backendName)
+    // if the dev CLI doesn't know about this backend yet, it may just need to sleep for a bit
+    // and then try again one more time
+    if (!b) {
+      await sleep(500)
+      b = this.devBackends.get(backendName)
+    }
+
+    // if the dev CLI still doesn't know about this backend, then 404
     if (!b || b.lastStatus === null) {
       res.writeHead(404)
       res.end()
@@ -437,7 +453,7 @@ class DevServer {
   }
 
   async spawnBackend(body: SpawnRequestBody): Promise<SpawnResult | HTTPError> {
-    const imageId = this.currentImageId
+    const imageId = await this.waitUntilImageIsReady(60_000) // wait up to 60 seconds for the image to be ready
     if (!imageId) {
       this.logger.log([chalk.red`Error spawning backend: the latest build of your session backend's Dockerfile has either failed or is still ongoing. Check the logs above and make sure there are no docker build errors before spawning.`])
       return new HTTPError(500, 'Internal Error', 'Error spawning backend: the latest build of your session backend\'s Dockerfile has either failed or has not yet completed. Make sure all docker build errors are resolved and a new image is built before spawning.')
@@ -467,7 +483,7 @@ class DevServer {
         logsStream: null,
       }
       this.devBackends.set(result.name, backend)
-      this.logger.log([`Spawned backend: ${chalk[backend.color](result.name)}`])
+      this.logger.log([`Spawned backend: ${this.applyBackendStyle(backend, result.name)}`])
       this.streamStatus(backend)
     } else {
       this.logger.log([chalk.red`Warning: Spawn with lock returned a running backend that was not originally spawned by this dev server. Blocking spawn.`])
@@ -481,5 +497,18 @@ class DevServer {
     }
 
     return transformedResult
+  }
+
+  // resolves with the image ID when the image is ready
+  // or null if the image fails to build or the timeout is reached
+  async waitUntilImageIsReady(timeoutMs: number): Promise<string | null> {
+    const start = Date.now()
+    while (start + timeoutMs > Date.now()) {
+      if (this.imagesBuilding === 0) {
+        return this.currentImageId
+      }
+      await sleep(500)
+    }
+    return null
   }
 }

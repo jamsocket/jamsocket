@@ -24,7 +24,7 @@ export class Jamsocket {
 
   public async serviceImage(service: string): Promise<string> {
     const config = this.expectAuthorized()
-    const result = await this.api.serviceImage(config.getAccount(), service, config.getAccessToken())
+    const result = await this.api.serviceImage(config.getAccount(), service, config)
     return result.imageName
   }
 
@@ -55,47 +55,47 @@ export class Jamsocket {
       service_environment: serviceEnvironment,
     }
 
-    return this.api.spawn(config.getAccount(), service, config.getAccessToken(), body)
+    return this.api.spawn(config.getAccount(), service, config, body)
   }
 
   public terminate(backend: string): Promise<TerminateResult> {
     const config = this.expectAuthorized()
-    return this.api.terminate(backend, config.getAccessToken())
+    return this.api.terminate(backend, config)
   }
 
   public backendInfo(backend: string): Promise<BackendInfoResult> {
     const config = this.expectAuthorized()
-    return this.api.backendInfo(backend, config.getAccessToken())
+    return this.api.backendInfo(backend, config)
   }
 
   public listRunningBackends(): Promise<RunningBackendsResult> {
     const config = this.expectAuthorized()
-    return this.api.listRunningBackends(config.getAccount(), config.getAccessToken())
+    return this.api.listRunningBackends(config.getAccount(), config)
   }
 
   public serviceCreate(service: string): Promise<ServiceCreateResult> {
     const config = this.expectAuthorized()
-    return this.api.serviceCreate(config.getAccount(), service, config.getAccessToken())
+    return this.api.serviceCreate(config.getAccount(), service, config)
   }
 
   public serviceDelete(service: string): Promise<ServiceDeleteResult> {
     const config = this.expectAuthorized()
-    return this.api.serviceDelete(config.getAccount(), service, config.getAccessToken())
+    return this.api.serviceDelete(config.getAccount(), service, config)
   }
 
   public serviceInfo(service: string): Promise<ServiceInfoResult> {
     const config = this.expectAuthorized()
-    return this.api.serviceInfo(config.getAccount(), service, config.getAccessToken())
+    return this.api.serviceInfo(config.getAccount(), service, config)
   }
 
   public serviceList(): Promise<ServiceListResult> {
     const config = this.expectAuthorized()
-    return this.api.serviceList(config.getAccount(), config.getAccessToken())
+    return this.api.serviceList(config.getAccount(), config)
   }
 
   public updateEnvironment(service: string, environment: string, imageTag?: string, newName?: string): Promise<EnvironmentUpdateResult> {
     const config = this.expectAuthorized()
-    return this.api.updateEnvironment(config.getAccount(), service, environment, config.getAccessToken(), {
+    return this.api.updateEnvironment(config.getAccount(), service, environment, config, {
       image_tag: imageTag,
       name: newName,
     })
@@ -103,24 +103,24 @@ export class Jamsocket {
 
   public imagesList(service: string): Promise<ServiceImagesResult> {
     const config = this.expectAuthorized()
-    return this.api.imagesList(config.getAccount(), service, config.getAccessToken())
+    return this.api.imagesList(config.getAccount(), service, config)
   }
 
   public streamLogs(backend: string, callback: (v: string) => void): EventStreamReturn {
     const config = this.expectAuthorized()
-    return this.api.streamLogs(backend, config.getAccessToken(), callback)
+    return this.api.streamLogs(backend, config, callback)
   }
 
   public streamMetrics(backend: string, callback: (v: string) => void): EventStreamReturn {
     const config = this.expectAuthorized()
-    return this.api.streamMetrics(backend, config.getAccessToken(), callback)
+    return this.api.streamMetrics(backend, config, callback)
   }
 
-  public streamStatus(backend: string, callback: (v: StatusMessage) => void): EventStreamReturn {
-    return this.api.streamStatus(backend, callback)
+  public streamStatus(backend: string, callback: (v: StatusMessage) => void, config?: JamsocketConfig): EventStreamReturn {
+    return this.api.streamStatus(backend, callback, config)
   }
 
-  public status(backend: string): Promise<StatusMessage> {
-    return this.api.status(backend)
+  public status(backend: string, config?: JamsocketConfig): Promise<StatusMessage> {
+    return this.api.status(backend, config)
   }
 }

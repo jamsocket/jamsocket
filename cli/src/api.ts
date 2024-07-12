@@ -1,4 +1,5 @@
 import { eventStream, request, Headers, EventStreamReturn } from './request'
+import type { JamsocketConfig } from './jamsocket-config'
 import * as https from 'https'
 
 enum HttpMethod {
@@ -11,6 +12,7 @@ export type CheckAuthResult = {
   status: 'ok';
   // account: string | null; // this is now deprecated
   accounts: string[];
+  is_admin: boolean;
 }
 
 export type SpawnRequestBody = {
@@ -138,6 +140,8 @@ export interface CompleteCliLoginResult {
   created_at: string,
   expiration: string,
   token: string,
+  user_is_admin?: boolean,
+  user_email?: string,
 }
 
 export class HTTPError extends Error {
@@ -203,8 +207,12 @@ export class JamsocketApi {
     return `${baseUrl}/cli-login/${loginToken}`
   }
 
-  private async makeRequest<T>(endpoint: string, method: HttpMethod, body?: any, headers?: Headers): Promise<T> {
+  private async makeRequest<T>(endpoint: string, method: HttpMethod, body?: any, headers?: Headers, config?: JamsocketConfig): Promise<T> {
     const url = `${this.apiBase}${endpoint}`
+    const user = config?.getUserEmail() ?? null
+    if (user) {
+      headers = { ...headers, 'X-Jamsocket-User': user }
+    }
     const response = await request(url, body || null, { ...this.options, method, headers })
 
     const isJSONContentType = response.headers['content-type'] === 'application/json'
@@ -233,19 +241,32 @@ export class JamsocketApi {
     return responseBody
   }
 
-  private async makeAuthenticatedRequest<T>(endpoint: string, method: HttpMethod, authToken: string, body?: any): Promise<T> {
-    const additionalHeaders = { 'Authorization': `Bearer ${authToken}` }
+  private async makeAuthenticatedRequest<T>(endpoint: string, method: HttpMethod, configOrAuthToken: JamsocketConfig | string, body?: any): Promise<T> {
+    let config: JamsocketConfig | undefined
+    let authHeaders: Record<string, string> = {}
+    if (typeof configOrAuthToken === 'string') {
+      config = undefined
+      authHeaders = { 'Authorization': `Bearer ${configOrAuthToken}` }
+    } else {
+      config = configOrAuthToken
+      authHeaders = config.getAuthHeaders()
+    }
+
     try {
       // NOTE: this await here is required so that all the Promise "callback" logic is wrapped in this try/catch
-      return await this.makeRequest<T>(endpoint, method, body, additionalHeaders)
+      return await this.makeRequest<T>(endpoint, method, body, authHeaders, config)
     } catch (error) {
       if (error instanceof HTTPError && AUTH_ERROR_HTTP_CODES.has(error.status)) throw new AuthenticationError(error.status, error.code, error.message)
       throw error
     }
   }
 
-  private makeStreamRequest(endpoint: string, headers: Headers | null, callback: (line: string) => void): EventStreamReturn {
+  private makeStreamRequest(endpoint: string, headers: Headers | null, callback: (line: string) => void, config?: JamsocketConfig): EventStreamReturn {
     const url = `${this.apiBase}${endpoint}`
+    const user = config?.getUserEmail() ?? null
+    if (user) {
+      headers = { ...headers, 'X-Jamsocket-User': user }
+    }
     return eventStream(url, {
       ...this.options,
       method: HttpMethod.Get,
@@ -253,74 +274,79 @@ export class JamsocketApi {
     }, callback)
   }
 
-  private makeAuthenticatedStreamRequest(endpoint: string, authToken: string, callback: (line: string) => void): EventStreamReturn {
-    const headers = { 'Authorization': `Bearer ${authToken}` }
-    return this.makeStreamRequest(endpoint, headers, callback)
+  private makeAuthenticatedStreamRequest(endpoint: string, config: JamsocketConfig, callback: (line: string) => void): EventStreamReturn {
+    const authHeaders = config.getAuthHeaders()
+    return this.makeStreamRequest(endpoint, authHeaders, callback, config)
   }
 
-  public checkAuth(authToken: string): Promise<CheckAuthResult> {
+  public checkAuthToken(authToken: string): Promise<CheckAuthResult> {
     const url = '/auth'
     return this.makeAuthenticatedRequest<CheckAuthResult>(url, HttpMethod.Get, authToken)
   }
 
-  public serviceImage(accountName: string, serviceName: string, authToken: string): Promise<ServiceImageResult> {
-    const url = `/v2/service/${accountName}/${serviceName}/image-name`
-    return this.makeAuthenticatedRequest<ServiceImageResult>(url, HttpMethod.Get, authToken)
+  public checkAuthConfig(config: JamsocketConfig): Promise<CheckAuthResult> {
+    const url = '/auth'
+    return this.makeAuthenticatedRequest<CheckAuthResult>(url, HttpMethod.Get, config)
   }
 
-  public serviceCreate(accountName: string, name: string, authToken: string): Promise<ServiceCreateResult> {
+  public serviceImage(accountName: string, serviceName: string, config: JamsocketConfig): Promise<ServiceImageResult> {
+    const url = `/v2/service/${accountName}/${serviceName}/image-name`
+    return this.makeAuthenticatedRequest<ServiceImageResult>(url, HttpMethod.Get, config)
+  }
+
+  public serviceCreate(accountName: string, name: string, config: JamsocketConfig): Promise<ServiceCreateResult> {
     const url = `/v2/account/${accountName}/service`
-    return this.makeAuthenticatedRequest<ServiceCreateResult>(url, HttpMethod.Post, authToken, {
+    return this.makeAuthenticatedRequest<ServiceCreateResult>(url, HttpMethod.Post, config, {
       name,
     })
   }
 
-  public serviceDelete(accountName: string, serviceName: string, authToken: string): Promise<ServiceDeleteResult> {
+  public serviceDelete(accountName: string, serviceName: string, config: JamsocketConfig): Promise<ServiceDeleteResult> {
     const url = `/v2/service/${accountName}/${serviceName}/delete`
-    return this.makeAuthenticatedRequest<ServiceDeleteResult>(url, HttpMethod.Post, authToken)
+    return this.makeAuthenticatedRequest<ServiceDeleteResult>(url, HttpMethod.Post, config)
   }
 
-  public serviceInfo(accountName: string, serviceName: string, authToken: string): Promise<ServiceInfoResult> {
+  public serviceInfo(accountName: string, serviceName: string, config: JamsocketConfig): Promise<ServiceInfoResult> {
     const url = `/v2/service/${accountName}/${serviceName}`
-    return this.makeAuthenticatedRequest<ServiceInfoResult>(url, HttpMethod.Get, authToken)
+    return this.makeAuthenticatedRequest<ServiceInfoResult>(url, HttpMethod.Get, config)
   }
 
-  public serviceList(accountName: string, authToken: string): Promise<ServiceListResult> {
+  public serviceList(accountName: string, config: JamsocketConfig): Promise<ServiceListResult> {
     const url = `/v2/account/${accountName}/services`
-    return this.makeAuthenticatedRequest<ServiceListResult>(url, HttpMethod.Get, authToken)
+    return this.makeAuthenticatedRequest<ServiceListResult>(url, HttpMethod.Get, config)
   }
 
-  public updateEnvironment(accountName: string, service: string, environment: string, authToken: string, body: UpdateEnvironmentBody): Promise<EnvironmentUpdateResult> {
+  public updateEnvironment(accountName: string, service: string, environment: string, config: JamsocketConfig, body: UpdateEnvironmentBody): Promise<EnvironmentUpdateResult> {
     const url = `/v2/service-env/${accountName}/${service}/${environment}/update`
-    return this.makeAuthenticatedRequest<EnvironmentUpdateResult>(url, HttpMethod.Post, authToken, body)
+    return this.makeAuthenticatedRequest<EnvironmentUpdateResult>(url, HttpMethod.Post, config, body)
   }
 
-  public spawn(accountName: string, serviceName: string, authToken: string, body: SpawnRequestBody): Promise<SpawnResult> {
+  public spawn(accountName: string, serviceName: string, config: JamsocketConfig, body: SpawnRequestBody): Promise<SpawnResult> {
     const url = `/v1/user/${accountName}/service/${serviceName}/spawn`
-    return this.makeAuthenticatedRequest<SpawnResult>(url, HttpMethod.Post, authToken, body)
+    return this.makeAuthenticatedRequest<SpawnResult>(url, HttpMethod.Post, config, body)
   }
 
-  public listRunningBackends(accountName: string, authToken: string): Promise<RunningBackendsResult> {
+  public listRunningBackends(accountName: string, config: JamsocketConfig): Promise<RunningBackendsResult> {
     const url = `/v2/account/${accountName}/backends`
-    return this.makeAuthenticatedRequest<RunningBackendsResult>(url, HttpMethod.Get, authToken)
+    return this.makeAuthenticatedRequest<RunningBackendsResult>(url, HttpMethod.Get, config)
   }
 
-  public imagesList(accountName: string, serviceName: string, authToken: string): Promise<ServiceImagesResult> {
+  public imagesList(accountName: string, serviceName: string, config: JamsocketConfig): Promise<ServiceImagesResult> {
     const url = `/v2/service/${accountName}/${serviceName}/images`
-    return this.makeAuthenticatedRequest<ServiceImagesResult>(url, HttpMethod.Get, authToken)
+    return this.makeAuthenticatedRequest<ServiceImagesResult>(url, HttpMethod.Get, config)
   }
 
-  public streamLogs(backend: string, authToken: string, callback: (line: string) => void): EventStreamReturn {
+  public streamLogs(backend: string, config: JamsocketConfig, callback: (line: string) => void): EventStreamReturn {
     const url = `/v2/backend/${backend}/logs`
-    return this.makeAuthenticatedStreamRequest(url, authToken, callback)
+    return this.makeAuthenticatedStreamRequest(url, config, callback)
   }
 
-  public streamMetrics(backend: string, authToken: string, callback: (line: string) => void): EventStreamReturn {
+  public streamMetrics(backend: string, config: JamsocketConfig, callback: (line: string) => void): EventStreamReturn {
     const url = `/v2/backend/${backend}/metrics/stream`
-    return this.makeAuthenticatedStreamRequest(url, authToken, callback)
+    return this.makeAuthenticatedStreamRequest(url, config, callback)
   }
 
-  public streamStatus(backend: string, callback: (statusMessage: StatusMessage) => void): EventStreamReturn {
+  public streamStatus(backend: string, callback: (statusMessage: StatusMessage) => void, config?: JamsocketConfig): EventStreamReturn {
     const url = `/v1/backend/${backend}/status/stream`
     const wrappedCallback = (line: string) => {
       const val = JSON.parse(line)
@@ -329,22 +355,22 @@ export class JamsocketApi {
         time: new Date(val.time),
       })
     }
-    return this.makeStreamRequest(url, null, wrappedCallback)
+    return this.makeStreamRequest(url, null, wrappedCallback, config)
   }
 
-  public async status(backend: string): Promise<StatusMessage> {
+  public async status(backend: string, config?: JamsocketConfig): Promise<StatusMessage> {
     const url = `/v1/backend/${backend}/status`
-    return this.makeRequest<StatusMessage>(url, HttpMethod.Get)
+    return this.makeRequest<StatusMessage>(url, HttpMethod.Get, undefined, undefined, config)
   }
 
-  public async terminate(backend: string, authToken: string): Promise<TerminateResult> {
+  public async terminate(backend: string, config: JamsocketConfig): Promise<TerminateResult> {
     const url = `/v2/backend/${backend}/terminate`
-    return this.makeAuthenticatedRequest<TerminateResult>(url, HttpMethod.Post, authToken)
+    return this.makeAuthenticatedRequest<TerminateResult>(url, HttpMethod.Post, config)
   }
 
-  public async backendInfo(backend: string, authToken: string): Promise<BackendInfoResult> {
+  public async backendInfo(backend: string, config: JamsocketConfig): Promise<BackendInfoResult> {
     const url = `/v1/backend/${backend}`
-    return this.makeAuthenticatedRequest<BackendInfoResult>(url, HttpMethod.Get, authToken)
+    return this.makeAuthenticatedRequest<BackendInfoResult>(url, HttpMethod.Get, config)
   }
 
   public async startLoginAttempt(): Promise<CliLoginAttemptResult> {
@@ -357,9 +383,9 @@ export class JamsocketApi {
     return this.makeRequest<CompleteCliLoginResult>(url, HttpMethod.Post, { code })
   }
 
-  public async revokeUserSession(userSessionId: string, authToken: string): Promise<UserSessionRevokeResult> {
+  public async revokeUserSession(userSessionId: string, config: JamsocketConfig): Promise<UserSessionRevokeResult> {
     const url = `/user-session/${userSessionId}/delete`
-    return this.makeAuthenticatedRequest<UserSessionRevokeResult>(url, HttpMethod.Post, authToken)
+    return this.makeAuthenticatedRequest<UserSessionRevokeResult>(url, HttpMethod.Post, config)
   }
 
   public streamLoginStatus(loginToken: string): Promise<boolean> {

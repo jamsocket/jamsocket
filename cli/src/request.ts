@@ -21,6 +21,7 @@ export type EventStreamReturn = {
   closed: Promise<void>
 }
 
+// eslint-disable-next-line unicorn/prefer-module
 const version = require('../package.json').version
 const platform = WSL ? 'wsl' : os.platform()
 const arch = os.arch() === 'ia32' ? 'x86' : os.arch()
@@ -133,10 +134,14 @@ export function eventStream(
 
   const closed = new Promise<void>((resolve, reject) => {
     const wrappedURL = new URL(url)
-    const headers = {
+    const headers: Record<string, string> = {
       'User-Agent': userAgent,
       ...options.headers,
       Accept: 'text/event-stream',
+    }
+
+    if (userHost !== null) {
+      headers['X-User-Host'] = userHost
     }
 
     let protocol = https
@@ -160,16 +165,11 @@ export function eventStream(
       res.on('data', (chunk: Buffer) => {
         const lines = chunk.toString().trim().split(/\n\n/)
         for (const line of lines) {
+          // only passes along lines that start with "data:"
+          // otherwise, it will just ignore the line
           const match = line.match(/data: ?(.*)/)
           if (match) {
             callback(match[1])
-          } else {
-            try {
-              const parsed = JSON.parse(line)
-              reject(new Error(parsed.error.message))
-            } catch {
-              reject(new Error(`Expected line to start with data:, got ${line}`))
-            }
           }
         }
       })
