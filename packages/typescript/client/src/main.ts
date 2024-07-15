@@ -94,6 +94,8 @@ export class SessionBackend {
             console.warn(`Skipping message from SSE endpoint: ${line}`)
             return null
           }
+
+          // remove the 'data: ' prefix
           const text = line.slice(5).trim()
           try {
             return JSON.parse(text) as StatusStreamEvent
