@@ -9,17 +9,36 @@ export type SpawnResult = {
   bearerToken?: string
 }
 
+const ALIVE_STATUSES = ['Loading', 'Starting', 'Ready']
+
 export class SessionBackend {
   private streamReader: ReadableStreamDefaultReader | null = null
-  readonly statuses: Status[] = []
+  private statusesSeen: Set<Status> = new Set()
+
+  private fetchingStatusStream: boolean = false
+
   private _isReady: boolean = false
   private _onReady: (() => void)[] = []
+  public onReadyPromise: Promise<void>
+  private _onReadyResolve!: () => void
+
+  private _isTerminated: boolean = false
+  public onTerminatedPromise: Promise<void>
+  private _onTerminatedResolve!: () => void
+
+  private _onStatus: ((msg: StatusStreamEvent) => void)[] = []
 
   constructor(
     readonly url: string,
     readonly statusUrl: string,
   ) {
-    this.waitUntilReady(statusUrl)
+    this.onReadyPromise = new Promise((resolve) => {
+      this._onReadyResolve = resolve
+    })
+    this.onTerminatedPromise = new Promise((resolve) => {
+      this._onTerminatedResolve = resolve
+    })
+    this.subscribeToStatusStream()
   }
 
   // Private method to set the session as ready and execute callbacks
@@ -27,28 +46,36 @@ export class SessionBackend {
     this._isReady = true
     this._onReady.forEach((cb) => cb())
     this._onReady = []
+    this._onReadyResolve()
   }
 
-  private waitUntilReady = async (statusUrl: string) => {
-    const res = await fetch(statusUrl, { mode: 'cors', cache: 'no-store' })
-    if (!res.ok) {
-      throw new Error(
-        `An error occured while fetching jamsocket backend status: ${await res.text()}`,
-      )
-    }
-    const status = await res.text()
+  private _setTerminated() {
+    this._isReady = false
+    this._isTerminated = true
+    this._onTerminatedResolve()
+  }
 
-    if (status.includes('Ready')) {
-      this._setReady()
+  private subscribeToStatusStream = async () => {
+    const msg = await this.status()
+
+    if (!ALIVE_STATUSES.includes(msg.state)) {
+      console.warn(`Jamsocket status is a Terminal state: ${msg.state}`)
+      this._setTerminated()
+      this._onStatus.forEach((cb) => cb(msg))
       return
     }
-    if (!status.includes('Loading') && !status.includes('Starting')) {
-      throw new Error(`Jamsocket status is a Terminal state: ${status}`)
-    }
 
-    const response = await fetch(`${statusUrl}/stream`, { cache: 'no-store' })
-    if (!response.body)
+    this.fetchStatusStream()
+  }
+
+  private fetchStatusStream = async () => {
+    if (this.isTerminated() || this.fetchingStatusStream) return
+    this.fetchingStatusStream = true
+    const response = await fetch(`${this.statusUrl}/stream`, { cache: 'no-store' })
+    if (!response.body) {
+      this.fetchingStatusStream = false
       throw new Error('response to Jamsocket backend status stream did not include body')
+    }
     this.streamReader = response.body.pipeThrough(new TextDecoderStream()).getReader()
     while (this.streamReader !== null) {
       const result = await this.streamReader.read()
@@ -61,24 +88,64 @@ export class SessionBackend {
 
       const messages = value
         .split('\n')
-        .map((v) => v.trim())
-        .filter(Boolean)
+        .map((line) => {
+          if (!line) return null
+          if (!line.trim().startsWith('data:')) {
+            console.warn(`Skipping message from SSE endpoint: ${line}`)
+            return null
+          }
+          const text = line.slice(5).trim()
+          try {
+            return JSON.parse(text) as StatusStreamEvent
+          } catch (e) {
+            console.error(`Error parsing status stream message as JSON: "${text}"`, e)
+            return null
+          }
+        })
+        .filter((msg) => msg !== null)
 
       for (const msg of messages) {
-        if (!msg?.startsWith('data:'))
-          throw new Error(`Unexpected message from SSE endpoint: ${msg}`)
-        const text = msg.slice(5).trim()
-        let data: StatusStreamEvent | null = null
-        try {
-          data = JSON.parse(text) as StatusStreamEvent
-        } catch (e) {
-          console.error(`Error parsing status stream message as JSON: "${text}"`, e)
-        }
-        if (data?.state === 'Ready') {
-          this._setReady()
-          this.destroyStatusStream()
-        }
+        // keep track of the statuses we've seen since we might have just resubscribed
+        // to the status stream and are seeing some of the statuses we've already seen again
+        if (this.statusesSeen.has(msg.state)) continue
+        this.statusesSeen.add(msg.state)
+
+        console.log(`Jamsocket session backend status is ${msg.state}`)
+        if (msg.state === 'Ready') this._setReady()
+        if (!ALIVE_STATUSES.includes(msg.state)) this._setTerminated()
+        this._onStatus.forEach((cb) => cb(msg))
       }
+      if (this.isTerminated()) this.destroyStatusStream()
+    }
+
+    if (!this.isTerminated()) {
+      console.error('Jamsocket status stream ended unexpectedly')
+      this.destroyStatusStream() // make sure we don't have a dangling stream
+      this.subscribeToStatusStream()
+    }
+  }
+
+  public async status(): Promise<StatusStreamEvent> {
+    let res = await fetch(this.statusUrl, { mode: 'cors', cache: 'no-store' })
+    // if the first request fails, retry once
+    if (!res.ok) {
+      await new Promise((resolve) => setTimeout(resolve, 500))
+      res = await fetch(this.statusUrl, { mode: 'cors', cache: 'no-store' })
+    }
+    if (!res.ok) {
+      throw new Error(
+        `An error occured while fetching jamsocket backend status: ${await res.text()}`,
+      )
+    }
+    const text = await res.text()
+    const msg = JSON.parse(text) as StatusStreamEvent
+    return msg
+  }
+
+  public onStatus(cb: (msg: StatusStreamEvent) => void): () => void {
+    this._onStatus.push(cb)
+    return () => {
+      this._onStatus = this._onStatus.filter((c) => c !== cb)
     }
   }
 
@@ -87,6 +154,7 @@ export class SessionBackend {
       this.streamReader.cancel()
       this.streamReader = null
     }
+    this.fetchingStatusStream = false
   }
 
   public destroy() {
@@ -95,6 +163,10 @@ export class SessionBackend {
 
   public isReady() {
     return this._isReady
+  }
+
+  public isTerminated() {
+    return this._isTerminated
   }
 
   public onReady(cb: () => void): () => void {
