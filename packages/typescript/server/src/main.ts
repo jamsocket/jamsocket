@@ -95,6 +95,11 @@ export function init(opts: JamsocketInitOptions): JamsocketInstance {
       cache: 'no-store',
     })
     if (!response.ok) {
+      if (response.status === 429) {
+        console.warn(
+          "You've hit the spawn rate limit. This may be because you've spawned too many session backends in a short period of time or you're already running the maximum number of concurrent session backends. (related: https://docs.jamsocket.com/pricing/free-tier-limits)",
+        )
+      }
       throw new Error(`Error spawning backend: ${response.status} ${await response.text()}`)
     }
     const body = await response.json()
