@@ -148,7 +148,6 @@ export interface ServiceInfoResult {
   last_spawned_at: string | null,
   last_image_upload_time: string | null,
   last_image_digest: string | null,
-  spawn_tokens_count: number,
   image_name: string,
   environments: Environment[],
 }
@@ -178,7 +177,7 @@ export type BackendWithStatus = {
   account_name: string
   status?: V2Status
   status_timestamp?: string
-  lock?: string
+  key?: string
 }
 
 export interface RunningBackendsResult {
@@ -202,7 +201,7 @@ export interface BackendInfoResult {
   account_name: string
   statuses: BackendV2Status[]
   image_digest: string
-  lock?: string | null
+  key?: string | null
   environment_name?: string | null
   max_mem_bytes?: number | null
 }
@@ -239,11 +238,6 @@ export class AuthenticationError extends HTTPError {
     super(status, code, message)
     this.name = 'AuthenticationError'
   }
-}
-
-export interface StatusMessage {
-  state: string,
-  time: Date,
 }
 
 export class JamsocketApi {
@@ -428,30 +422,27 @@ export class JamsocketApi {
     return this.makeAuthenticatedStreamRequest(url, config, callback)
   }
 
-  public streamStatus(backend: string, callback: (statusMessage: StatusMessage) => void, config?: JamsocketConfig): EventStreamReturn {
-    const url = `/v1/backend/${backend}/status/stream`
+  public streamStatus(backend: string, callback: (statusMessage: PlaneV2StatusMessage) => void, config?: JamsocketConfig): EventStreamReturn {
+    const url = `/v2/backend/${backend}/status/stream`
     const wrappedCallback = (line: string) => {
       const val = JSON.parse(line)
-      callback({
-        state: val.state,
-        time: new Date(val.time),
-      })
+      callback(val)
     }
     return this.makeStreamRequest(url, null, wrappedCallback, config)
   }
 
-  public async status(backend: string, config?: JamsocketConfig): Promise<StatusMessage> {
-    const url = `/v1/backend/${backend}/status`
-    return this.makeRequest<StatusMessage>(url, HttpMethod.Get, undefined, undefined, config)
+  public async status(backend: string, config?: JamsocketConfig): Promise<PlaneV2StatusMessage> {
+    const url = `/v2/backend/${backend}/status`
+    return this.makeRequest<PlaneV2StatusMessage>(url, HttpMethod.Get, undefined, undefined, config)
   }
 
-  public async terminate(backend: string, config: JamsocketConfig): Promise<TerminateResult> {
+  public async terminate(backend: string, hard: boolean, config: JamsocketConfig): Promise<TerminateResult> {
     const url = `/v2/backend/${backend}/terminate`
-    return this.makeAuthenticatedRequest<TerminateResult>(url, HttpMethod.Post, config)
+    return this.makeAuthenticatedRequest<TerminateResult>(url, HttpMethod.Post, config, { hard })
   }
 
   public async backendInfo(backend: string, config: JamsocketConfig): Promise<BackendInfoResult> {
-    const url = `/v1/backend/${backend}`
+    const url = `/v2/backend/${backend}`
     return this.makeAuthenticatedRequest<BackendInfoResult>(url, HttpMethod.Get, config)
   }
 

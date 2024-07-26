@@ -19,7 +19,6 @@ export default class Create extends Command {
     const jamsocket = Jamsocket.fromEnvironment()
     const serviceInfo = await jamsocket.serviceInfo(args.name)
 
-    const spawnTokenCount = serviceInfo.spawn_tokens_count
     const lastImgUpload = serviceInfo.last_image_upload_time ? formatDistanceToNow(new Date(serviceInfo.last_image_upload_time)) : null
     const lastSpawn = serviceInfo.last_spawned_at ? formatDistanceToNow(new Date(serviceInfo.last_spawned_at)) : null
 
@@ -27,7 +26,6 @@ export default class Create extends Command {
       'The service',
       lightBlue(serviceInfo.name),
       lastImgUpload === null ? ('has ' + lightMagenta('no container images') + ',') : ('had a ' + lightMagenta(`container image pushed to it ${lastImgUpload} ago`) + ','),
-      spawnTokenCount === 0 ? '' : ('has ' + lightMagenta(`${spawnTokenCount} spawn tokens`) + ','),
       lastSpawn === null ? ('and has ' + lightMagenta('never been spawned') + '.') : ('and was ' + lightMagenta(`last spawned ${lastSpawn} ago`) + '.'),
     ].filter(Boolean)
 
