@@ -22,6 +22,88 @@ export type SpawnRequestBody = {
   service_environment?: string;
 }
 
+export type V1Status =
+  | 'Loading'
+  | 'Starting'
+  | 'Ready'
+  | 'Swept'
+  | 'Exited'
+  | 'Terminated'
+  | 'Failed'
+  | 'ErrorLoading'
+  | 'ErrorStarting'
+  | 'TimedOutBeforeReady'
+
+export type V2Status =
+  | 'scheduled'
+  | 'loading'
+  | 'starting'
+  | 'waiting'
+  | 'ready'
+  | 'terminating'
+  | 'hard-terminating'
+  | 'terminated'
+
+export type ConnectResourceLimits = {
+  cpu_period?: number;
+  // Proportion of period used by container (in microseconds)
+  cpu_period_percent?: number;
+  // Total cpu time allocated to container (in seconds)
+  cpu_time_limit?: number;
+  memory_limit_bytes?: number;
+  disk_limit_bytes?: number;
+}
+
+export type JamsocketConnectRequestBody = {
+  key?: string;
+  spawn?: boolean | {
+    tag?: string;
+    lifetime_limit_seconds?: number;
+    max_idle_seconds?: number;
+    executable?: {
+      mount?: string | boolean;
+      env?: Record<string, string>;
+      resource_limits?: ConnectResourceLimits;
+    };
+  };
+  user?: string;
+  auth?: Record<string, any>;
+}
+
+export type JamsocketConnectResponse = {
+  backend_id: string;
+  spawned: boolean;
+  status: V2Status;
+  token: string;
+  url: string;
+  secret_token?: string | null;
+  status_url: string;
+  ready_url: string;
+}
+
+// these are public messages that come over the status and status/stream endpoints
+export type PlaneTerminationReason = 'swept' | 'external' | 'key_expired' | 'lost' | 'startup_timeout'
+export type PlaneTerminationKind = 'soft' | 'hard'
+export type PlaneV2StatusMessage =
+  | { status: 'scheduled', time: number }
+  | { status: 'loading', time: number }
+  | { status: 'starting', time: number }
+  | { status: 'waiting', time: number }
+  | { status: 'ready', time: number }
+  | { status: 'terminating', time: number, termination_reason: PlaneTerminationReason }
+  | { status: 'hard-terminating', time: number, termination_reason: PlaneTerminationReason }
+  | { status: 'terminated', time: number, termination_reason?: PlaneTerminationReason, termination_kind?: PlaneTerminationKind, exit_error?: boolean }
+
+export type PlaneV2State =
+  | { status: 'scheduled' }
+  | { status: 'loading' }
+  | { status: 'starting' }
+  | { status: 'waiting', address?: string }
+  | { status: 'ready', address?: string }
+  | { status: 'terminating', last_status: V2Status, reason: PlaneTerminationReason }
+  | { status: 'hard-terminating', last_status: V2Status, reason: PlaneTerminationReason }
+  | { status: 'terminated', last_status: V2Status, reason: PlaneTerminationReason, termination: PlaneTerminationKind, exit_code?: number | null }
+
 export type UpdateEnvironmentBody = {
   name?: string;
   image_tag?: string;
@@ -85,7 +167,7 @@ export interface SpawnResult {
   ready_url: string,
   status_url: string,
   spawned: boolean,
-  status: string | null
+  status: V1Status | null
 }
 
 export type BackendWithStatus = {
@@ -94,7 +176,7 @@ export type BackendWithStatus = {
   service_name: string
   cluster_name: string
   account_name: string
-  status?: string
+  status?: V2Status
   status_timestamp?: string
   lock?: string
 }
@@ -107,8 +189,8 @@ export interface TerminateResult {
   status: 'ok',
 }
 
-export interface BackendStatus {
-  value: string
+export interface BackendV2Status {
+  value: PlaneV2State,
   timestamp: string
 }
 
@@ -118,7 +200,7 @@ export interface BackendInfoResult {
   service_name: string
   cluster_name: string
   account_name: string
-  statuses: BackendStatus[]
+  statuses: BackendV2Status[]
   image_digest: string
   lock?: string | null
   environment_name?: string | null

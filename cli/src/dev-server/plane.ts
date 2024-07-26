@@ -2,10 +2,38 @@ import { spawn, type ChildProcessWithoutNullStreams, spawnSync } from 'child_pro
 import readline from 'readline'
 import chalk from 'chalk'
 import EventSource from 'eventsource'
-import { SpawnResult, HTTPError } from '../api'
-import { capitalize, sleep } from './util'
+import { HTTPError, V2Status, JamsocketConnectRequestBody, ConnectResourceLimits, PlaneV2StatusMessage } from '../api'
+import { sleep } from './util'
 import { spawnDockerSync } from '../docker'
 import type { Logger } from './logger'
+
+type PlaneConnectRequest = {
+  key?: {
+    name: string
+    namespace?: string
+    tag?: string
+  }
+  user?: string
+  auth?: Record<string, any>
+  spawn_config?: {
+    id?: string
+    cluster?: string
+    pool?: string
+    executable: {
+      image: string
+      pull_policy?: 'Always' | 'Never' | 'IfNotPresent'
+      credentials?: { username: string; password: string }
+      resource_limits?: ConnectResourceLimits
+      mount?: boolean | string
+      network_name?: string
+      env?: Record<string, string>
+    }
+    lifetime_limit_seconds?: number
+    max_idle_seconds?: number
+    use_static_token?: boolean
+    subdomain?: string
+  }
+}
 
 export type PlaneConnectResponse = {
   backend_id: string
@@ -14,32 +42,15 @@ export type PlaneConnectResponse = {
   url: string
   secret_token: string
   status_url: string
-  status: string
+  status: V2Status
 }
 
-type PlaneTerminationReason = 'swept' | 'external' | 'key_expired' | 'lost' | 'startup_timeout'
-type PlaneTerminationKind = 'soft' | 'hard'
-
-export type PlaneStatusMessage =
-  | { status: 'scheduled', time: number }
-  | { status: 'loading', time: number }
-  | { status: 'starting', time: number }
-  | { status: 'waiting', time: number }
-  | { status: 'ready', time: number }
-  | { status: 'terminating', time: number, termination_reason: PlaneTerminationReason, termination_kind: PlaneTerminationKind }
-  | { status: 'terminated', time: number, termination_reason?: PlaneTerminationReason, termination_kind?: PlaneTerminationKind, exit_error?: boolean }
-
-export type StatusV1 = {
-  state: string,
-  time: string,
-  backend: string,
-}
 export type StreamHandle = {
   closed: Promise<void>
   close: () => void
 }
 
-const PLANE_IMAGE = 'plane/quickstart:sha-a3a55bd'
+const PLANE_IMAGE = 'plane/quickstart:sha-d9d16d9'
 const LAST_N_PLANE_LOGS = 20 // the number of plane logs to show if a Plane error is enountered
 
 // NOTE: this class works with a Plane2 interface, but its own interface is meant to be compatible with Jamsocket V1
@@ -133,9 +144,9 @@ export class LocalPlane {
     return { close, closed }
   }
 
-  async terminate(backend: string): Promise<void | HTTPError> {
-    // TODO: should we do a soft-terminate here?
-    const terminateUrl = `${this.url}/ctrl/b/${backend}/hard-terminate`
+  async terminate(backend: string, hard = false): Promise<void | HTTPError> {
+    let terminateUrl = `${this.url}/ctrl/b/${backend}`
+    terminateUrl += hard ? '/hard-terminate' : '/soft-terminate'
     const response = await fetch(terminateUrl, { method: 'POST' })
     const body = await response.text()
     if (response.status !== 200) {
@@ -143,28 +154,12 @@ export class LocalPlane {
     }
   }
 
-  streamStatus(backend: string, callback: (statusMessage: StatusV1) => void): StreamHandle {
+  streamStatus(backend: string, callback: (statusMessage: PlaneV2StatusMessage) => void): StreamHandle {
     const statusUrl = `${this.url}/pub/b/${backend}/status-stream`
     const es = new EventSource(statusUrl)
-    let lastAliveStatusMsg: PlaneStatusMessage | null = null
-    let lastV1Status: string | null = null
-
     es.addEventListener('message', (e: MessageEvent) => {
-      const msg = JSON.parse(e.data) as PlaneStatusMessage
-      const v1Status = translateStatusToV1(msg, lastAliveStatusMsg)
-      if (lastAliveStatusMsg === null || (msg.status !== 'terminating' && msg.time > lastAliveStatusMsg.time)) {
-        lastAliveStatusMsg = msg
-      }
-
-      const dontEmit = lastV1Status && v1Status === lastV1Status
-      lastV1Status = v1Status
-      if (dontEmit) return
-
-      callback({
-        state: v1Status,
-        time: (new Date(msg.time)).toISOString(),
-        backend,
-      })
+      const msg = JSON.parse(e.data) as PlaneV2StatusMessage
+      callback(msg)
     })
     let resolveClosed: () => void
     const closed = new Promise<void>(resolve => {
@@ -183,36 +178,47 @@ export class LocalPlane {
 
   async spawn(
     image: string,
-    env?: Record<string, string>,
-    gracePeriodSeconds?: number,
-    lock?: string,
+    connectReq: JamsocketConnectRequestBody,
     useStaticToken?: boolean,
     dockerNetwork?: string,
-  ): Promise<SpawnResult | HTTPError> {
-    const spawnUrl = `${this.url}/ctrl/connect`
-    const spawnConfig: Record<string, any> = {
-      executable: { image, env, pull_policy: 'Never' },
-      max_idle_seconds: gracePeriodSeconds,
-    }
-    if (useStaticToken) {
-      spawnConfig.use_static_token = true
-    }
-    if (dockerNetwork) {
-      spawnConfig.executable.network_name = dockerNetwork
-    }
-    const spawnBody = {
-      key: lock ? {
-        name: lock,
+  ): Promise<PlaneConnectResponse | HTTPError> {
+    const connectUrl = `${this.url}/ctrl/connect`
+
+    const connectBody: PlaneConnectRequest = {
+      key: connectReq.key ? {
+        name: connectReq.key,
         tag: image,
       } : undefined,
-      spawn_config: spawnConfig,
+      user: connectReq.user,
+      auth: connectReq.auth,
     }
-    const response = await fetch(spawnUrl, {
+
+    if (connectReq.spawn !== false) {
+      connectBody.spawn_config = {
+        executable: { image, pull_policy: 'Never' },
+        max_idle_seconds: 300,
+      }
+      if (useStaticToken) {
+        connectBody.spawn_config.use_static_token = true
+      }
+      if (dockerNetwork) {
+        connectBody.spawn_config.executable.network_name = dockerNetwork
+      }
+      if (typeof connectReq.spawn === 'object') {
+        connectBody.spawn_config.executable.env = connectReq.spawn.executable?.env
+        connectBody.spawn_config.executable.mount = connectReq.spawn.executable?.mount
+        connectBody.spawn_config.executable.resource_limits = connectReq.spawn.executable?.resource_limits
+        connectBody.spawn_config.lifetime_limit_seconds = connectReq.spawn.lifetime_limit_seconds
+        connectBody.spawn_config.max_idle_seconds = connectReq.spawn.max_idle_seconds
+      }
+    }
+
+    const response = await fetch(connectUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(spawnBody),
+      body: JSON.stringify(connectBody),
     })
 
     const body = await response.text()
@@ -221,19 +227,7 @@ export class LocalPlane {
       return new HTTPError(response.status, response.statusText, `Failed to spawn backend: ${response.status} ${response.statusText} - ${body}`)
     }
 
-    const bodyJson = JSON.parse(body) as PlaneConnectResponse
-
-    // NOTE: a bit hacky but we know the time is not used in determining the status
-    // all of this can go away when we switch away from v1 statuses
-    const v1Status = translateStatusToV1({ status: bodyJson.status, time: 0 } as PlaneStatusMessage, null)
-    return {
-      name: bodyJson.backend_id,
-      spawned: bodyJson.spawned,
-      url: bodyJson.url,
-      status_url: bodyJson.status_url,
-      ready_url: '',
-      status: v1Status,
-    }
+    return JSON.parse(body) as PlaneConnectResponse
   }
 }
 
@@ -243,51 +237,12 @@ export function dockerKillPlaneBackends(backendNames: string[]): void {
   }
 }
 
-// Plane2 statuses: scheduled, loading, starting, waiting, ready, terminating, terminated
-// if this returns null, then ignore the status
-function translateStatusToV1(
-  plane2StatusMsg: PlaneStatusMessage,
-  lastAliveStatusMsg: PlaneStatusMessage | null,
-): string {
-  switch (plane2StatusMsg.status) {
-  case 'scheduled':
-    return 'Loading'
-  case 'waiting':
-    return 'Starting'
-  case 'terminating':
-    return 'Ready'
-  case 'terminated':
-    if (plane2StatusMsg.termination_reason === 'external') {
-      return 'Terminated'
-    }
-    if (plane2StatusMsg.termination_reason && ['swept', 'key_expired'].includes(plane2StatusMsg.termination_reason)) {
-      return 'Swept'
-    }
-    if (!lastAliveStatusMsg || ['scheduled', 'loading'].includes(lastAliveStatusMsg.status)) {
-      return 'ErrorLoading'
-    }
-    if (lastAliveStatusMsg.status === 'starting') {
-      return 'ErrorStarting'
-    }
-    if (lastAliveStatusMsg.status === 'waiting') {
-      if (plane2StatusMsg.termination_reason === 'startup_timeout') return 'TimedOutBeforeReady'
-      return 'ErrorStarting'
-    }
-    // if we've gotten here, the last alive status was 'ready'
-    if (plane2StatusMsg.exit_error === undefined) return 'Terminated'
-    if (plane2StatusMsg.exit_error === false) return 'Exited'
-    return 'Failed'
-  default:
-    return capitalize(plane2StatusMsg.status)
-  }
+export function isV2StatusAlive(v2Status: V2Status): boolean {
+  return v2Status !== 'terminated'
 }
 
-export function isV1StatusAlive(v1Status: string): boolean {
-  return ['Loading', 'Starting', 'Ready'].includes(v1Status)
-}
-
-export function isV1ErrorStatus(v1Status: string): boolean {
-  return ['ErrorLoading', 'ErrorStarting', 'TimedOutBeforeReady', 'Failed'].includes(v1Status)
+export function isV2ErrorStatus(v2StatusMsg: PlaneV2StatusMessage): boolean {
+  return v2StatusMsg.status === 'terminated' && Boolean(v2StatusMsg.exit_error) && v2StatusMsg.termination_reason !== 'external'
 }
 
 export function runPlane(): { url: string, process: ChildProcessWithoutNullStreams, containerName: string } {
