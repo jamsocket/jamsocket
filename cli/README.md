@@ -23,6 +23,7 @@ If you want to use the Jamsocket CLI from an automated environment (e.g. a CI/CD
 * [`jamsocket backend logs BACKEND`](#jamsocket-backend-logs-backend)
 * [`jamsocket backend metrics BACKEND`](#jamsocket-backend-metrics-backend)
 * [`jamsocket backend terminate BACKENDS`](#jamsocket-backend-terminate-backends)
+* [`jamsocket connect SERVICE`](#jamsocket-connect-service)
 * [`jamsocket dev`](#jamsocket-dev)
 * [`jamsocket help [COMMAND]`](#jamsocket-help-command)
 * [`jamsocket images SERVICE`](#jamsocket-images-service)
@@ -30,6 +31,7 @@ If you want to use the Jamsocket CLI from an automated environment (e.g. a CI/CD
 * [`jamsocket logout`](#jamsocket-logout)
 * [`jamsocket logs BACKEND`](#jamsocket-logs-backend)
 * [`jamsocket push SERVICE [IMAGE]`](#jamsocket-push-service-image)
+* [`jamsocket service connect SERVICE`](#jamsocket-service-connect-service)
 * [`jamsocket service create NAME`](#jamsocket-service-create-name)
 * [`jamsocket service delete NAME`](#jamsocket-service-delete-name)
 * [`jamsocket service images SERVICE`](#jamsocket-service-images-service)
@@ -115,7 +117,10 @@ Terminates one or more backends given the backend name(s).
 
 ```
 USAGE
-  $ jamsocket backend terminate [BACKENDS]
+  $ jamsocket backend terminate [BACKENDS] [-f]
+
+FLAGS
+  -f, --force  whether to force the backend to hard terminate (defaults to false)
 
 DESCRIPTION
   Terminates one or more backends given the backend name(s).
@@ -125,6 +130,59 @@ ALIASES
 
 EXAMPLES
   $ jamsocket backend terminate abc123 def456 ...
+```
+
+## `jamsocket connect SERVICE`
+
+Gets a URL that can be used to connect to a session backend. Will spawn a new session backend if no key (aka lock) is provided or if no session backend is currently holding the provided key.
+
+```
+USAGE
+  $ jamsocket connect [SERVICE] [-e <value>] [-t <value>] [-i <value>] [-l <value>] [-k <value>] [-u <value>]
+    [-a <value>] [--spawn]
+
+ARGUMENTS
+  SERVICE  Name of service to spawn.
+
+FLAGS
+  -a, --auth=<value>                    Optional serialized JSON to be passed to a session backend when connecting with
+                                        the returned URL/connection string.
+  -e, --env=<value>...                  optional environment variables to pass to the container
+  -i, --max-idle-seconds=<value>        The max time in seconds a session backend should wait after last connection is
+                                        closed before shutting down container (default is 300)
+  -k, --key=<value>                     If provided, fetches the session backend currently holding the given key
+                                        (formerly known as a "lock"). If no session backend holds the key, or if a key
+                                        is not provided, a new session backend will be spawned.
+  -l, --lifetime-limit-seconds=<value>  The max time in seconds the session backend should be allowed to run.
+  -t, --tag=<value>                     An optional image tag or image digest to use when spawning a backend.
+  -u, --user=<value>                    Optional username to be associated with the URL/connection string returned by
+                                        the connect command.
+  --[no-]spawn                          Whether to spawn a new session backend if no session backend is currently
+                                        holding the provided key.
+
+DESCRIPTION
+  Gets a URL that can be used to connect to a session backend. Will spawn a new session backend if no key (aka lock) is
+  provided or if no session backend is currently holding the provided key.
+
+ALIASES
+  $ jamsocket connect
+
+EXAMPLES
+  $ jamsocket connect my-service
+
+  $ jamsocket connect my-service -k my-key
+
+  $ jamsocket connect my-service -t my-tag
+
+  $ jamsocket connect my-service -e SOME_ENV_VAR=foo -e ANOTHER_ENV_VAR=bar
+
+  $ jamsocket connect my-service -i 60
+
+  $ jamsocket connect my-service -l 300
+
+  $ jamsocket connect my-service --no-spawn
+
+  $ jamsocket connect my-service -u my-user -a '{"foo":"my-json-data"}'
 ```
 
 ## `jamsocket dev`
@@ -274,6 +332,59 @@ EXAMPLES
   $ jamsocket push my-service -f path/to/Dockerfile -c .
 
   $ jamsocket push my-service my-image -t my-tag
+```
+
+## `jamsocket service connect SERVICE`
+
+Gets a URL that can be used to connect to a session backend. Will spawn a new session backend if no key (aka lock) is provided or if no session backend is currently holding the provided key.
+
+```
+USAGE
+  $ jamsocket service connect [SERVICE] [-e <value>] [-t <value>] [-i <value>] [-l <value>] [-k <value>] [-u <value>]
+    [-a <value>] [--spawn]
+
+ARGUMENTS
+  SERVICE  Name of service to spawn.
+
+FLAGS
+  -a, --auth=<value>                    Optional serialized JSON to be passed to a session backend when connecting with
+                                        the returned URL/connection string.
+  -e, --env=<value>...                  optional environment variables to pass to the container
+  -i, --max-idle-seconds=<value>        The max time in seconds a session backend should wait after last connection is
+                                        closed before shutting down container (default is 300)
+  -k, --key=<value>                     If provided, fetches the session backend currently holding the given key
+                                        (formerly known as a "lock"). If no session backend holds the key, or if a key
+                                        is not provided, a new session backend will be spawned.
+  -l, --lifetime-limit-seconds=<value>  The max time in seconds the session backend should be allowed to run.
+  -t, --tag=<value>                     An optional image tag or image digest to use when spawning a backend.
+  -u, --user=<value>                    Optional username to be associated with the URL/connection string returned by
+                                        the connect command.
+  --[no-]spawn                          Whether to spawn a new session backend if no session backend is currently
+                                        holding the provided key.
+
+DESCRIPTION
+  Gets a URL that can be used to connect to a session backend. Will spawn a new session backend if no key (aka lock) is
+  provided or if no session backend is currently holding the provided key.
+
+ALIASES
+  $ jamsocket connect
+
+EXAMPLES
+  $ jamsocket service connect my-service
+
+  $ jamsocket service connect my-service -k my-key
+
+  $ jamsocket service connect my-service -t my-tag
+
+  $ jamsocket service connect my-service -e SOME_ENV_VAR=foo -e ANOTHER_ENV_VAR=bar
+
+  $ jamsocket service connect my-service -i 60
+
+  $ jamsocket service connect my-service -l 300
+
+  $ jamsocket service connect my-service --no-spawn
+
+  $ jamsocket service connect my-service -u my-user -a '{"foo":"my-json-data"}'
 ```
 
 ## `jamsocket service create NAME`
@@ -453,7 +564,10 @@ Terminates one or more backends given the backend name(s).
 
 ```
 USAGE
-  $ jamsocket terminate [BACKENDS]
+  $ jamsocket terminate [BACKENDS] [-f]
+
+FLAGS
+  -f, --force  whether to force the backend to hard terminate (defaults to false)
 
 DESCRIPTION
   Terminates one or more backends given the backend name(s).

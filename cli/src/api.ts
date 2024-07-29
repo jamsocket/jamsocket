@@ -22,6 +22,88 @@ export type SpawnRequestBody = {
   service_environment?: string;
 }
 
+export type V1Status =
+  | 'Loading'
+  | 'Starting'
+  | 'Ready'
+  | 'Swept'
+  | 'Exited'
+  | 'Terminated'
+  | 'Failed'
+  | 'ErrorLoading'
+  | 'ErrorStarting'
+  | 'TimedOutBeforeReady'
+
+export type V2Status =
+  | 'scheduled'
+  | 'loading'
+  | 'starting'
+  | 'waiting'
+  | 'ready'
+  | 'terminating'
+  | 'hard-terminating'
+  | 'terminated'
+
+export type ConnectResourceLimits = {
+  cpu_period?: number;
+  // Proportion of period used by container (in microseconds)
+  cpu_period_percent?: number;
+  // Total cpu time allocated to container (in seconds)
+  cpu_time_limit?: number;
+  memory_limit_bytes?: number;
+  disk_limit_bytes?: number;
+}
+
+export type JamsocketConnectRequestBody = {
+  key?: string;
+  spawn?: boolean | {
+    tag?: string;
+    lifetime_limit_seconds?: number;
+    max_idle_seconds?: number;
+    executable?: {
+      mount?: string | boolean;
+      env?: Record<string, string>;
+      resource_limits?: ConnectResourceLimits;
+    };
+  };
+  user?: string;
+  auth?: Record<string, any>;
+}
+
+export type JamsocketConnectResponse = {
+  backend_id: string;
+  spawned: boolean;
+  status: V2Status;
+  token: string;
+  url: string;
+  secret_token?: string | null;
+  status_url: string;
+  ready_url: string;
+}
+
+// these are public messages that come over the status and status/stream endpoints
+export type PlaneTerminationReason = 'swept' | 'external' | 'key_expired' | 'lost' | 'startup_timeout'
+export type PlaneTerminationKind = 'soft' | 'hard'
+export type PlaneV2StatusMessage =
+  | { status: 'scheduled', time: number }
+  | { status: 'loading', time: number }
+  | { status: 'starting', time: number }
+  | { status: 'waiting', time: number }
+  | { status: 'ready', time: number }
+  | { status: 'terminating', time: number, termination_reason: PlaneTerminationReason }
+  | { status: 'hard-terminating', time: number, termination_reason: PlaneTerminationReason }
+  | { status: 'terminated', time: number, termination_reason?: PlaneTerminationReason, termination_kind?: PlaneTerminationKind, exit_error?: boolean }
+
+export type PlaneV2State =
+  | { status: 'scheduled' }
+  | { status: 'loading' }
+  | { status: 'starting' }
+  | { status: 'waiting', address?: string }
+  | { status: 'ready', address?: string }
+  | { status: 'terminating', last_status: V2Status, reason: PlaneTerminationReason }
+  | { status: 'hard-terminating', last_status: V2Status, reason: PlaneTerminationReason }
+  | { status: 'terminated', last_status: V2Status, reason: PlaneTerminationReason, termination: PlaneTerminationKind, exit_code?: number | null }
+
 export type UpdateEnvironmentBody = {
   name?: string;
   image_tag?: string;
@@ -66,7 +148,6 @@ export interface ServiceInfoResult {
   last_spawned_at: string | null,
   last_image_upload_time: string | null,
   last_image_digest: string | null,
-  spawn_tokens_count: number,
   image_name: string,
   environments: Environment[],
 }
@@ -85,7 +166,7 @@ export interface SpawnResult {
   ready_url: string,
   status_url: string,
   spawned: boolean,
-  status: string | null
+  status: V1Status | null
 }
 
 export type BackendWithStatus = {
@@ -94,9 +175,9 @@ export type BackendWithStatus = {
   service_name: string
   cluster_name: string
   account_name: string
-  status?: string
+  status?: V2Status
   status_timestamp?: string
-  lock?: string
+  key?: string
 }
 
 export interface RunningBackendsResult {
@@ -107,8 +188,8 @@ export interface TerminateResult {
   status: 'ok',
 }
 
-export interface BackendStatus {
-  value: string
+export interface BackendV2Status {
+  value: PlaneV2State,
   timestamp: string
 }
 
@@ -118,9 +199,9 @@ export interface BackendInfoResult {
   service_name: string
   cluster_name: string
   account_name: string
-  statuses: BackendStatus[]
+  statuses: BackendV2Status[]
   image_digest: string
-  lock?: string | null
+  key?: string | null
   environment_name?: string | null
   max_mem_bytes?: number | null
 }
@@ -157,11 +238,6 @@ export class AuthenticationError extends HTTPError {
     super(status, code, message)
     this.name = 'AuthenticationError'
   }
-}
-
-export interface StatusMessage {
-  state: string,
-  time: Date,
 }
 
 export class JamsocketApi {
@@ -210,8 +286,12 @@ export class JamsocketApi {
   private async makeRequest<T>(endpoint: string, method: HttpMethod, body?: any, headers?: Headers, config?: JamsocketConfig): Promise<T> {
     const url = `${this.apiBase}${endpoint}`
     const user = config?.getUserEmail() ?? null
+    const account = config?.getAccount() ?? null
     if (user) {
       headers = { ...headers, 'X-Jamsocket-User': user }
+    }
+    if (account) {
+      headers = { ...headers, 'X-Jamsocket-Account': account }
     }
     const response = await request(url, body || null, { ...this.options, method, headers })
 
@@ -264,8 +344,12 @@ export class JamsocketApi {
   private makeStreamRequest(endpoint: string, headers: Headers | null, callback: (line: string) => void, config?: JamsocketConfig): EventStreamReturn {
     const url = `${this.apiBase}${endpoint}`
     const user = config?.getUserEmail() ?? null
+    const account = config?.getAccount() ?? null
     if (user) {
       headers = { ...headers, 'X-Jamsocket-User': user }
+    }
+    if (account) {
+      headers = { ...headers, 'X-Jamsocket-Account': account }
     }
     return eventStream(url, {
       ...this.options,
@@ -326,6 +410,12 @@ export class JamsocketApi {
     return this.makeAuthenticatedRequest<SpawnResult>(url, HttpMethod.Post, config, body)
   }
 
+  public connect(accountName: string, serviceName: string, serviceEnvironment: string | null, config: JamsocketConfig, body?: JamsocketConnectRequestBody): Promise<JamsocketConnectResponse> {
+    const service = serviceEnvironment ? `${serviceName}/${serviceEnvironment}` : serviceName
+    const url = `/v2/service/${accountName}/${service}/connect`
+    return this.makeAuthenticatedRequest<JamsocketConnectResponse>(url, HttpMethod.Post, config, body)
+  }
+
   public listRunningBackends(accountName: string, config: JamsocketConfig): Promise<RunningBackendsResult> {
     const url = `/v2/account/${accountName}/backends`
     return this.makeAuthenticatedRequest<RunningBackendsResult>(url, HttpMethod.Get, config)
@@ -346,30 +436,27 @@ export class JamsocketApi {
     return this.makeAuthenticatedStreamRequest(url, config, callback)
   }
 
-  public streamStatus(backend: string, callback: (statusMessage: StatusMessage) => void, config?: JamsocketConfig): EventStreamReturn {
-    const url = `/v1/backend/${backend}/status/stream`
+  public streamStatus(backend: string, callback: (statusMessage: PlaneV2StatusMessage) => void, config?: JamsocketConfig): EventStreamReturn {
+    const url = `/v2/backend/${backend}/status/stream`
     const wrappedCallback = (line: string) => {
       const val = JSON.parse(line)
-      callback({
-        state: val.state,
-        time: new Date(val.time),
-      })
+      callback(val)
     }
     return this.makeStreamRequest(url, null, wrappedCallback, config)
   }
 
-  public async status(backend: string, config?: JamsocketConfig): Promise<StatusMessage> {
-    const url = `/v1/backend/${backend}/status`
-    return this.makeRequest<StatusMessage>(url, HttpMethod.Get, undefined, undefined, config)
+  public async status(backend: string, config?: JamsocketConfig): Promise<PlaneV2StatusMessage> {
+    const url = `/v2/backend/${backend}/status`
+    return this.makeRequest<PlaneV2StatusMessage>(url, HttpMethod.Get, undefined, undefined, config)
   }
 
-  public async terminate(backend: string, config: JamsocketConfig): Promise<TerminateResult> {
+  public async terminate(backend: string, hard: boolean, config: JamsocketConfig): Promise<TerminateResult> {
     const url = `/v2/backend/${backend}/terminate`
-    return this.makeAuthenticatedRequest<TerminateResult>(url, HttpMethod.Post, config)
+    return this.makeAuthenticatedRequest<TerminateResult>(url, HttpMethod.Post, config, { hard })
   }
 
   public async backendInfo(backend: string, config: JamsocketConfig): Promise<BackendInfoResult> {
-    const url = `/v1/backend/${backend}`
+    const url = `/v2/backend/${backend}`
     return this.makeAuthenticatedRequest<BackendInfoResult>(url, HttpMethod.Get, config)
   }
 

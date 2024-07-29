@@ -2,6 +2,7 @@ import { Command } from '@oclif/core'
 import chalk from 'chalk'
 import { Jamsocket } from '../../jamsocket'
 import { blue, lightBlue, lightMagenta, lightGreen } from '../../formatting'
+import { PlaneV2State } from '../../api'
 
 export default class Info extends Command {
   static description = 'Retrieves information about a backend given its name.'
@@ -25,7 +26,7 @@ export default class Info extends Command {
     this.log(`account:      ${blue(info.account_name)}`)
     this.log(`cluster:      ${blue(info.cluster_name)}`)
     this.log(`image digest: ${blue(info.image_digest)}`)
-    if (info.lock) this.log(`lock:         ${blue(info.lock)}`)
+    if (info.key) this.log(`key:          ${blue(info.key)}`)
     if (info.environment_name) this.log(`environment:  ${blue(info.environment_name)}`)
     if (info.max_mem_bytes) this.log(`mem usage:    ${blue(`${info.max_mem_bytes} bytes`)}`)
     this.log(`dashboard:    ${lightGreen(`${appBaseUrl}/backend/${info.name}`)}`)
@@ -36,8 +37,32 @@ export default class Info extends Command {
     } else {
       info.statuses.sort((a, b) => a.timestamp > b.timestamp ? 1 : -1)
       for (const status of info.statuses) {
-        this.log(`${status.timestamp}  ${lightBlue(status.value)}`)
+        this.log(`${status.timestamp}  ${lightBlue(status.value.status)} ${formatStatusMeta(status.value)}`)
       }
     }
   }
+}
+
+function formatStatusMeta(value: PlaneV2State): string {
+  const meta: string[] = []
+  if (
+    value.status === 'scheduled' ||
+    value.status === 'loading' ||
+    value.status === 'starting' ||
+    value.status === 'waiting' ||
+    value.status === 'ready'
+  ) {
+    return ''
+  }
+
+  meta.push(`reason: ${value.reason}`)
+
+  if (value.status === 'terminated') {
+    meta.push(
+      `kind: ${value.termination}`,
+      `exit code: ${value.exit_code ?? '-'}`,
+    )
+  }
+
+  return `(${meta.join(', ')})`
 }

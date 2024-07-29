@@ -1,5 +1,5 @@
-import { JamsocketApi, BackendInfoResult, RunningBackendsResult, SpawnRequestBody, SpawnResult, StatusMessage, TerminateResult } from './api'
-import type { ServiceCreateResult, ServiceListResult, ServiceInfoResult, ServiceDeleteResult, ServiceImagesResult, EnvironmentUpdateResult } from './api'
+import { JamsocketApi, BackendInfoResult, RunningBackendsResult, SpawnRequestBody, SpawnResult, PlaneV2StatusMessage, TerminateResult } from './api'
+import type { ServiceCreateResult, ServiceListResult, ServiceInfoResult, ServiceDeleteResult, ServiceImagesResult, EnvironmentUpdateResult, JamsocketConnectRequestBody, JamsocketConnectResponse } from './api'
 import { JamsocketConfig } from './jamsocket-config'
 import { tag as dockerTag, push as dockerPush } from './docker'
 import type { EventStreamReturn } from './request'
@@ -58,9 +58,14 @@ export class Jamsocket {
     return this.api.spawn(config.getAccount(), service, config, body)
   }
 
-  public terminate(backend: string): Promise<TerminateResult> {
+  public connect(service: string, serviceEnvironment: string | null, body?: JamsocketConnectRequestBody): Promise<JamsocketConnectResponse> {
     const config = this.expectAuthorized()
-    return this.api.terminate(backend, config)
+    return this.api.connect(config.getAccount(), service, serviceEnvironment, config, body)
+  }
+
+  public terminate(backend: string, hard: boolean): Promise<TerminateResult> {
+    const config = this.expectAuthorized()
+    return this.api.terminate(backend, hard, config)
   }
 
   public backendInfo(backend: string): Promise<BackendInfoResult> {
@@ -116,11 +121,11 @@ export class Jamsocket {
     return this.api.streamMetrics(backend, config, callback)
   }
 
-  public streamStatus(backend: string, callback: (v: StatusMessage) => void, config?: JamsocketConfig): EventStreamReturn {
+  public streamStatus(backend: string, callback: (v: PlaneV2StatusMessage) => void, config?: JamsocketConfig): EventStreamReturn {
     return this.api.streamStatus(backend, callback, config)
   }
 
-  public status(backend: string, config?: JamsocketConfig): Promise<StatusMessage> {
+  public status(backend: string, config?: JamsocketConfig): Promise<PlaneV2StatusMessage> {
     return this.api.status(backend, config)
   }
 }

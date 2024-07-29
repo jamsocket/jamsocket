@@ -6,11 +6,11 @@ import { formatDistanceToNow } from 'date-fns'
 import { CliUx } from '@oclif/core'
 import { buildImage } from '../docker'
 import type { BuildImageOptions } from '../docker'
-import { SpawnResult, SpawnRequestBody, HTTPError } from '../api'
+import { JamsocketConnectRequestBody, V1Status, JamsocketConnectResponse, PlaneV2StatusMessage, HTTPError, V2Status, SpawnRequestBody } from '../api'
 import { readRequestBody, createColorGetter, sleep, type Color } from './util'
 import { Logger } from './logger'
-import type { StreamHandle, StatusV1 } from './plane'
-import { LocalPlane, runPlane, ensurePlaneImage, isV1StatusAlive, isV1ErrorStatus, dockerKillPlaneBackends } from './plane'
+import type { StreamHandle, PlaneConnectResponse } from './plane'
+import { LocalPlane, runPlane, ensurePlaneImage, isV2StatusAlive, dockerKillPlaneBackends, isV2ErrorStatus } from './plane'
 
 const CTRL_C = '\u0003'
 const DEFAULT_DEV_SERVER_PORT = 8080
@@ -19,11 +19,18 @@ type Backend = {
   name: string
   imageId: string
   spawnTime: number
-  lastStatus: StatusV1 | null
-  lock: string | null
+  lastStatus: PlaneV2StatusMessage | null
+  lastV1Status: StatusMsgV1 | null
+  key: string | null
   color: Color
   logsStream: StreamHandle | null
   statusStream: StreamHandle | null
+}
+
+type StatusMsgV1 = {
+  state: V1Status,
+  time: string,
+  backend: string,
 }
 
 type Options = {
@@ -196,7 +203,7 @@ class DevServer {
         },
         status: {
           header: 'Status',
-          get: backend => chalk[backend.color](backend.lastStatus?.state ?? '-'),
+          get: backend => chalk[backend.color](backend.lastStatus?.status ?? '-'),
         },
         spawned: {
           header: 'Spawn time',
@@ -206,9 +213,9 @@ class DevServer {
           header: 'Image ID',
           get: backend => chalk[backend.color](backend.imageId.slice(0, 7)),
         },
-        lock: {
-          header: 'Lock',
-          get: backend => chalk[backend.color](backend.lock ?? '-'),
+        key: {
+          header: 'Key (aka lock)',
+          get: backend => chalk[backend.color](backend.key ?? '-'),
         },
       }, {
         printLine: line => footer.push(line),
@@ -259,14 +266,14 @@ class DevServer {
     const backendNames = [...this.devBackends.values()].map(b => b.name)
     if (backendNames.length > 0) {
       this.logger.log(['', 'Terminating session backends...'])
-      await this.terminateBackends(backendNames)
+      await this.terminateBackends(backendNames, true)
     } else {
       this.logger.log(['', 'No session backends to terminate'])
     }
   }
 
-  async terminateBackends(backends: string[]): Promise<void> {
-    const terminationPromises = backends.map(name => this.plane.terminate(name))
+  async terminateBackends(backends: string[], force = false): Promise<void> {
+    const terminationPromises = backends.map(name => this.plane.terminate(name, force))
     this.logger.log([`Terminating ${backends.length} backend(s): ${backends.map(name => name).join(', ')}`])
     try {
       await Promise.all(terminationPromises)
@@ -283,19 +290,39 @@ class DevServer {
   }
 
   async streamStatus(backend: Backend): Promise<void> {
+    // doing some gymnastics to translate v2 statuses to v1 statuses
+    // once we drop support for v1 statuses in a future version, we can
+    // remove a lot of this extra logic
+    let lastAliveStatusMsg: PlaneV2StatusMessage | null = null
+    let lastV1Status: string | null = null
     backend.statusStream = this.plane.streamStatus(backend.name, status => {
+      const v1Status = translateStatusToV1(status, lastAliveStatusMsg)
+      if (lastAliveStatusMsg === null || (isPreterminatingStatus(status.status) && status.time > lastAliveStatusMsg.time)) {
+        lastAliveStatusMsg = status
+      }
+
+      const dontEmit = lastV1Status && v1Status === lastV1Status
+      lastV1Status = v1Status
+      if (!dontEmit) {
+        backend.lastV1Status = {
+          state: v1Status,
+          time: new Date(status.time).toISOString(),
+          backend: backend.name,
+        }
+      }
+
       backend.lastStatus = status
-      this.logger.log([`Status for ${this.applyBackendStyle(backend, backend.name)}: ${status.state}`])
-      if (!isV1StatusAlive(status.state)) {
+      this.logger.log([`Status for ${this.applyBackendStyle(backend, backend.name)}: ${status.status}`])
+      if (!isV2StatusAlive(status.status)) {
         backend.statusStream?.close()
         backend.logsStream?.close()
         this.devBackends.delete(backend.name)
-        if (isV1ErrorStatus(status.state)) {
-          this.logger.log([chalk.yellow`See https://docs.jamsocket.com/platform/troubleshooting for help on troubleshooting ${status.state} statuses`])
+        if (isV2ErrorStatus(status)) {
+          this.logger.log([chalk.yellow`See https://docs.jamsocket.com/platform/troubleshooting for help on troubleshooting unexpected terminated statuses.`])
         }
       }
       // once we hit Starting, we're safe to start listening to logs
-      if (status.state === 'Starting') {
+      if (status.status === 'starting') {
         this.streamLogs(backend)
       }
     })
@@ -340,30 +367,61 @@ class DevServer {
         return
       }
 
+      // -------- v1 endpoints --------
+
       const isSpawnReq = /^\/user\/([^/]+)\/service\/([^/]+)\/spawn/.exec(req.url ?? '') !== null
       if (req.method === 'POST' && isSpawnReq) {
         await this.handleSpawnRequest(req, res)
         return
       }
 
-      const statusStreamMatch = /^\/backend\/([^/]+)\/status\/stream/.exec(req.url ?? '')
+      const v1StatusStreamMatch = /^\/backend\/([^/]+)\/status\/stream/.exec(req.url ?? '')
+      if (req.method === 'GET' && v1StatusStreamMatch !== null) {
+        const backendName = v1StatusStreamMatch[1]
+        await this.handleV1StatusStreamRequest(backendName, res)
+        return
+      }
+
+      const v1StatusMatch = /^\/backend\/([^/]+)\/status/.exec(req.url ?? '')
+      if (req.method === 'GET' && v1StatusMatch !== null) {
+        const backendName = v1StatusMatch[1]
+        await this.handleV1StatusRequest(backendName, res)
+        return
+      }
+
+      const v1TerminateMatch = /^\/backend\/([^/]+)\/terminate/.exec(req.url ?? '')
+      if (req.method === 'POST' && v1TerminateMatch !== null) {
+        const backendName = v1TerminateMatch[1]
+        await this.handleV1TerminateRequest(backendName, res)
+        return
+      }
+
+      // -------- v2 endpoints --------
+
+      const isConnectReq = /^\/v2\/service\/([^/]+)\/([^/]+)\/connect/.exec(req.url ?? '') !== null
+      if (req.method === 'POST' && isConnectReq) {
+        await this.handleConnectRequest(req, res)
+        return
+      }
+
+      const statusStreamMatch = /^\/v2\/backend\/([^/]+)\/status\/stream/.exec(req.url ?? '')
       if (req.method === 'GET' && statusStreamMatch !== null) {
         const backendName = statusStreamMatch[1]
         await this.handleStatusStreamRequest(backendName, res)
         return
       }
 
-      const statusMatch = /^\/backend\/([^/]+)\/status/.exec(req.url ?? '')
+      const statusMatch = /^\/v2\/backend\/([^/]+)\/status/.exec(req.url ?? '')
       if (req.method === 'GET' && statusMatch !== null) {
         const backendName = statusMatch[1]
         await this.handleStatusRequest(backendName, res)
         return
       }
 
-      const terminateMatch = /^\/backend\/([^/]+)\/terminate/.exec(req.url ?? '')
+      const terminateMatch = /^\/v2\/backend\/([^/]+)\/terminate/.exec(req.url ?? '')
       if (req.method === 'POST' && terminateMatch !== null) {
         const backendName = terminateMatch[1]
-        await this.handleTerminateRequest(backendName, res)
+        await this.handleTerminateRequest(backendName, req, res)
         return
       }
 
@@ -383,8 +441,7 @@ class DevServer {
     res.setHeader('Content-Type', 'text/event-stream')
     res.writeHead(200)
     const stream = this.plane.streamStatus(backend, status => {
-      // needs to return {"state":"Ready","backend":"usv10","time":"2024-01-17T21:41:35.682891Z"}
-      const data: StatusV1 = status
+      const data: PlaneV2StatusMessage = status
       res.write(`data:${JSON.stringify(data)}\n\n`)
     })
     await stream.closed
@@ -392,11 +449,64 @@ class DevServer {
     res.end()
   }
 
+  async handleV1StatusStreamRequest(backend: string, res: http.ServerResponse): Promise<void> {
+    res.setHeader('Access-Control-Allow-Origin', '*')
+    res.setHeader('Content-Type', 'text/event-stream')
+    res.writeHead(200)
+
+    let lastAliveStatusMsg: PlaneV2StatusMessage | null = null
+    let lastV1Status: string | null = null
+
+    const stream = this.plane.streamStatus(backend, v2Status => {
+      const v1Status = translateStatusToV1(v2Status, lastAliveStatusMsg)
+      if (lastAliveStatusMsg === null || (isPreterminatingStatus(v2Status.status) && v2Status.time > lastAliveStatusMsg.time)) {
+        lastAliveStatusMsg = v2Status
+      }
+
+      const dontEmit = lastV1Status && v1Status === lastV1Status
+      lastV1Status = v1Status
+      if (dontEmit) return
+
+      const data: StatusMsgV1 = {
+        state: v1Status,
+        time: new Date(v2Status.time).toISOString(),
+        backend: backend,
+      }
+      res.write(`data:${JSON.stringify(data)}\n\n`)
+    })
+    await stream.closed
+
+    res.end()
+  }
+
+  async handleV1StatusRequest(backendName: string, res: http.ServerResponse): Promise<void> {
+    let b = this.devBackends.get(backendName)
+    // if the dev CLI doesn't know about this backend yet, it may just need to sleep for a bit
+    // and then try again one more time
+    if (!b || b.lastV1Status === null) {
+      await sleep(500)
+      b = this.devBackends.get(backendName)
+    }
+
+    // if the dev CLI still doesn't know about this backend, then 404
+    if (!b || b.lastV1Status === null) {
+      res.writeHead(404)
+      res.end()
+      return
+    }
+
+    const data: StatusMsgV1 = b.lastV1Status
+    res.setHeader('Access-Control-Allow-Origin', '*')
+    res.setHeader('Content-Type', 'application/json')
+    res.writeHead(200)
+    res.end(JSON.stringify(data))
+  }
+
   async handleStatusRequest(backendName: string, res: http.ServerResponse): Promise<void> {
     let b = this.devBackends.get(backendName)
     // if the dev CLI doesn't know about this backend yet, it may just need to sleep for a bit
     // and then try again one more time
-    if (!b) {
+    if (!b || b.lastStatus === null) {
       await sleep(500)
       b = this.devBackends.get(backendName)
     }
@@ -408,15 +518,14 @@ class DevServer {
       return
     }
 
-    // needs to return {"state":"Ready","backend":"usv10","time":"2024-01-17T21:41:35.682891Z"}
-    const data: StatusV1 = b.lastStatus
+    const data: PlaneV2StatusMessage = b.lastStatus
     res.setHeader('Access-Control-Allow-Origin', '*')
     res.setHeader('Content-Type', 'application/json')
     res.writeHead(200)
     res.end(JSON.stringify(data))
   }
 
-  async handleTerminateRequest(backendName: string, res: http.ServerResponse): Promise<void> {
+  async handleTerminateRequest(backendName: string, req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
     const b = this.devBackends.get(backendName)
     // if the dev CLI doesn't know about this backend, then 404
     if (!b || b.lastStatus === null) {
@@ -425,22 +534,101 @@ class DevServer {
       return
     }
 
-    await this.terminateBackends([backendName])
+    const text = await readRequestBody(req)
+    let body: Record<string, any> = {}
+    try {
+      if (text.length > 0) {
+        body = JSON.parse(text)
+      }
+    } catch {
+      res.writeHead(400)
+      res.end('Failed to parse the request body as JSON')
+      return
+    }
+
+    await this.terminateBackends([backendName], body.hard === true)
     res.setHeader('Content-Type', 'application/json')
     res.writeHead(200)
     res.end('{"status":"ok"}')
+  }
+
+  async handleV1TerminateRequest(backendName: string, res: http.ServerResponse): Promise<void> {
+    const b = this.devBackends.get(backendName)
+    // if the dev CLI doesn't know about this backend, then 404
+    if (!b || b.lastStatus === null) {
+      res.writeHead(404)
+      res.end()
+      return
+    }
+
+    // v1 always hard terminates
+    await this.terminateBackends([backendName], true)
+    res.setHeader('Content-Type', 'application/json')
+    res.writeHead(200)
+    res.end('{"status":"ok"}')
+  }
+
+  async handleConnectRequest(req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
+    // TODO: We are just ignoring account/service here. Is there some kind of validation we
+    // could do here to help clients avoid issues when going to production?
+    const text = await readRequestBody(req)
+    let body: Record<string, any> = {}
+    try {
+      if (text.length > 0) {
+        body = JSON.parse(text)
+      }
+    } catch {
+      res.writeHead(400)
+      res.end('Failed to parse the request body as JSON')
+      return
+    }
+
+    const result = await this.spawnBackend(body)
+    if (result instanceof HTTPError) {
+      res.writeHead(result.status)
+      res.end(result.toString())
+      return
+    }
+
+    const respBody: JamsocketConnectResponse = {
+      backend_id: result.backend_id,
+      status_url: `http://localhost:${this.port}/v2/backend/${result.backend_id}/status`,
+      status: result.status,
+      spawned: result.spawned,
+      ready_url: '',
+      url: result.url,
+      secret_token: result.secret_token,
+      token: result.token,
+    }
+    res.setHeader('Content-Type', 'application/json')
+    res.writeHead(200)
+    res.end(JSON.stringify(respBody))
   }
 
   async handleSpawnRequest(req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
     // TODO: We are just ignoring account/service here. Is there some kind of validation we
     // could do here to help clients avoid issues when going to production?
     const text = await readRequestBody(req)
-    let body: Record<string, any> = {}
+    let body: SpawnRequestBody = {}
     try {
       body = JSON.parse(text)
-    } catch {}
+    } catch {
+      res.writeHead(400)
+      res.end('Failed to parse the request body as JSON')
+      return
+    }
 
-    const result = await this.spawnBackend(body)
+    const connectReq: JamsocketConnectRequestBody = {
+      key: body.lock,
+      spawn: {
+        executable: {
+          env: body.env,
+        },
+        max_idle_seconds: body.grace_period_seconds,
+      },
+    }
+
+    const result = await this.spawnBackend(connectReq)
     if (result instanceof HTTPError) {
       res.writeHead(result.status)
       res.end(result.toString())
@@ -452,48 +640,49 @@ class DevServer {
     res.end(JSON.stringify(result))
   }
 
-  async spawnBackend(body: SpawnRequestBody): Promise<SpawnResult | HTTPError> {
+  async spawnBackend(body: JamsocketConnectRequestBody): Promise<PlaneConnectResponse | HTTPError> {
     const imageId = await this.waitUntilImageIsReady(60_000) // wait up to 60 seconds for the image to be ready
     if (!imageId) {
       this.logger.log([chalk.red`Error spawning backend: the latest build of your session backend's Dockerfile has either failed or is still ongoing. Check the logs above and make sure there are no docker build errors before spawning.`])
       return new HTTPError(500, 'Internal Error', 'Error spawning backend: the latest build of your session backend\'s Dockerfile has either failed or has not yet completed. Make sure all docker build errors are resolved and a new image is built before spawning.')
     }
 
-    const result = await this.plane.spawn(imageId, body.env, body.grace_period_seconds, body.lock, this.useStaticToken, this.dockerNetwork)
+    const result = await this.plane.spawn(imageId, body, this.useStaticToken, this.dockerNetwork)
     if (result instanceof HTTPError) return result
 
-    const existingBackend = this.devBackends.get(result.name)
+    const existingBackend = this.devBackends.get(result.backend_id)
     if (existingBackend) {
       if (result.spawned) {
-        return new HTTPError(500, 'Internal Error', `Spawned backend ${result.name} already exists in devBackends but "spawned=true" in spawn response. Some bug has occurred.`)
+        return new HTTPError(500, 'Internal Error', `Spawned backend ${result.backend_id} already exists in devBackends but "spawned=true" in spawn response. Some bug has occurred.`)
       }
       if (existingBackend.imageId !== imageId) {
-        this.logger.log([chalk.red`Warning: Spawn with lock returned a running backend with an outdated version of the session backend code. Blocking spawn.`])
-        return new HTTPError(500, 'Internal Error', 'jamsocket dev-server: Spawn with lock returned a running backend with an outdated version of the session backend code. Blocking spawn.')
+        this.logger.log([chalk.red`Warning: Spawn with key returned a running backend with an outdated version of the session backend code. Blocking spawn.`])
+        return new HTTPError(500, 'Internal Error', 'jamsocket dev-server: Spawn with key returned a running backend with an outdated version of the session backend code. Blocking spawn.')
       }
     } else if (result.spawned) {
       const backend = {
-        name: result.name,
+        name: result.backend_id,
         imageId: imageId,
         spawnTime: Date.now(),
-        lock: body.lock ?? null,
+        key: body.key ?? null,
         color: this.getColor(),
         lastStatus: null,
+        lastV1Status: null,
         statusStream: null,
         logsStream: null,
       }
-      this.devBackends.set(result.name, backend)
-      this.logger.log([`Spawned backend: ${this.applyBackendStyle(backend, result.name)}`])
+      this.devBackends.set(result.backend_id, backend)
+      this.logger.log([`Spawned backend: ${this.applyBackendStyle(backend, result.backend_id)}`])
       this.streamStatus(backend)
     } else {
-      this.logger.log([chalk.red`Warning: Spawn with lock returned a running backend that was not originally spawned by this dev server. Blocking spawn.`])
-      return new HTTPError(500, 'Internal Error', 'jamsocket dev-server: Spawn with lock returned a running backend that was not originally spawned by this dev server. Blocking spawn.')
+      this.logger.log([chalk.red`Warning: Spawn with key returned a running backend that was not originally spawned by this dev server. Blocking spawn.`])
+      return new HTTPError(500, 'Internal Error', 'jamsocket dev-server: Spawn with key returned a running backend that was not originally spawned by this dev server. Blocking spawn.')
     }
 
     // rewrite status_url to point back to this dev server
     const transformedResult = {
       ...result,
-      status_url: `http://localhost:${this.port}/backend/${result.name}/status`,
+      status_url: `http://localhost:${this.port}/backend/${result.backend_id}/status`,
     }
 
     return transformedResult
@@ -511,4 +700,47 @@ class DevServer {
     }
     return null
   }
+}
+
+function translateStatusToV1(
+  plane2StatusMsg: PlaneV2StatusMessage,
+  lastAliveStatusMsg: PlaneV2StatusMessage | null,
+): V1Status {
+  switch (plane2StatusMsg.status) {
+  case 'scheduled':
+  case 'loading':
+    return 'Loading'
+  case 'starting':
+  case 'waiting':
+    return 'Starting'
+  case 'ready':
+  case 'terminating':
+  case 'hard-terminating':
+    return 'Ready'
+  case 'terminated':
+    if (plane2StatusMsg.termination_reason === 'external') {
+      return 'Terminated'
+    }
+    if (plane2StatusMsg.termination_reason && ['swept', 'key_expired'].includes(plane2StatusMsg.termination_reason)) {
+      return 'Swept'
+    }
+    if (!lastAliveStatusMsg || ['scheduled', 'loading'].includes(lastAliveStatusMsg.status)) {
+      return 'ErrorLoading'
+    }
+    if (lastAliveStatusMsg.status === 'starting') {
+      return 'ErrorStarting'
+    }
+    if (lastAliveStatusMsg.status === 'waiting') {
+      if (plane2StatusMsg.termination_reason === 'startup_timeout') return 'TimedOutBeforeReady'
+      return 'ErrorStarting'
+    }
+    // if we've gotten here, the last alive status was 'ready'
+    if (plane2StatusMsg.exit_error === undefined) return 'Terminated'
+    if (plane2StatusMsg.exit_error === false) return 'Exited'
+    return 'Failed'
+  }
+}
+
+function isPreterminatingStatus(status: V2Status): boolean {
+  return !['terminating', 'hard-terminating', 'terminated'].includes(status)
 }

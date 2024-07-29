@@ -1,4 +1,4 @@
-import { Command } from '@oclif/core'
+import { Command, Flags } from '@oclif/core'
 import { Jamsocket } from '../../jamsocket'
 import { lightMagenta } from '../../formatting'
 
@@ -12,15 +12,19 @@ export default class Terminate extends Command {
   ]
 
   static args = [{ name: 'backends', required: true }]
+  static flags = {
+    force: Flags.boolean({ char: 'f', description: 'whether to force the backend to hard terminate (defaults to false)' }),
+  }
 
   public async run(): Promise<void> {
     // it's not possible to have a multiple values for the same argument, so this is the workaround
     const backends = [...this.argv]
+    const { flags } = await this.parse(Terminate)
     const jamsocket = Jamsocket.fromEnvironment()
 
     for (const backend of backends) {
       try {
-        await jamsocket.terminate(backend)
+        await jamsocket.terminate(backend, flags.force)
       } catch {
         this.warn(`Failed to request termination for backend: ${lightMagenta(backend)}. Skipping...`)
         continue

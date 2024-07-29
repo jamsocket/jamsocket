@@ -37,10 +37,10 @@ export default class List extends Command {
             '-'
         },
       },
-      lock: {
-        header: 'Lock',
+      key: {
+        header: 'Key (aka Lock)',
         get: row => {
-          return row.lock ? row.lock : ''
+          return row.key ? row.key : ''
         },
       },
     }, {
