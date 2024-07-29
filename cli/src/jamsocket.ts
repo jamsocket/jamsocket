@@ -1,5 +1,5 @@
 import { JamsocketApi, BackendInfoResult, RunningBackendsResult, SpawnRequestBody, SpawnResult, PlaneV2StatusMessage, TerminateResult } from './api'
-import type { ServiceCreateResult, ServiceListResult, ServiceInfoResult, ServiceDeleteResult, ServiceImagesResult, EnvironmentUpdateResult } from './api'
+import type { ServiceCreateResult, ServiceListResult, ServiceInfoResult, ServiceDeleteResult, ServiceImagesResult, EnvironmentUpdateResult, JamsocketConnectRequestBody, JamsocketConnectResponse } from './api'
 import { JamsocketConfig } from './jamsocket-config'
 import { tag as dockerTag, push as dockerPush } from './docker'
 import type { EventStreamReturn } from './request'
@@ -56,6 +56,11 @@ export class Jamsocket {
     }
 
     return this.api.spawn(config.getAccount(), service, config, body)
+  }
+
+  public connect(service: string, serviceEnvironment: string | null, body?: JamsocketConnectRequestBody): Promise<JamsocketConnectResponse> {
+    const config = this.expectAuthorized()
+    return this.api.connect(config.getAccount(), service, serviceEnvironment, config, body)
   }
 
   public terminate(backend: string, hard: boolean): Promise<TerminateResult> {

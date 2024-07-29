@@ -402,6 +402,12 @@ export class JamsocketApi {
     return this.makeAuthenticatedRequest<SpawnResult>(url, HttpMethod.Post, config, body)
   }
 
+  public connect(accountName: string, serviceName: string, serviceEnvironment: string | null, config: JamsocketConfig, body?: JamsocketConnectRequestBody): Promise<JamsocketConnectResponse> {
+    const service = serviceEnvironment ? `${serviceName}/${serviceEnvironment}` : serviceName
+    const url = `/v2/service/${accountName}/${service}/connect`
+    return this.makeAuthenticatedRequest<JamsocketConnectResponse>(url, HttpMethod.Post, config, body)
+  }
+
   public listRunningBackends(accountName: string, config: JamsocketConfig): Promise<RunningBackendsResult> {
     const url = `/v2/account/${accountName}/backends`
     return this.makeAuthenticatedRequest<RunningBackendsResult>(url, HttpMethod.Get, config)
