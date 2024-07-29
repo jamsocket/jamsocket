@@ -286,8 +286,12 @@ export class JamsocketApi {
   private async makeRequest<T>(endpoint: string, method: HttpMethod, body?: any, headers?: Headers, config?: JamsocketConfig): Promise<T> {
     const url = `${this.apiBase}${endpoint}`
     const user = config?.getUserEmail() ?? null
+    const account = config?.getAccount() ?? null
     if (user) {
       headers = { ...headers, 'X-Jamsocket-User': user }
+    }
+    if (account) {
+      headers = { ...headers, 'X-Jamsocket-Account': account }
     }
     const response = await request(url, body || null, { ...this.options, method, headers })
 
@@ -340,8 +344,12 @@ export class JamsocketApi {
   private makeStreamRequest(endpoint: string, headers: Headers | null, callback: (line: string) => void, config?: JamsocketConfig): EventStreamReturn {
     const url = `${this.apiBase}${endpoint}`
     const user = config?.getUserEmail() ?? null
+    const account = config?.getAccount() ?? null
     if (user) {
       headers = { ...headers, 'X-Jamsocket-User': user }
+    }
+    if (account) {
+      headers = { ...headers, 'X-Jamsocket-Account': account }
     }
     return eventStream(url, {
       ...this.options,
