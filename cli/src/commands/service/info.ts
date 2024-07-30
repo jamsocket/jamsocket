@@ -2,7 +2,7 @@ import { Command } from '@oclif/core'
 import chalk from 'chalk'
 import { formatDistanceToNow } from 'date-fns'
 import { Jamsocket } from '../../jamsocket'
-import { blue, gray, lightBlue, lightMagenta, lightGreen } from '../../formatting'
+import { blue, gray, lightBlue, lightMagenta, lightGreen } from '../../lib/formatting'
 
 export default class Create extends Command {
   static description = 'Gets some information about a service'

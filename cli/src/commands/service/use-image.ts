@@ -1,6 +1,6 @@
 import { Command, Flags } from '@oclif/core'
 import { Jamsocket } from '../../jamsocket'
-import { blue, lightBlue, lightMagenta } from '../../formatting'
+import { blue, lightBlue, lightMagenta } from '../../lib/formatting'
 
 export default class UseImage extends Command {
   static description = 'Sets the image tag or digest to use when spawning a service/environment'

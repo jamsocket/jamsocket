@@ -1,9 +1,9 @@
 import * as https from 'https'
 import * as http from 'http'
-import { HTTPError } from './api'
+import { HTTPError } from '../api'
 import * as os from 'os'
 import WSL from 'is-wsl'
-import { AUTH_ERROR_HTTP_CODES, AuthenticationError } from './api'
+import { AUTH_ERROR_HTTP_CODES, AuthenticationError } from '../api'
 import assert from 'assert'
 
 type Header = string | string[] | undefined
@@ -22,7 +22,7 @@ export type EventStreamReturn = {
 }
 
 // eslint-disable-next-line unicorn/prefer-module
-const version = require('../package.json').version
+const version = require('../../package.json').version
 const platform = WSL ? 'wsl' : os.platform()
 const arch = os.arch() === 'ia32' ? 'x86' : os.arch()
 const userAgent = `jamsocket-cli/${version} ${platform}-${arch} node-${process.version}`

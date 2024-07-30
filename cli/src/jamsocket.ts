@@ -1,8 +1,8 @@
 import { JamsocketApi, BackendInfoResult, RunningBackendsResult, SpawnRequestBody, SpawnResult, PlaneV2StatusMessage, TerminateResult } from './api'
 import type { ServiceCreateResult, ServiceListResult, ServiceInfoResult, ServiceDeleteResult, ServiceImagesResult, EnvironmentUpdateResult, JamsocketConnectRequestBody, JamsocketConnectResponse } from './api'
 import { JamsocketConfig } from './jamsocket-config'
-import { tag as dockerTag, push as dockerPush } from './docker'
-import type { EventStreamReturn } from './request'
+import { tag as dockerTag, push as dockerPush } from './lib/docker'
+import type { EventStreamReturn } from './lib/request'
 
 export class Jamsocket {
   constructor(public config: JamsocketConfig | null, public api: JamsocketApi) {}

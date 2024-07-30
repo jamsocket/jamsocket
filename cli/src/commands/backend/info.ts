@@ -1,7 +1,9 @@
 import { Command } from '@oclif/core'
 import chalk from 'chalk'
 import { Jamsocket } from '../../jamsocket'
-import { blue, lightBlue, lightMagenta, lightGreen } from '../../formatting'
+import { formatDistanceToNow } from 'date-fns'
+import prettyBytes from '../../lib/pretty-bytes'
+import { blue, lightBlue, lightMagenta, lightGreen } from '../../lib/formatting'
 import { PlaneV2State } from '../../api'
 
 export default class Info extends Command {
@@ -21,14 +23,14 @@ export default class Info extends Command {
     const appBaseUrl = jamsocket.api.getAppBaseUrl()
 
     this.log(chalk.bold`Info for backend: ${lightMagenta(info.name)}`)
-    this.log(`created:      ${blue(info.created_at)}`)
+    this.log(`created:      ${blue(info.created_at)} (${formatDistanceToNow(new Date(info.created_at))} ago)`)
     this.log(`service:      ${blue(info.service_name)}`)
     this.log(`account:      ${blue(info.account_name)}`)
     this.log(`cluster:      ${blue(info.cluster_name)}`)
     this.log(`image digest: ${blue(info.image_digest)}`)
     if (info.key) this.log(`key:          ${blue(info.key)}`)
     if (info.environment_name) this.log(`environment:  ${blue(info.environment_name)}`)
-    if (info.max_mem_bytes) this.log(`mem usage:    ${blue(`${info.max_mem_bytes} bytes`)}`)
+    if (info.max_mem_bytes) this.log(`mem usage:    ${blue(prettyBytes(info.max_mem_bytes))}`)
     this.log(`dashboard:    ${lightGreen(`${appBaseUrl}/backend/${info.name}`)}`)
     this.log()
     this.log(chalk.bold`Statuses:`)

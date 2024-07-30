@@ -3,7 +3,7 @@ import chalk from 'chalk'
 import * as inquirer from 'inquirer'
 import { JamsocketApi, AuthenticationError, CompleteCliLoginResult } from '../api'
 import { deleteJamsocketConfig, JamsocketConfig } from '../jamsocket-config'
-import { lightMagenta, lightGreen, lightBlue, gradientBlue } from '../formatting'
+import { lightMagenta, lightGreen, lightBlue, gradientBlue } from '../lib/formatting'
 
 export default class Login extends Command {
   static description = 'Authenticates user to the Jamsocket API.'

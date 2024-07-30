@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from 'fs'
 import path from 'path'
 import { Command, Flags } from '@oclif/core'
 import { createDevServer } from '../dev-server'
-import { type BuildImageOptions, getDockerNetworks } from '../docker'
+import { type BuildImageOptions, getDockerNetworks } from '../lib/docker'
 import { JamsocketApi } from '../api'
 import { JamsocketConfig } from '../jamsocket-config'
 

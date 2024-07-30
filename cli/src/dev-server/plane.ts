@@ -4,7 +4,7 @@ import chalk from 'chalk'
 import EventSource from 'eventsource'
 import { HTTPError, V2Status, JamsocketConnectRequestBody, ConnectResourceLimits, PlaneV2StatusMessage } from '../api'
 import { sleep } from './util'
-import { spawnDockerSync } from '../docker'
+import { spawnDockerSync } from '../lib/docker'
 import type { Logger } from './logger'
 
 type PlaneConnectRequest = {

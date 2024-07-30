@@ -2,7 +2,7 @@ import { Command, Flags } from '@oclif/core'
 import chalk from 'chalk'
 import { Jamsocket } from '../../jamsocket'
 import * as customFlags from '../../flags'
-import { blue, lightBlue, lightGreen } from '../../formatting'
+import { blue, lightBlue, lightGreen } from '../../lib/formatting'
 import { JamsocketConnectRequestBody } from '../../api'
 
 export default class Spawn extends Command {

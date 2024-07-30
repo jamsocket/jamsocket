@@ -2,8 +2,8 @@ import { Command, Flags } from '@oclif/core'
 import chalk from 'chalk'
 import * as inquirer from 'inquirer'
 import { Jamsocket } from '../jamsocket'
-import { getImagePlatform, buildImage } from '../docker'
-import { lightMagenta, blue } from '../formatting'
+import { getImagePlatform, buildImage } from '../lib/docker'
+import { lightMagenta, blue } from '../lib/formatting'
 
 export default class Push extends Command {
   static description = 'Builds and pushes an image to Jamsocket\'s container registry using the provided Dockerfile.'

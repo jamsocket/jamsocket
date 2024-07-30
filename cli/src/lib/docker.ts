@@ -1,7 +1,7 @@
 import { SpawnSyncOptionsWithStringEncoding, SpawnSyncReturns, StdioOptions, spawn, spawnSync } from 'child_process'
 import { mkdirSync, writeFileSync } from 'fs'
 import { join } from 'path'
-import { JAMSOCKET_CONFIG_DIR } from './jamsocket-config'
+import { JAMSOCKET_CONFIG_DIR } from '../jamsocket-config'
 
 export function getImagePlatform(imageName: string): { os: string, arch: string } {
   const getPlatform = spawnDockerSync(['image', 'inspect', '--format', '{{.Os}} {{.Architecture}}', imageName])

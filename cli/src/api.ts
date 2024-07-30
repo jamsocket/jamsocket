@@ -1,4 +1,4 @@
-import { eventStream, request, Headers, EventStreamReturn } from './request'
+import { eventStream, request, Headers, EventStreamReturn } from './lib/request'
 import type { JamsocketConfig } from './jamsocket-config'
 import * as https from 'https'
 

@@ -1,7 +1,7 @@
 import { Command } from '@oclif/core'
 import { Jamsocket } from '../../jamsocket'
 import chalk from 'chalk'
-import { blue, lightGreen } from '../../formatting'
+import { blue, lightGreen } from '../../lib/formatting'
 
 function prettifyBytes(bytes: number) {
   const suffixes = ['B', 'KiB', 'MiB', 'GiB', 'TiB']

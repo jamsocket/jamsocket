@@ -25,7 +25,7 @@ export default class List extends Command {
       name: { header: 'Name' },
       created_at: {
         header: 'Created',
-        get: row => formatDistanceToNow(new Date(row.created_at)),
+        get: row => `${formatDistanceToNow(new Date(row.created_at))} ago`,
       },
       account_name: { header: 'Account' },
       service_name: { header: 'Service' },

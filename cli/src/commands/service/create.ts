@@ -1,6 +1,6 @@
 import { Command } from '@oclif/core'
 import { Jamsocket } from '../../jamsocket'
-import { lightMagenta } from '../../formatting'
+import { lightMagenta } from '../../lib/formatting'
 
 export default class Create extends Command {
   static description = 'Creates a service'

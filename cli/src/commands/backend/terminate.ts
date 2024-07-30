@@ -1,6 +1,6 @@
 import { Command, Flags } from '@oclif/core'
 import { Jamsocket } from '../../jamsocket'
-import { lightMagenta } from '../../formatting'
+import { lightMagenta } from '../../lib/formatting'
 
 export default class Terminate extends Command {
   static description = 'Terminates one or more backends given the backend name(s).'

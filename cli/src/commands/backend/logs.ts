@@ -1,6 +1,6 @@
 import { Command } from '@oclif/core'
 import { Jamsocket } from '../../jamsocket'
-import { blue } from '../../formatting'
+import { blue } from '../../lib/formatting'
 
 export default class Logs extends Command {
     static description = 'Stream logs from a running backend.'

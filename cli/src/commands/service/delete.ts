@@ -2,7 +2,7 @@ import { Command, CliUx } from '@oclif/core'
 import { Jamsocket } from '../../jamsocket'
 import * as inquirer from 'inquirer'
 import { formatDistanceToNow } from 'date-fns'
-import { lightBlue, lightMagenta } from '../../formatting'
+import { lightBlue, lightMagenta } from '../../lib/formatting'
 
 export default class Create extends Command {
   static description = 'Deletes a service'
