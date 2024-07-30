@@ -6,7 +6,8 @@ import { getImagePlatform, buildImage } from '../lib/docker'
 import { lightMagenta, blue } from '../lib/formatting'
 
 export default class Push extends Command {
-  static description = 'Builds and pushes an image to Jamsocket\'s container registry using the provided Dockerfile.'
+  static description =
+    "Builds and pushes an image to Jamsocket's container registry using the provided Dockerfile."
 
   static examples = [
     '<%= config.bin %> <%= command.id %> my-service -f path/to/Dockerfile',
@@ -15,14 +16,28 @@ export default class Push extends Command {
   ]
 
   static flags = {
-    dockerfile: Flags.string({ char: 'f', description: 'path to the Dockerfile to build the image from' }),
-    context: Flags.string({ char: 'c', description: 'path to the build context for the Dockerfile (defaults to current working directory)' }),
-    tag: Flags.string({ char: 't', description: 'optional tag to apply to the image in the jamsocket registry' }),
+    dockerfile: Flags.string({
+      char: 'f',
+      description: 'path to the Dockerfile to build the image from',
+    }),
+    context: Flags.string({
+      char: 'c',
+      description:
+        'path to the build context for the Dockerfile (defaults to current working directory)',
+    }),
+    tag: Flags.string({
+      char: 't',
+      description: 'optional tag to apply to the image in the jamsocket registry',
+    }),
   }
 
   static args = [
     { name: 'service', description: 'Jamsocket service to push the image to', required: true },
-    { name: 'image', description: 'Optionally, provide an image to push instead of a Dockerfile', required: false },
+    {
+      name: 'image',
+      description: 'Optionally, provide an image to push instead of a Dockerfile',
+      required: false,
+    },
   ]
 
   public async run(): Promise<void> {
@@ -31,7 +46,9 @@ export default class Push extends Command {
 
     // make sure either Dockerfile or an image is provided (not both or neither)
     if (Boolean(args.image) === Boolean(flags.dockerfile)) {
-      this.error('Either an image or a Dockerfile must be provided. Rerun with --help for more information.')
+      this.error(
+        'Either an image or a Dockerfile must be provided. Rerun with --help for more information.',
+      )
     }
 
     let image: string | null = null
@@ -43,16 +60,23 @@ export default class Push extends Command {
       const { os, arch } = getImagePlatform(args.image)
       if (os !== 'linux' || arch !== 'amd64') {
         this.log()
-        this.warn(chalk.bold.red`The image ${args.image} may not be compatible with Jamsocket because its image os/arch is ${os}/${arch}.`)
-        this.log('If you encounter errors while spawning with this image, you may need to rebuild the image with the platform flag (--platform=linux/amd64) and push again.')
+        this.warn(
+          chalk.bold
+            .red`The image ${args.image} may not be compatible with Jamsocket because its image os/arch is ${os}/${arch}.`,
+        )
+        this.log(
+          'If you encounter errors while spawning with this image, you may need to rebuild the image with the platform flag (--platform=linux/amd64) and push again.',
+        )
         this.log()
 
-        const response = await inquirer.prompt([{
-          name: 'goAhead',
-          message: lightMagenta('Go ahead and push image?'),
-          type: 'list',
-          choices: [{ name: 'no' }, { name: 'yes' }],
-        }])
+        const response = await inquirer.prompt([
+          {
+            name: 'goAhead',
+            message: lightMagenta('Go ahead and push image?'),
+            type: 'list',
+            choices: [{ name: 'no' }, { name: 'yes' }],
+          },
+        ])
 
         if (response.goAhead !== 'yes') {
           this.log('Image push canceled.')

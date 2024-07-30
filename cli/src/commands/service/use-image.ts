@@ -11,11 +11,21 @@ export default class UseImage extends Command {
   ]
 
   static flags = {
-    image: Flags.string({ char: 'i', required: true, description: 'image tag or digest for the service/environment to use (Run `jamsocket images` for a list of images you can use.)' }),
+    image: Flags.string({
+      char: 'i',
+      required: true,
+      description:
+        'image tag or digest for the service/environment to use (Run `jamsocket images` for a list of images you can use.)',
+    }),
   }
 
   static args = [
-    { name: 'service', required: true, description: 'Name of service/environment whose image should be updated. If only a service is provided, the "default" environment is used.' },
+    {
+      name: 'service',
+      required: true,
+      description:
+        'Name of service/environment whose image should be updated. If only a service is provided, the "default" environment is used.',
+    },
   ]
 
   public async run(): Promise<void> {
@@ -33,7 +43,11 @@ export default class UseImage extends Command {
 
     await jamsocket.updateEnvironment(service, environment, flags.image)
 
-    this.log(`Updated ${lightMagenta(`${service}/${environment}`)} to use image ${blue(flags.image)}`)
-    this.log(`Run ${lightBlue(`jamsocket service info ${service}`)} for more information about your service and its environments.`)
+    this.log(
+      `Updated ${lightMagenta(`${service}/${environment}`)} to use image ${blue(flags.image)}`,
+    )
+    this.log(
+      `Run ${lightBlue(`jamsocket service info ${service}`)} for more information about your service and its environments.`,
+    )
   }
 }

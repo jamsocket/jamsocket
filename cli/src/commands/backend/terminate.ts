@@ -7,13 +7,14 @@ export default class Terminate extends Command {
   // we turn off strict mode so that we can accept multiple values for the same argument
   static strict = false
   static aliases = ['terminate']
-  static examples = [
-    '<%= config.bin %> <%= command.id %> abc123 def456 ...',
-  ]
+  static examples = ['<%= config.bin %> <%= command.id %> abc123 def456 ...']
 
   static args = [{ name: 'backends', required: true }]
   static flags = {
-    force: Flags.boolean({ char: 'f', description: 'whether to force the backend to hard terminate (defaults to false)' }),
+    force: Flags.boolean({
+      char: 'f',
+      description: 'whether to force the backend to hard terminate (defaults to false)',
+    }),
   }
 
   public async run(): Promise<void> {
@@ -26,7 +27,9 @@ export default class Terminate extends Command {
       try {
         await jamsocket.terminate(backend, flags.force)
       } catch {
-        this.warn(`Failed to request termination for backend: ${lightMagenta(backend)}. Skipping...`)
+        this.warn(
+          `Failed to request termination for backend: ${lightMagenta(backend)}. Skipping...`,
+        )
         continue
       }
       this.log(`Termination requested for backend: ${lightMagenta(backend)}`)

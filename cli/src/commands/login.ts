@@ -8,16 +8,22 @@ import { lightMagenta, lightGreen, lightBlue, gradientBlue } from '../lib/format
 export default class Login extends Command {
   static description = 'Authenticates user to the Jamsocket API.'
 
-  static examples = [
-    '<%= config.bin %> <%= command.id %>',
-  ]
+  static examples = ['<%= config.bin %> <%= command.id %>']
 
   static args = [
-    { name: 'account', description: 'Account to use when logging in. (Only necessary for users with multiple accounts.)', required: false },
+    {
+      name: 'account',
+      description:
+        'Account to use when logging in. (Only necessary for users with multiple accounts.)',
+      required: false,
+    },
   ]
 
   static flags = {
-    token: Flags.string({ char: 't', description: 'for automated environments, optional API token to log into the CLI with' }),
+    token: Flags.string({
+      char: 't',
+      description: 'for automated environments, optional API token to log into the CLI with',
+    }),
   }
 
   public async run(): Promise<void> {
@@ -31,11 +37,16 @@ export default class Login extends Command {
       try {
         const result = await api.checkAuthConfig(savedConfig)
         this.log()
-        if (result.accounts.length === 0) throw new Error(`No account found for logged in user. You may need to log in to ${api.getAppBaseUrl()} to finish setting up your account.`)
+        if (result.accounts.length === 0)
+          throw new Error(
+            `No account found for logged in user. You may need to log in to ${api.getAppBaseUrl()} to finish setting up your account.`,
+          )
 
         // if logged in with api token, say "You are already logged in as account" and drop out
         if (savedConfig.loggedInType() === 'api_token') {
-          this.log(`You are already logged in as account ${lightBlue(savedConfig.getAccount())}. To log into a different account, run ${lightMagenta('jamsocket logout')} first.\n`)
+          this.log(
+            `You are already logged in as account ${lightBlue(savedConfig.getAccount())}. To log into a different account, run ${lightMagenta('jamsocket logout')} first.\n`,
+          )
           return
         }
 
@@ -44,10 +55,16 @@ export default class Login extends Command {
           this.log(`You are already logged in as account ${lightBlue(savedConfig.getAccount())}.\n`)
 
           if (result.accounts.length > 1) {
-            this.log(`Run ${lightMagenta('jamsocket login <account>')} to switch to one of the following accounts: ${result.accounts.map(n => lightBlue(n)).join(', ')}.\n`)
-            this.log(`Otherwise, run ${lightMagenta('jamsocket logout')} first to log into an account not listed here.\n`)
+            this.log(
+              `Run ${lightMagenta('jamsocket login <account>')} to switch to one of the following accounts: ${result.accounts.map((n) => lightBlue(n)).join(', ')}.\n`,
+            )
+            this.log(
+              `Otherwise, run ${lightMagenta('jamsocket logout')} first to log into an account not listed here.\n`,
+            )
           } else {
-            this.log(`To log into a different account, run ${lightMagenta('jamsocket logout')} first.\n`)
+            this.log(
+              `To log into a different account, run ${lightMagenta('jamsocket logout')} first.\n`,
+            )
           }
           return
         }
@@ -81,7 +98,10 @@ export default class Login extends Command {
 
       const { accounts } = await api.checkAuthToken(token)
       this.log()
-      if (accounts.length === 0) throw new Error(`No account found for user. You may need to log in to ${api.getAppBaseUrl()} to finish setting up your account.`)
+      if (accounts.length === 0)
+        throw new Error(
+          `No account found for user. You may need to log in to ${api.getAppBaseUrl()} to finish setting up your account.`,
+        )
       // an api token can only be used for one account, so this should be the only account in the list
       const account = accounts[0]
 
@@ -109,12 +129,17 @@ export default class Login extends Command {
     }
 
     this.log()
-    const code = (await CliUx.ux.prompt(`Paste the ${lightGreen('4-digit code')} you received at login here`)).trim()
+    const code = (
+      await CliUx.ux.prompt(`Paste the ${lightGreen('4-digit code')} you received at login here`)
+    ).trim()
 
     const userSession = await api.completeLoginAttempt(loginAttempt.token, code)
     const authResult = await api.checkAuthToken(userSession.token)
 
-    if (authResult.accounts.length === 0) throw new Error(`No account found for user. You may need to ${lightMagenta(`log in to ${api.getAppBaseUrl()}`)} to finish setting up your account.`)
+    if (authResult.accounts.length === 0)
+      throw new Error(
+        `No account found for user. You may need to ${lightMagenta(`log in to ${api.getAppBaseUrl()}`)} to finish setting up your account.`,
+      )
 
     // if they requested an account, check if that account is in the list of accounts
     if (requestedAccount) {
@@ -135,12 +160,15 @@ export default class Login extends Command {
 
     // otherwise, they have multiple accounts, so prompt them to select an account
     this.log()
-    const response = await inquirer.prompt([{
-      name: 'account',
-      message: 'You have access to multiple accounts. Please specify which account you would like to use.',
-      type: 'list',
-      choices: authResult.accounts.map(account => ({ name: account })),
-    }])
+    const response = await inquirer.prompt([
+      {
+        name: 'account',
+        message:
+          'You have access to multiple accounts. Please specify which account you would like to use.',
+        type: 'list',
+        choices: authResult.accounts.map((account) => ({ name: account })),
+      },
+    ])
 
     if (response.account !== null) {
       this.finalizeUserSessionLogin(userSession, response.account)
@@ -150,10 +178,7 @@ export default class Login extends Command {
     throw new Error('Auth failed. No account selected. Try running jamsocket login again.')
   }
 
-  finalizeUserSessionLogin(
-    userSession: CompleteCliLoginResult,
-    selectedAccount: string,
-  ): void {
+  finalizeUserSessionLogin(userSession: CompleteCliLoginResult, selectedAccount: string): void {
     const config = new JamsocketConfig({
       user_session: {
         uuid: userSession.uuid,

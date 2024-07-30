@@ -1,52 +1,12 @@
 // Based on https://www.npmjs.com/package/pretty-bytes/v/6.1.1
 
-const BYTE_UNITS = [
-  'B',
-  'kB',
-  'MB',
-  'GB',
-  'TB',
-  'PB',
-  'EB',
-  'ZB',
-  'YB',
-]
+const BYTE_UNITS = ['B', 'kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
 
-const BIBYTE_UNITS = [
-  'B',
-  'KiB',
-  'MiB',
-  'GiB',
-  'TiB',
-  'PiB',
-  'EiB',
-  'ZiB',
-  'YiB',
-]
+const BIBYTE_UNITS = ['B', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB']
 
-const BIT_UNITS = [
-  'b',
-  'kbit',
-  'Mbit',
-  'Gbit',
-  'Tbit',
-  'Pbit',
-  'Ebit',
-  'Zbit',
-  'Ybit',
-]
+const BIT_UNITS = ['b', 'kbit', 'Mbit', 'Gbit', 'Tbit', 'Pbit', 'Ebit', 'Zbit', 'Ybit']
 
-const BIBIT_UNITS = [
-  'b',
-  'kibit',
-  'Mibit',
-  'Gibit',
-  'Tibit',
-  'Pibit',
-  'Eibit',
-  'Zibit',
-  'Yibit',
-]
+const BIBIT_UNITS = ['b', 'kibit', 'Mibit', 'Gibit', 'Tibit', 'Pibit', 'Eibit', 'Zibit', 'Yibit']
 
 type Locale = string | string[] | boolean
 type Options = {
@@ -65,7 +25,11 @@ Formats the given number using `Number#toLocaleString`.
 - If locale is true, the system default locale is used for translation.
 - If no value for locale is specified, the number is returned unmodified.
 */
-function toLocaleString(number: number, locale?: Locale, options?: Intl.NumberFormatOptions): string {
+function toLocaleString(
+  number: number,
+  locale?: Locale,
+  options?: Intl.NumberFormatOptions,
+): string {
   let result = `${number}`
   if (typeof locale === 'string' || Array.isArray(locale)) {
     result = number.toLocaleString(locale, options)
@@ -88,9 +52,13 @@ export default function prettyBytes(number: number, options?: Options): string {
     ...options,
   }
 
-  const UNITS = options.bits ?
-    (options.binary ? BIBIT_UNITS : BIT_UNITS) :
-    (options.binary ? BIBYTE_UNITS : BYTE_UNITS)
+  const UNITS = options.bits
+    ? options.binary
+      ? BIBIT_UNITS
+      : BIT_UNITS
+    : options.binary
+      ? BIBYTE_UNITS
+      : BYTE_UNITS
 
   const separator = options.space ? ' ' : ''
 
@@ -99,7 +67,7 @@ export default function prettyBytes(number: number, options?: Options): string {
   }
 
   const isNegative = number < 0
-  const prefix = isNegative ? '-' : (options.signed ? '+' : '')
+  const prefix = isNegative ? '-' : options.signed ? '+' : ''
 
   if (isNegative) {
     number = -number
@@ -120,7 +88,10 @@ export default function prettyBytes(number: number, options?: Options): string {
     return prefix + numberString + separator + UNITS[0]
   }
 
-  const exponent = Math.min(Math.floor(options.binary ? Math.log(number) / Math.log(1024) : Math.log10(number) / 3), UNITS.length - 1)
+  const exponent = Math.min(
+    Math.floor(options.binary ? Math.log(number) / Math.log(1024) : Math.log10(number) / 3),
+    UNITS.length - 1,
+  )
   number /= (options.binary ? 1024 : 1000) ** exponent
 
   if (!localeOptions) {

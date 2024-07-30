@@ -7,9 +7,7 @@ import { blue, gray, lightBlue, lightMagenta, lightGreen } from '../../lib/forma
 export default class Create extends Command {
   static description = 'Gets some information about a service'
 
-  static examples = [
-    '<%= config.bin %> <%= command.id %> my-service',
-  ]
+  static examples = ['<%= config.bin %> <%= command.id %> my-service']
 
   static args = [{ name: 'name', required: true }]
 
@@ -21,7 +19,9 @@ export default class Create extends Command {
 
     const appBaseUrl = jamsocket.api.getAppBaseUrl()
 
-    const lastSpawn = info.last_spawned_at ? blue(`${formatDistanceToNow(new Date(info.last_spawned_at))} ago`) : '-'
+    const lastSpawn = info.last_spawned_at
+      ? blue(`${formatDistanceToNow(new Date(info.last_spawned_at))} ago`)
+      : '-'
     let lastPush = '-'
     if (info.last_image_upload_time) {
       lastPush = [
@@ -35,7 +35,9 @@ export default class Create extends Command {
     this.log(`  created: ${blue(`${formatDistanceToNow(new Date(info.created_at))} ago`)}`)
     this.log(`  last spawn: ${lastSpawn}`)
     this.log(`  last image push: ${lastPush}`)
-    this.log(`  dashboard: ${lightGreen(`${appBaseUrl}/service/${info.account_name}/${info.name}`)}`)
+    this.log(
+      `  dashboard: ${lightGreen(`${appBaseUrl}/service/${info.account_name}/${info.name}`)}`,
+    )
 
     if (info.environments.length > 1) {
       this.log()
@@ -45,7 +47,9 @@ export default class Create extends Command {
         this.log(`  ${lightMagenta(e.name)}`)
         this.log(`    cluster: ${lightBlue(e.cluster)}`)
         this.log(`    image tag/digest: ${lightBlue(e.image_tag)}`)
-        this.log(`    last spawned: ${e.last_spawned_at ? blue(`${formatDistanceToNow(new Date(e.last_spawned_at))} ago`) : '-'}`)
+        this.log(
+          `    last spawned: ${e.last_spawned_at ? blue(`${formatDistanceToNow(new Date(e.last_spawned_at))} ago`) : '-'}`,
+        )
       }
     } else {
       this.log(`  cluster: ${lightBlue(info.environments[0].cluster)}`)

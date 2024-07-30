@@ -10,15 +10,15 @@ const PROJECT_CONFIG_PATH_JS = path.resolve(process.cwd(), 'jamsocket.config.js'
 const PROJECT_CONFIG_PATH_JSON = path.resolve(process.cwd(), 'jamsocket.config.json')
 
 type ProjectConfig = {
-  dockerfile?: string,
-  watch?: string | string[],
+  dockerfile?: string
+  watch?: string | string[]
   port?: number
-  interactive?: boolean,
-  useStaticToken?: boolean,
-  styleLogOutput?: boolean,
+  interactive?: boolean
+  useStaticToken?: boolean
+  styleLogOutput?: boolean
   dockerOptions?: {
-    path?: string,
-    network?: string,
+    path?: string
+    network?: string
   }
 }
 
@@ -42,13 +42,17 @@ function getProjectConfig(): ProjectConfig | null {
   const hasJson = existsSync(PROJECT_CONFIG_PATH_JSON)
   const hasJs = existsSync(PROJECT_CONFIG_PATH_JS)
   if (hasJson && hasJs) {
-    throw new Error('Both jamsocket.config.js and jamsocket.config.json files exist. Please remove one of them.')
+    throw new Error(
+      'Both jamsocket.config.js and jamsocket.config.json files exist. Please remove one of them.',
+    )
   }
 
   if (hasJson) {
     const projectConfig = JSON.parse(readFileSync(PROJECT_CONFIG_PATH_JSON, 'utf8'))
     if (!isProjectConfig(projectConfig)) {
-      throw new Error('Invalid jamsocket.config.json file. Please see https://docs.jamsocket.com/platform/dev-cli for more information.')
+      throw new Error(
+        'Invalid jamsocket.config.json file. Please see https://docs.jamsocket.com/platform/dev-cli for more information.',
+      )
     }
     return projectConfig
   }
@@ -58,7 +62,9 @@ function getProjectConfig(): ProjectConfig | null {
     // eslint-disable-next-line unicorn/prefer-module
     const projectConfig = require(PROJECT_CONFIG_PATH_JS)
     if (!isProjectConfig(projectConfig)) {
-      throw new Error('Invalid jamsocket.config.js file. Please see https://docs.jamsocket.com/platform/dev-cli for more information.')
+      throw new Error(
+        'Invalid jamsocket.config.js file. Please see https://docs.jamsocket.com/platform/dev-cli for more information.',
+      )
     }
     return projectConfig
   }
@@ -66,7 +72,8 @@ function getProjectConfig(): ProjectConfig | null {
 }
 
 export default class Dev extends Command {
-  static description = 'Starts a local jamsocket dev server. You may configure the dev server with a jamsocket.config.json file in the current directory or by passing flags. (Flags take precedence over jamsocket.config.json)'
+  static description =
+    'Starts a local jamsocket dev server. You may configure the dev server with a jamsocket.config.json file in the current directory or by passing flags. (Flags take precedence over jamsocket.config.json)'
   static examples = [
     '<%= config.bin %> <%= command.id %>',
     '<%= config.bin %> <%= command.id %> --dockerfile session-backend/Dockerfile --watch src --watch package.json --port 8080',
@@ -74,15 +81,51 @@ export default class Dev extends Command {
 
   static flags = {
     // TODO: breaking change: remove this and only use -f instead of -d
-    dockerfileold: Flags.string({ char: 'd', description: 'Path to the session backend\'s Dockerfile', hidden: true }),
-    dockerfile: Flags.string({ char: 'f', description: 'Path to the session backend\'s Dockerfile' }),
-    context: Flags.string({ char: 'c', description: 'Path to the build context for the Dockerfile (defaults to current working directory)' }),
-    'docker-network': Flags.string({ char: 'n', hidden: true, description: 'The Docker network to use for the session backend (only for development)' }),
-    watch: Flags.string({ char: 'w', multiple: true, description: 'A file or directory to watch for changes' }),
-    port: Flags.integer({ char: 'p', description: 'The port to run the dev server on. (Defaults to 8080)' }),
-    interactive: Flags.boolean({ char: 'i', description: 'Enables/Disables TTY iteractivity. (Defaults to true)', allowNo: true }),
-    'use-static-token': Flags.boolean({ char: 's', hidden: true, description: 'Makes session backends use a static connection token instead of generating a new one with each spawn/connect request. (Defaults to false)', allowNo: false }),
-    'style-log-output': Flags.boolean({ description: 'Styles log output from session backends for better readability. (Defaults to true)', allowNo: true }),
+    dockerfileold: Flags.string({
+      char: 'd',
+      description: "Path to the session backend's Dockerfile",
+      hidden: true,
+    }),
+    dockerfile: Flags.string({
+      char: 'f',
+      description: "Path to the session backend's Dockerfile",
+    }),
+    context: Flags.string({
+      char: 'c',
+      description:
+        'Path to the build context for the Dockerfile (defaults to current working directory)',
+    }),
+    'docker-network': Flags.string({
+      char: 'n',
+      hidden: true,
+      description: 'The Docker network to use for the session backend (only for development)',
+    }),
+    watch: Flags.string({
+      char: 'w',
+      multiple: true,
+      description: 'A file or directory to watch for changes',
+    }),
+    port: Flags.integer({
+      char: 'p',
+      description: 'The port to run the dev server on. (Defaults to 8080)',
+    }),
+    interactive: Flags.boolean({
+      char: 'i',
+      description: 'Enables/Disables TTY iteractivity. (Defaults to true)',
+      allowNo: true,
+    }),
+    'use-static-token': Flags.boolean({
+      char: 's',
+      hidden: true,
+      description:
+        'Makes session backends use a static connection token instead of generating a new one with each spawn/connect request. (Defaults to false)',
+      allowNo: false,
+    }),
+    'style-log-output': Flags.boolean({
+      description:
+        'Styles log output from session backends for better readability. (Defaults to true)',
+      allowNo: true,
+    }),
   }
 
   public async run(): Promise<void> {
@@ -93,7 +136,9 @@ export default class Dev extends Command {
     const projectConfig = getProjectConfig()
     const dockerfile = flags.dockerfile ?? flags.dockerfileold ?? projectConfig?.dockerfile ?? null
     if (!dockerfile) {
-      throw new Error('No Dockerfile provided. Please provide a Dockerfile with the --dockerfile flag or a jamsocket.config.js file in the current directory.')
+      throw new Error(
+        'No Dockerfile provided. Please provide a Dockerfile with the --dockerfile flag or a jamsocket.config.js file in the current directory.',
+      )
     }
 
     let watch = flags.watch ?? projectConfig?.watch ?? undefined
@@ -111,12 +156,15 @@ export default class Dev extends Command {
       dockerOptions.path = path.resolve(process.cwd(), dockerContext)
     }
 
-    const dockerNetwork = flags['docker-network'] ?? projectConfig?.dockerOptions?.network ?? undefined
+    const dockerNetwork =
+      flags['docker-network'] ?? projectConfig?.dockerOptions?.network ?? undefined
 
     if (dockerNetwork) {
       const availableDockerNetworks = getDockerNetworks()
       if (!availableDockerNetworks.includes(dockerNetwork)) {
-        throw new Error(`Docker network "${dockerNetwork}" not found. Available networks: ${availableDockerNetworks.join(', ')}`)
+        throw new Error(
+          `Docker network "${dockerNetwork}" not found. Available networks: ${availableDockerNetworks.join(', ')}`,
+        )
       }
     }
 
@@ -125,7 +173,7 @@ export default class Dev extends Command {
 
     await createDevServer({
       dockerfile: path.resolve(process.cwd(), dockerfile),
-      watch: watch?.map(w => path.resolve(process.cwd(), w)),
+      watch: watch?.map((w) => path.resolve(process.cwd(), w)),
       port,
       interactive,
       dockerOptions,

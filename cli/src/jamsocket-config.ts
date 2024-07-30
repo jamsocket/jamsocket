@@ -86,7 +86,9 @@ export class JamsocketConfig {
     if (isUserSessionConfig(this.config)) {
       this.config.user_session.selected_account = selectedAccount
     } else {
-      throw new Error('Cannot update selected account for API token config. This is a bug with the Jamsocket CLI.')
+      throw new Error(
+        'Cannot update selected account for API token config. This is a bug with the Jamsocket CLI.',
+      )
     }
   }
 

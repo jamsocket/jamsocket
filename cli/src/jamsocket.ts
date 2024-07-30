@@ -1,11 +1,31 @@
-import { JamsocketApi, BackendInfoResult, RunningBackendsResult, SpawnRequestBody, SpawnResult, PlaneV2StatusMessage, TerminateResult } from './api'
-import type { ServiceCreateResult, ServiceListResult, ServiceInfoResult, ServiceDeleteResult, ServiceImagesResult, EnvironmentUpdateResult, JamsocketConnectRequestBody, JamsocketConnectResponse } from './api'
+import {
+  JamsocketApi,
+  BackendInfoResult,
+  RunningBackendsResult,
+  SpawnRequestBody,
+  SpawnResult,
+  PlaneV2StatusMessage,
+  TerminateResult,
+} from './api'
+import type {
+  ServiceCreateResult,
+  ServiceListResult,
+  ServiceInfoResult,
+  ServiceDeleteResult,
+  ServiceImagesResult,
+  EnvironmentUpdateResult,
+  JamsocketConnectRequestBody,
+  JamsocketConnectResponse,
+} from './api'
 import { JamsocketConfig } from './jamsocket-config'
 import { tag as dockerTag, push as dockerPush } from './lib/docker'
 import type { EventStreamReturn } from './lib/request'
 
 export class Jamsocket {
-  constructor(public config: JamsocketConfig | null, public api: JamsocketApi) {}
+  constructor(
+    public config: JamsocketConfig | null,
+    public api: JamsocketApi,
+  ) {}
 
   public static fromEnvironment(): Jamsocket {
     const config = JamsocketConfig.fromSaved()
@@ -45,7 +65,13 @@ export class Jamsocket {
   }
 
   // eslint-ignore-next-line max-params
-  public spawn(service: string, serviceEnvironment?: string, env?: Record<string, string>, grace?: number, lock?: string): Promise<SpawnResult> {
+  public spawn(
+    service: string,
+    serviceEnvironment?: string,
+    env?: Record<string, string>,
+    grace?: number,
+    lock?: string,
+  ): Promise<SpawnResult> {
     const config = this.expectAuthorized()
 
     const body: SpawnRequestBody = {
@@ -58,7 +84,11 @@ export class Jamsocket {
     return this.api.spawn(config.getAccount(), service, config, body)
   }
 
-  public connect(service: string, serviceEnvironment: string | null, body?: JamsocketConnectRequestBody): Promise<JamsocketConnectResponse> {
+  public connect(
+    service: string,
+    serviceEnvironment: string | null,
+    body?: JamsocketConnectRequestBody,
+  ): Promise<JamsocketConnectResponse> {
     const config = this.expectAuthorized()
     return this.api.connect(config.getAccount(), service, serviceEnvironment, config, body)
   }
@@ -98,7 +128,12 @@ export class Jamsocket {
     return this.api.serviceList(config.getAccount(), config)
   }
 
-  public updateEnvironment(service: string, environment: string, imageTag?: string, newName?: string): Promise<EnvironmentUpdateResult> {
+  public updateEnvironment(
+    service: string,
+    environment: string,
+    imageTag?: string,
+    newName?: string,
+  ): Promise<EnvironmentUpdateResult> {
     const config = this.expectAuthorized()
     return this.api.updateEnvironment(config.getAccount(), service, environment, config, {
       image_tag: imageTag,
@@ -121,7 +156,11 @@ export class Jamsocket {
     return this.api.streamMetrics(backend, config, callback)
   }
 
-  public streamStatus(backend: string, callback: (v: PlaneV2StatusMessage) => void, config?: JamsocketConfig): EventStreamReturn {
+  public streamStatus(
+    backend: string,
+    callback: (v: PlaneV2StatusMessage) => void,
+    config?: JamsocketConfig,
+  ): EventStreamReturn {
     return this.api.streamStatus(backend, callback, config)
   }
 

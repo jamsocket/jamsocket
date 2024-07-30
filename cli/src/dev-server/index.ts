@@ -6,11 +6,26 @@ import { formatDistanceToNow } from 'date-fns'
 import { CliUx } from '@oclif/core'
 import { buildImage } from '../lib/docker'
 import type { BuildImageOptions } from '../lib/docker'
-import { JamsocketConnectRequestBody, V1Status, JamsocketConnectResponse, PlaneV2StatusMessage, HTTPError, V2Status, SpawnRequestBody } from '../api'
+import {
+  JamsocketConnectRequestBody,
+  V1Status,
+  JamsocketConnectResponse,
+  PlaneV2StatusMessage,
+  HTTPError,
+  V2Status,
+  SpawnRequestBody,
+} from '../api'
 import { readRequestBody, createColorGetter, sleep, type Color } from './util'
 import { Logger } from './logger'
 import type { StreamHandle, PlaneConnectResponse } from './plane'
-import { LocalPlane, runPlane, ensurePlaneImage, isV2StatusAlive, dockerKillPlaneBackends, isV2ErrorStatus } from './plane'
+import {
+  LocalPlane,
+  runPlane,
+  ensurePlaneImage,
+  isV2StatusAlive,
+  dockerKillPlaneBackends,
+  isV2ErrorStatus,
+} from './plane'
 
 const CTRL_C = '\u0003'
 const DEFAULT_DEV_SERVER_PORT = 8080
@@ -28,9 +43,9 @@ type Backend = {
 }
 
 type StatusMsgV1 = {
-  state: V1Status,
-  time: string,
-  backend: string,
+  state: V1Status
+  time: string
+  backend: string
 }
 
 type Options = {
@@ -119,7 +134,7 @@ class DevServer {
 
     if (watch) {
       this.logger.log([`Watching ${watch.join(', ')} for changes...`, ''])
-      const watchPaths = watch.map(w => path.resolve(process.cwd(), w))
+      const watchPaths = watch.map((w) => path.resolve(process.cwd(), w))
       this.fsWatcher = chokidar.watch(watchPaths).on('change', async () => {
         try {
           await this.rebuild()
@@ -185,7 +200,9 @@ class DevServer {
       // eslint-disable-next-line unicorn/no-process-exit, no-process-exit
       process.exit(error ? 1 : 0)
     } catch (error) {
-      this.logger.log([chalk.red`Error during shutdown: ${error instanceof Error ? error.toString() : 'Unknown error'}`])
+      this.logger.log([
+        chalk.red`Error during shutdown: ${error instanceof Error ? error.toString() : 'Unknown error'}`,
+      ])
       // eslint-disable-next-line unicorn/no-process-exit, no-process-exit
       process.exit(1)
     }
@@ -196,38 +213,46 @@ class DevServer {
     if (this.imagesBuilding > 0) {
       footer.push(chalk.yellow` Rebuilding session backend image... Not ready to spawn`)
     } else if (this.devBackends.size > 0) {
-      CliUx.ux.table<Backend>([...this.devBackends.values()], {
-        name: {
-          header: 'Name',
-          get: backend => chalk[backend.color](backend.name),
+      CliUx.ux.table<Backend>(
+        [...this.devBackends.values()],
+        {
+          name: {
+            header: 'Name',
+            get: (backend) => chalk[backend.color](backend.name),
+          },
+          status: {
+            header: 'Status',
+            get: (backend) => chalk[backend.color](backend.lastStatus?.status ?? '-'),
+          },
+          spawned: {
+            header: 'Spawn time',
+            get: (backend) =>
+              chalk[backend.color](`${formatDistanceToNow(new Date(backend.spawnTime))} ago`),
+          },
+          image: {
+            header: 'Image ID',
+            get: (backend) => chalk[backend.color](backend.imageId.slice(0, 7)),
+          },
+          key: {
+            header: 'Key (aka lock)',
+            get: (backend) => chalk[backend.color](backend.key ?? '-'),
+          },
         },
-        status: {
-          header: 'Status',
-          get: backend => chalk[backend.color](backend.lastStatus?.status ?? '-'),
+        {
+          printLine: (line) => footer.push(line),
         },
-        spawned: {
-          header: 'Spawn time',
-          get: backend => chalk[backend.color](`${formatDistanceToNow(new Date(backend.spawnTime))} ago`),
-        },
-        image: {
-          header: 'Image ID',
-          get: backend => chalk[backend.color](backend.imageId.slice(0, 7)),
-        },
-        key: {
-          header: 'Key (aka lock)',
-          get: backend => chalk[backend.color](backend.key ?? '-'),
-        },
-      }, {
-        printLine: line => footer.push(line),
-      })
+      )
     } else if (this.currentImageId === null) {
-      footer.push(chalk.red` No running backends (Not ready to spawn - the session backend is still building or has failed to build)`)
+      footer.push(
+        chalk.red` No running backends (Not ready to spawn - the session backend is still building or has failed to build)`,
+      )
     } else {
       footer.push(chalk.bold` No running backends. Ready to spawn!`)
     }
     footer.push(
       '',
-      chalk.bold.italic` ${chalk.underline`[b]`} Build ${chalk.underline`[t]`} Terminate backends ${chalk.underline`[ctrl-c]`} Stop`,
+      chalk.bold
+        .italic` ${chalk.underline`[b]`} Build ${chalk.underline`[t]`} Terminate backends ${chalk.underline`[ctrl-c]`} Stop`,
       '',
     )
     return footer
@@ -263,7 +288,7 @@ class DevServer {
   }
 
   async terminateAllDevbackends(): Promise<void> {
-    const backendNames = [...this.devBackends.values()].map(b => b.name)
+    const backendNames = [...this.devBackends.values()].map((b) => b.name)
     if (backendNames.length > 0) {
       this.logger.log(['', 'Terminating session backends...'])
       await this.terminateBackends(backendNames, true)
@@ -273,8 +298,10 @@ class DevServer {
   }
 
   async terminateBackends(backends: string[], force = false): Promise<void> {
-    const terminationPromises = backends.map(name => this.plane.terminate(name, force))
-    this.logger.log([`Terminating ${backends.length} backend(s): ${backends.map(name => name).join(', ')}`])
+    const terminationPromises = backends.map((name) => this.plane.terminate(name, force))
+    this.logger.log([
+      `Terminating ${backends.length} backend(s): ${backends.map((name) => name).join(', ')}`,
+    ])
     try {
       await Promise.all(terminationPromises)
     } catch (error) {
@@ -295,9 +322,12 @@ class DevServer {
     // remove a lot of this extra logic
     let lastAliveStatusMsg: PlaneV2StatusMessage | null = null
     let lastV1Status: string | null = null
-    backend.statusStream = this.plane.streamStatus(backend.name, status => {
+    backend.statusStream = this.plane.streamStatus(backend.name, (status) => {
       const v1Status = translateStatusToV1(status, lastAliveStatusMsg)
-      if (lastAliveStatusMsg === null || (isPreterminatingStatus(status.status) && status.time > lastAliveStatusMsg.time)) {
+      if (
+        lastAliveStatusMsg === null ||
+        (isPreterminatingStatus(status.status) && status.time > lastAliveStatusMsg.time)
+      ) {
         lastAliveStatusMsg = status
       }
 
@@ -312,13 +342,17 @@ class DevServer {
       }
 
       backend.lastStatus = status
-      this.logger.log([`Status for ${this.applyBackendStyle(backend, backend.name)}: ${status.status}`])
+      this.logger.log([
+        `Status for ${this.applyBackendStyle(backend, backend.name)}: ${status.status}`,
+      ])
       if (!isV2StatusAlive(status.status)) {
         backend.statusStream?.close()
         backend.logsStream?.close()
         this.devBackends.delete(backend.name)
         if (isV2ErrorStatus(status)) {
-          this.logger.log([chalk.yellow`See https://docs.jamsocket.com/platform/troubleshooting for help on troubleshooting unexpected terminated statuses.`])
+          this.logger.log([
+            chalk.yellow`See https://docs.jamsocket.com/platform/troubleshooting for help on troubleshooting unexpected terminated statuses.`,
+          ])
         }
       }
       // once we hit Starting, we're safe to start listening to logs
@@ -344,7 +378,7 @@ class DevServer {
   }
 
   async streamLogs(backend: Backend): Promise<void> {
-    backend.logsStream = await this.plane.streamLogs(backend.name, log => {
+    backend.logsStream = await this.plane.streamLogs(backend.name, (log) => {
       this.logger.log([this.applyBackendStyle(backend, `[${backend.name}] ${log}`)])
     })
     this.logger.log([`Streaming logs for ${this.applyBackendStyle(backend, backend.name)}`])
@@ -440,7 +474,7 @@ class DevServer {
     res.setHeader('Access-Control-Allow-Origin', '*')
     res.setHeader('Content-Type', 'text/event-stream')
     res.writeHead(200)
-    const stream = this.plane.streamStatus(backend, status => {
+    const stream = this.plane.streamStatus(backend, (status) => {
       const data: PlaneV2StatusMessage = status
       res.write(`data:${JSON.stringify(data)}\n\n`)
     })
@@ -457,9 +491,12 @@ class DevServer {
     let lastAliveStatusMsg: PlaneV2StatusMessage | null = null
     let lastV1Status: string | null = null
 
-    const stream = this.plane.streamStatus(backend, v2Status => {
+    const stream = this.plane.streamStatus(backend, (v2Status) => {
       const v1Status = translateStatusToV1(v2Status, lastAliveStatusMsg)
-      if (lastAliveStatusMsg === null || (isPreterminatingStatus(v2Status.status) && v2Status.time > lastAliveStatusMsg.time)) {
+      if (
+        lastAliveStatusMsg === null ||
+        (isPreterminatingStatus(v2Status.status) && v2Status.time > lastAliveStatusMsg.time)
+      ) {
         lastAliveStatusMsg = v2Status
       }
 
@@ -525,7 +562,11 @@ class DevServer {
     res.end(JSON.stringify(data))
   }
 
-  async handleTerminateRequest(backendName: string, req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
+  async handleTerminateRequest(
+    backendName: string,
+    req: http.IncomingMessage,
+    res: http.ServerResponse,
+  ): Promise<void> {
     const b = this.devBackends.get(backendName)
     // if the dev CLI doesn't know about this backend, then 404
     if (!b || b.lastStatus === null) {
@@ -643,8 +684,14 @@ class DevServer {
   async spawnBackend(body: JamsocketConnectRequestBody): Promise<PlaneConnectResponse | HTTPError> {
     const imageId = await this.waitUntilImageIsReady(60_000) // wait up to 60 seconds for the image to be ready
     if (!imageId) {
-      this.logger.log([chalk.red`Error spawning backend: the latest build of your session backend's Dockerfile has either failed or is still ongoing. Check the logs above and make sure there are no docker build errors before spawning.`])
-      return new HTTPError(500, 'Internal Error', 'Error spawning backend: the latest build of your session backend\'s Dockerfile has either failed or has not yet completed. Make sure all docker build errors are resolved and a new image is built before spawning.')
+      this.logger.log([
+        chalk.red`Error spawning backend: the latest build of your session backend's Dockerfile has either failed or is still ongoing. Check the logs above and make sure there are no docker build errors before spawning.`,
+      ])
+      return new HTTPError(
+        500,
+        'Internal Error',
+        "Error spawning backend: the latest build of your session backend's Dockerfile has either failed or has not yet completed. Make sure all docker build errors are resolved and a new image is built before spawning.",
+      )
     }
 
     const result = await this.plane.spawn(imageId, body, this.useStaticToken, this.dockerNetwork)
@@ -653,11 +700,21 @@ class DevServer {
     const existingBackend = this.devBackends.get(result.backend_id)
     if (existingBackend) {
       if (result.spawned) {
-        return new HTTPError(500, 'Internal Error', `Spawned backend ${result.backend_id} already exists in devBackends but "spawned=true" in spawn response. Some bug has occurred.`)
+        return new HTTPError(
+          500,
+          'Internal Error',
+          `Spawned backend ${result.backend_id} already exists in devBackends but "spawned=true" in spawn response. Some bug has occurred.`,
+        )
       }
       if (existingBackend.imageId !== imageId) {
-        this.logger.log([chalk.red`Warning: Spawn with key returned a running backend with an outdated version of the session backend code. Blocking spawn.`])
-        return new HTTPError(500, 'Internal Error', 'jamsocket dev-server: Spawn with key returned a running backend with an outdated version of the session backend code. Blocking spawn.')
+        this.logger.log([
+          chalk.red`Warning: Spawn with key returned a running backend with an outdated version of the session backend code. Blocking spawn.`,
+        ])
+        return new HTTPError(
+          500,
+          'Internal Error',
+          'jamsocket dev-server: Spawn with key returned a running backend with an outdated version of the session backend code. Blocking spawn.',
+        )
       }
     } else if (result.spawned) {
       const backend = {
@@ -675,8 +732,14 @@ class DevServer {
       this.logger.log([`Spawned backend: ${this.applyBackendStyle(backend, result.backend_id)}`])
       this.streamStatus(backend)
     } else {
-      this.logger.log([chalk.red`Warning: Spawn with key returned a running backend that was not originally spawned by this dev server. Blocking spawn.`])
-      return new HTTPError(500, 'Internal Error', 'jamsocket dev-server: Spawn with key returned a running backend that was not originally spawned by this dev server. Blocking spawn.')
+      this.logger.log([
+        chalk.red`Warning: Spawn with key returned a running backend that was not originally spawned by this dev server. Blocking spawn.`,
+      ])
+      return new HTTPError(
+        500,
+        'Internal Error',
+        'jamsocket dev-server: Spawn with key returned a running backend that was not originally spawned by this dev server. Blocking spawn.',
+      )
     }
 
     // rewrite status_url to point back to this dev server
@@ -707,37 +770,40 @@ function translateStatusToV1(
   lastAliveStatusMsg: PlaneV2StatusMessage | null,
 ): V1Status {
   switch (plane2StatusMsg.status) {
-  case 'scheduled':
-  case 'loading':
-    return 'Loading'
-  case 'starting':
-  case 'waiting':
-    return 'Starting'
-  case 'ready':
-  case 'terminating':
-  case 'hard-terminating':
-    return 'Ready'
-  case 'terminated':
-    if (plane2StatusMsg.termination_reason === 'external') {
-      return 'Terminated'
-    }
-    if (plane2StatusMsg.termination_reason && ['swept', 'key_expired'].includes(plane2StatusMsg.termination_reason)) {
-      return 'Swept'
-    }
-    if (!lastAliveStatusMsg || ['scheduled', 'loading'].includes(lastAliveStatusMsg.status)) {
-      return 'ErrorLoading'
-    }
-    if (lastAliveStatusMsg.status === 'starting') {
-      return 'ErrorStarting'
-    }
-    if (lastAliveStatusMsg.status === 'waiting') {
-      if (plane2StatusMsg.termination_reason === 'startup_timeout') return 'TimedOutBeforeReady'
-      return 'ErrorStarting'
-    }
-    // if we've gotten here, the last alive status was 'ready'
-    if (plane2StatusMsg.exit_error === undefined) return 'Terminated'
-    if (plane2StatusMsg.exit_error === false) return 'Exited'
-    return 'Failed'
+    case 'scheduled':
+    case 'loading':
+      return 'Loading'
+    case 'starting':
+    case 'waiting':
+      return 'Starting'
+    case 'ready':
+    case 'terminating':
+    case 'hard-terminating':
+      return 'Ready'
+    case 'terminated':
+      if (plane2StatusMsg.termination_reason === 'external') {
+        return 'Terminated'
+      }
+      if (
+        plane2StatusMsg.termination_reason &&
+        ['swept', 'key_expired'].includes(plane2StatusMsg.termination_reason)
+      ) {
+        return 'Swept'
+      }
+      if (!lastAliveStatusMsg || ['scheduled', 'loading'].includes(lastAliveStatusMsg.status)) {
+        return 'ErrorLoading'
+      }
+      if (lastAliveStatusMsg.status === 'starting') {
+        return 'ErrorStarting'
+      }
+      if (lastAliveStatusMsg.status === 'waiting') {
+        if (plane2StatusMsg.termination_reason === 'startup_timeout') return 'TimedOutBeforeReady'
+        return 'ErrorStarting'
+      }
+      // if we've gotten here, the last alive status was 'ready'
+      if (plane2StatusMsg.exit_error === undefined) return 'Terminated'
+      if (plane2StatusMsg.exit_error === false) return 'Exited'
+      return 'Failed'
   }
 }
 
