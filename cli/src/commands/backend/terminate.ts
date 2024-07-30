@@ -19,7 +19,7 @@ export default class Terminate extends Command {
 
   public async run(): Promise<void> {
     // it's not possible to have a multiple values for the same argument, so this is the workaround
-    const backends = [...this.argv]
+    const backends = this.argv.filter((arg) => !arg.startsWith('-'))
     const { flags } = await this.parse(Terminate)
     const jamsocket = Jamsocket.fromEnvironment()
 
