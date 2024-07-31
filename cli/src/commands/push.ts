@@ -1,8 +1,10 @@
 import { Command, Flags } from '@oclif/core'
+import { spawnSync } from 'child_process'
+import { resolve } from 'path'
 import chalk from 'chalk'
 import * as inquirer from 'inquirer'
 import { Jamsocket } from '../jamsocket'
-import { getImagePlatform, buildImage } from '../lib/docker'
+import { getImagePlatform, buildImage, BuildImageOptions } from '../lib/docker'
 import { lightMagenta, blue } from '../lib/formatting'
 
 export default class Push extends Command {
@@ -28,6 +30,11 @@ export default class Push extends Command {
     tag: Flags.string({
       char: 't',
       description: 'optional tag to apply to the image in the jamsocket registry',
+    }),
+    ['include-git-commit']: Flags.boolean({
+      char: 'g',
+      description:
+        'optionally include git commit metadata as labels in the image (uses the git repo of the docker context)',
     }),
   }
 
@@ -56,6 +63,11 @@ export default class Push extends Command {
     if (args.image) {
       if (flags.context !== undefined) {
         throw new Error('--context flag should only be used with the --dockerfile flag')
+      }
+      if (flags['include-git-commit']) {
+        throw new Error(
+          'The --include-git-commit flag can only be used when building a fresh image. Please provide a Dockerfile with the --dockerfile flag.',
+        )
       }
       const { os, arch } = getImagePlatform(args.image)
       if (os !== 'linux' || arch !== 'amd64') {
@@ -87,7 +99,56 @@ export default class Push extends Command {
     }
 
     if (flags.dockerfile) {
-      const options = flags.context ? { path: flags.context } : undefined
+      let labels: Record<string, string> = {}
+      if (flags['include-git-commit']) {
+        // check for unstaged changes
+        const cwd = flags.context ? resolve(process.cwd(), flags.context) : process.cwd()
+        const encoding = 'utf-8'
+        const result = spawnSync('git', ['diff-index', '--quiet', 'HEAD', '--'], { encoding, cwd })
+        if (result.status !== 0) {
+          this.error(
+            'There unstaged changes in the git repository. The --include-git-commit flag can only be used if there are no unstaged changes. Please commit or stash these changes before continuing.',
+          )
+        }
+
+        try {
+          const hash = spawnSync('git', ['rev-parse', 'HEAD'], { cwd, encoding })
+            .output.join('\n')
+            .trim()
+          const message = spawnSync('git', ['log', '-1', '--pretty=%B'], { cwd, encoding })
+            .output.join('\n')
+            .trim()
+          const branch = spawnSync('git', ['rev-parse', '--abbrev-ref', 'HEAD'], { cwd, encoding })
+            .output.join('\n')
+            .trim()
+          const originUrl = spawnSync('git', ['remote', 'get-url', 'origin'], {
+            cwd,
+            encoding,
+          })
+            .output.join('\n')
+            .trim()
+
+          let repository: string | null = originUrl.split('github.com')[1] ?? null
+          repository = originUrl.split('github.com')[1] ?? null
+          repository = repository?.slice(1) ?? null
+          if (repository.split('/').length !== 2) repository = null
+          if (repository?.endsWith('.git')) {
+            repository = repository.slice(0, -4)
+          }
+
+          labels = { hash, message, branch }
+          if (repository) {
+            labels.repository = repository
+          }
+        } catch (error) {
+          this.error('Error retrieving git information:', error as any)
+        }
+      }
+
+      const options: BuildImageOptions = { labels }
+      if (flags.context) {
+        options.path = resolve(process.cwd(), flags.context)
+      }
       this.log(blue(`Building image from Dockerfile: ${flags.dockerfile}`))
       image = await buildImage(flags.dockerfile, options)
     }

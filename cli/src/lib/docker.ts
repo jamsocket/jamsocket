@@ -26,6 +26,7 @@ export function getImagePlatform(imageName: string): { os: string; arch: string 
 
 export type BuildImageOptions = {
   path?: string
+  labels?: Record<string, string>
 }
 
 type StdioWriteFn = (val: string) => void
@@ -39,15 +40,20 @@ export async function buildImage(
   const errWrite = stderrWrite ?? process.stderr.write.bind(process.stderr)
   const optionsWithDefaults: Required<BuildImageOptions> = {
     path: '.',
+    labels: {},
     ...options,
   }
 
+  const args = ['build', '--platform', 'linux/amd64', '-f', dockerfilePath]
+  const labels = Object.entries(optionsWithDefaults.labels)
+  for (const [key, value] of labels) {
+    args.push('--label')
+    args.push(`${key}=${value}`)
+  }
+  args.push(optionsWithDefaults.path)
+
   return new Promise<string>((resolve, reject) => {
-    const buildProcess = spawn(
-      'docker',
-      ['build', '--platform', 'linux/amd64', '-f', dockerfilePath, optionsWithDefaults.path],
-      { stdio: ['inherit', 'pipe', 'pipe'] },
-    )
+    const buildProcess = spawn('docker', args, { stdio: ['inherit', 'pipe', 'pipe'] })
 
     let output = ''
     buildProcess.stdout.on('data', (data) => {
