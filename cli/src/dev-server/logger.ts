@@ -54,9 +54,10 @@ export class Logger {
     // draw a box around the footer
     const padding = 2
     // eslint-disable-next-line unicorn/no-array-reduce
-    const boxWidth = footer.reduce((max, line) => Math.max(max, stringLength(line)), 0) + (padding * 2) + 2
+    const boxWidth =
+      footer.reduce((max, line) => Math.max(max, stringLength(line)), 0) + padding * 2 + 2
     if (boxWidth <= terminalWidth) {
-      footer = footer.map(line => {
+      footer = footer.map((line) => {
         line = `\u2016${' '.repeat(padding)}${line}`
         const endPadding = boxWidth - stringLength(line) - 1
         return `${line}${' '.repeat(endPadding)}\u2016`

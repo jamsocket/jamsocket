@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 const oclif = require('@oclif/core')
-const { checkVersion } = require('../lib/request.js')
+const { checkVersion } = require('../lib/lib/request.js')
 
 const CODE_TO_ERROR_MESSAGE = {
   Forbidden: 'You do not have permission to access this resource.',

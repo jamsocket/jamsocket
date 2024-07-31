@@ -2,9 +2,15 @@ import { spawn, type ChildProcessWithoutNullStreams, spawnSync } from 'child_pro
 import readline from 'readline'
 import chalk from 'chalk'
 import EventSource from 'eventsource'
-import { HTTPError, V2Status, JamsocketConnectRequestBody, ConnectResourceLimits, PlaneV2StatusMessage } from '../api'
+import {
+  HTTPError,
+  V2Status,
+  JamsocketConnectRequestBody,
+  ConnectResourceLimits,
+  PlaneV2StatusMessage,
+} from '../api'
 import { sleep } from './util'
-import { spawnDockerSync } from '../docker'
+import { spawnDockerSync } from '../lib/docker'
 import type { Logger } from './logger'
 
 type PlaneConnectRequest = {
@@ -65,16 +71,16 @@ export class LocalPlane {
   ) {
     const planeLogs: string[] = []
 
-    readline.createInterface({ input: this.process.stderr }).on('line', line => {
+    readline.createInterface({ input: this.process.stderr }).on('line', (line) => {
       planeLogs.push(chalk.red(`[plane stderr] ${line}`))
       while (planeLogs.length > LAST_N_PLANE_LOGS) planeLogs.shift()
     })
-    readline.createInterface({ input: this.process.stdout }).on('line', line => {
+    readline.createInterface({ input: this.process.stdout }).on('line', (line) => {
       planeLogs.push(`[plane stdout] ${line}`)
       while (planeLogs.length > LAST_N_PLANE_LOGS) planeLogs.shift()
     })
 
-    this.onExit = new Promise(resolve => {
+    this.onExit = new Promise((resolve) => {
       this.process.on('exit', () => {
         if (planeLogs.length > 0) {
           this.logger.log(planeLogs)
@@ -91,10 +97,10 @@ export class LocalPlane {
 
   ready(): Promise<void> {
     if (this._readyPromise) return this._readyPromise
-    this._readyPromise = new Promise(resolve => {
+    this._readyPromise = new Promise((resolve) => {
       // wait for the "[SERVICE] entered RUNNING state" lines to appear in the logs
       const planeServices = new Set(['plane-controller', 'plane-drone', 'plane-proxy', 'postgres'])
-      const rl = readline.createInterface({ input: this.process.stdout }).on('line', line => {
+      const rl = readline.createInterface({ input: this.process.stdout }).on('line', (line) => {
         const match = /([a-z-]+) entered RUNNING state/.exec(line)
         if (match && planeServices.has(match[1])) {
           planeServices.delete(match[1])
@@ -130,9 +136,11 @@ export class LocalPlane {
       logsProcess.kill()
     }
     const closed = new Promise<void>((resolve, reject) => {
-      logsProcess.on('error', err => {
+      logsProcess.on('error', (err) => {
         if (err.message.includes('ENOENT')) {
-          reject(new Error('Docker command not found. Make sure Docker is installed and in your PATH.'))
+          reject(
+            new Error('Docker command not found. Make sure Docker is installed and in your PATH.'),
+          )
         } else {
           reject(err)
         }
@@ -150,11 +158,18 @@ export class LocalPlane {
     const response = await fetch(terminateUrl, { method: 'POST' })
     const body = await response.text()
     if (response.status !== 200) {
-      throw new HTTPError(response.status, response.statusText, `Failed to terminate backend: ${response.status} ${response.statusText} - ${body}`)
+      throw new HTTPError(
+        response.status,
+        response.statusText,
+        `Failed to terminate backend: ${response.status} ${response.statusText} - ${body}`,
+      )
     }
   }
 
-  streamStatus(backend: string, callback: (statusMessage: PlaneV2StatusMessage) => void): StreamHandle {
+  streamStatus(
+    backend: string,
+    callback: (statusMessage: PlaneV2StatusMessage) => void,
+  ): StreamHandle {
     const statusUrl = `${this.url}/pub/b/${backend}/status-stream`
     const es = new EventSource(statusUrl)
     es.addEventListener('message', (e: MessageEvent) => {
@@ -162,7 +177,7 @@ export class LocalPlane {
       callback(msg)
     })
     let resolveClosed: () => void
-    const closed = new Promise<void>(resolve => {
+    const closed = new Promise<void>((resolve) => {
       resolveClosed = resolve
     })
 
@@ -185,10 +200,12 @@ export class LocalPlane {
     const connectUrl = `${this.url}/ctrl/connect`
 
     const connectBody: PlaneConnectRequest = {
-      key: connectReq.key ? {
-        name: connectReq.key,
-        tag: image,
-      } : undefined,
+      key: connectReq.key
+        ? {
+            name: connectReq.key,
+            tag: image,
+          }
+        : undefined,
       user: connectReq.user,
       auth: connectReq.auth,
     }
@@ -207,7 +224,8 @@ export class LocalPlane {
       if (typeof connectReq.spawn === 'object') {
         connectBody.spawn_config.executable.env = connectReq.spawn.executable?.env
         connectBody.spawn_config.executable.mount = connectReq.spawn.executable?.mount
-        connectBody.spawn_config.executable.resource_limits = connectReq.spawn.executable?.resource_limits
+        connectBody.spawn_config.executable.resource_limits =
+          connectReq.spawn.executable?.resource_limits
         connectBody.spawn_config.lifetime_limit_seconds = connectReq.spawn.lifetime_limit_seconds
         connectBody.spawn_config.max_idle_seconds = connectReq.spawn.max_idle_seconds
       }
@@ -224,7 +242,11 @@ export class LocalPlane {
     const body = await response.text()
 
     if (response.status !== 200) {
-      return new HTTPError(response.status, response.statusText, `Failed to spawn backend: ${response.status} ${response.statusText} - ${body}`)
+      return new HTTPError(
+        response.status,
+        response.statusText,
+        `Failed to spawn backend: ${response.status} ${response.statusText} - ${body}`,
+      )
     }
 
     return JSON.parse(body) as PlaneConnectResponse
@@ -242,10 +264,18 @@ export function isV2StatusAlive(v2Status: V2Status): boolean {
 }
 
 export function isV2ErrorStatus(v2StatusMsg: PlaneV2StatusMessage): boolean {
-  return v2StatusMsg.status === 'terminated' && Boolean(v2StatusMsg.exit_error) && v2StatusMsg.termination_reason !== 'external'
+  return (
+    v2StatusMsg.status === 'terminated' &&
+    Boolean(v2StatusMsg.exit_error) &&
+    v2StatusMsg.termination_reason !== 'external'
+  )
 }
 
-export function runPlane(): { url: string, process: ChildProcessWithoutNullStreams, containerName: string } {
+export function runPlane(): {
+  url: string
+  process: ChildProcessWithoutNullStreams
+  containerName: string
+} {
   const containerName = `plane-quickstart-${Math.floor(Math.random() * 1_000_000)}`
   // NOTE: for now, plane quickstart MUST be run port 9191
   // and the cluster must be served on 9090 as these are

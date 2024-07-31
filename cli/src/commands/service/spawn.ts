@@ -2,12 +2,13 @@ import { Command, Flags } from '@oclif/core'
 import chalk from 'chalk'
 import { Jamsocket } from '../../jamsocket'
 import * as customFlags from '../../flags'
-import { blue, lightBlue, lightGreen } from '../../formatting'
+import { blue, lightBlue, lightGreen } from '../../lib/formatting'
 
 export default class Spawn extends Command {
   static aliases = ['spawn']
 
-  static description = 'Spawns a session backend with the provided service/environment\'s docker image.'
+  static description =
+    "Spawns a session backend with the provided service/environment's docker image."
 
   static examples = [
     '<%= config.bin %> <%= command.id %> my-service',
@@ -19,12 +20,21 @@ export default class Spawn extends Command {
   static flags = {
     // passing { multiple: true } here due to a bug: https://github.com/oclif/core/pull/414
     env: customFlags.env({ multiple: true }),
-    grace: Flags.integer({ char: 'g', description: 'optional grace period (in seconds) to wait after last connection is closed before shutting down container (default is 300)' }),
+    grace: Flags.integer({
+      char: 'g',
+      description:
+        'optional grace period (in seconds) to wait after last connection is closed before shutting down container (default is 300)',
+    }),
     lock: Flags.string({ char: 'l', description: 'optional lock to spawn the service with' }),
   }
 
   static args = [
-    { name: 'service', required: true, description: 'Name of service/environment to spawn. (Providing the environment is optional if service only has one environment, otherwise it is required)' },
+    {
+      name: 'service',
+      required: true,
+      description:
+        'Name of service/environment to spawn. (Providing the environment is optional if service only has one environment, otherwise it is required)',
+    },
   ]
 
   public async run(): Promise<void> {

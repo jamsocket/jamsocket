@@ -1,25 +1,25 @@
-import { eventStream, request, Headers, EventStreamReturn } from './request'
+import { eventStream, request, Headers, EventStreamReturn } from './lib/request'
 import type { JamsocketConfig } from './jamsocket-config'
 import * as https from 'https'
 
 enum HttpMethod {
   Get = 'GET',
   Post = 'POST',
-  Delete = 'DELETE'
+  Delete = 'DELETE',
 }
 
 export type CheckAuthResult = {
-  status: 'ok';
+  status: 'ok'
   // account: string | null; // this is now deprecated
-  accounts: string[];
-  is_admin: boolean;
+  accounts: string[]
+  is_admin: boolean
 }
 
 export type SpawnRequestBody = {
-  env?: Record<string, string>; // env vars always map strings to strings
-  grace_period_seconds?: number;
-  lock?: string;
-  service_environment?: string;
+  env?: Record<string, string> // env vars always map strings to strings
+  grace_period_seconds?: number
+  lock?: string
+  service_environment?: string
 }
 
 export type V1Status =
@@ -45,88 +45,107 @@ export type V2Status =
   | 'terminated'
 
 export type ConnectResourceLimits = {
-  cpu_period?: number;
+  cpu_period?: number
   // Proportion of period used by container (in microseconds)
-  cpu_period_percent?: number;
+  cpu_period_percent?: number
   // Total cpu time allocated to container (in seconds)
-  cpu_time_limit?: number;
-  memory_limit_bytes?: number;
-  disk_limit_bytes?: number;
+  cpu_time_limit?: number
+  memory_limit_bytes?: number
+  disk_limit_bytes?: number
 }
 
 export type JamsocketConnectRequestBody = {
-  key?: string;
-  spawn?: boolean | {
-    tag?: string;
-    lifetime_limit_seconds?: number;
-    max_idle_seconds?: number;
-    executable?: {
-      mount?: string | boolean;
-      env?: Record<string, string>;
-      resource_limits?: ConnectResourceLimits;
-    };
-  };
-  user?: string;
-  auth?: Record<string, any>;
+  key?: string
+  spawn?:
+    | boolean
+    | {
+        tag?: string
+        lifetime_limit_seconds?: number
+        max_idle_seconds?: number
+        executable?: {
+          mount?: string | boolean
+          env?: Record<string, string>
+          resource_limits?: ConnectResourceLimits
+        }
+      }
+  user?: string
+  auth?: Record<string, any>
 }
 
 export type JamsocketConnectResponse = {
-  backend_id: string;
-  spawned: boolean;
-  status: V2Status;
-  token: string;
-  url: string;
-  secret_token?: string | null;
-  status_url: string;
-  ready_url: string;
+  backend_id: string
+  spawned: boolean
+  status: V2Status
+  token: string
+  url: string
+  secret_token?: string | null
+  status_url: string
+  ready_url: string
 }
 
 // these are public messages that come over the status and status/stream endpoints
-export type PlaneTerminationReason = 'swept' | 'external' | 'key_expired' | 'lost' | 'startup_timeout'
+export type PlaneTerminationReason =
+  | 'swept'
+  | 'external'
+  | 'key_expired'
+  | 'lost'
+  | 'startup_timeout'
 export type PlaneTerminationKind = 'soft' | 'hard'
 export type PlaneV2StatusMessage =
-  | { status: 'scheduled', time: number }
-  | { status: 'loading', time: number }
-  | { status: 'starting', time: number }
-  | { status: 'waiting', time: number }
-  | { status: 'ready', time: number }
-  | { status: 'terminating', time: number, termination_reason: PlaneTerminationReason }
-  | { status: 'hard-terminating', time: number, termination_reason: PlaneTerminationReason }
-  | { status: 'terminated', time: number, termination_reason?: PlaneTerminationReason, termination_kind?: PlaneTerminationKind, exit_error?: boolean }
+  | { status: 'scheduled'; time: number }
+  | { status: 'loading'; time: number }
+  | { status: 'starting'; time: number }
+  | { status: 'waiting'; time: number }
+  | { status: 'ready'; time: number }
+  | { status: 'terminating'; time: number; termination_reason: PlaneTerminationReason }
+  | { status: 'hard-terminating'; time: number; termination_reason: PlaneTerminationReason }
+  | {
+      status: 'terminated'
+      time: number
+      termination_reason?: PlaneTerminationReason
+      termination_kind?: PlaneTerminationKind
+      exit_error?: boolean
+    }
 
 export type PlaneV2State =
   | { status: 'scheduled' }
   | { status: 'loading' }
   | { status: 'starting' }
-  | { status: 'waiting', address?: string }
-  | { status: 'ready', address?: string }
-  | { status: 'terminating', last_status: V2Status, reason: PlaneTerminationReason }
-  | { status: 'hard-terminating', last_status: V2Status, reason: PlaneTerminationReason }
-  | { status: 'terminated', last_status: V2Status, reason: PlaneTerminationReason, termination: PlaneTerminationKind, exit_code?: number | null }
+  | { status: 'waiting'; address?: string }
+  | { status: 'ready'; address?: string }
+  | { status: 'terminating'; last_status: V2Status; reason: PlaneTerminationReason }
+  | { status: 'hard-terminating'; last_status: V2Status; reason: PlaneTerminationReason }
+  | {
+      status: 'terminated'
+      last_status: V2Status
+      reason: PlaneTerminationReason
+      termination: PlaneTerminationKind
+      exit_code?: number | null
+    }
 
 export type UpdateEnvironmentBody = {
-  name?: string;
-  image_tag?: string;
+  name?: string
+  image_tag?: string
 }
 
 export interface ServiceImageResult {
-  status: 'ok',
-  imageName: string,
+  status: 'ok'
+  imageName: string
 }
 
 export interface ServiceListResult {
-  services: Array<string>,
+  services: Array<string>
 }
 
 export interface ServiceCreateResult {
-  status: 'ok',
+  status: 'ok'
 }
 
 export type Image = {
-  repository: string,
-  digest: string,
-  tag: string,
-  upload_time: string,
+  repository: string
+  digest: string
+  tag: string
+  upload_time: string
 }
 
 export interface ServiceImagesResult {
@@ -134,22 +153,22 @@ export interface ServiceImagesResult {
 }
 
 export interface Environment {
-  name: string,
-  image_tag: string,
-  cluster: string,
-  created_at: string,
-  last_spawned_at: string | null,
+  name: string
+  image_tag: string
+  cluster: string
+  created_at: string
+  last_spawned_at: string | null
 }
 
 export interface ServiceInfoResult {
-  name: string,
-  account_name: string,
-  created_at: string,
-  last_spawned_at: string | null,
-  last_image_upload_time: string | null,
-  last_image_digest: string | null,
-  image_name: string,
-  environments: Environment[],
+  name: string
+  account_name: string
+  created_at: string
+  last_spawned_at: string | null
+  last_image_upload_time: string | null
+  last_image_digest: string | null
+  image_name: string
+  environments: Environment[]
 }
 
 export interface ServiceDeleteResult {
@@ -161,11 +180,11 @@ export interface EnvironmentUpdateResult {
 }
 
 export interface SpawnResult {
-  url: string,
-  name: string,
-  ready_url: string,
-  status_url: string,
-  spawned: boolean,
+  url: string
+  name: string
+  ready_url: string
+  status_url: string
+  spawned: boolean
   status: V1Status | null
 }
 
@@ -185,11 +204,11 @@ export interface RunningBackendsResult {
 }
 
 export interface TerminateResult {
-  status: 'ok',
+  status: 'ok'
 }
 
 export interface BackendV2Status {
-  value: PlaneV2State,
+  value: PlaneV2State
   timestamp: string
 }
 
@@ -207,26 +226,30 @@ export interface BackendInfoResult {
 }
 
 export interface UserSessionRevokeResult {
-  status: 'ok',
+  status: 'ok'
 }
 
 export interface CliLoginAttemptResult {
-  token: string,
+  token: string
 }
 
 export interface CompleteCliLoginResult {
-  uuid: string,
-  user_id: string,
+  uuid: string
+  user_id: string
   user_agent: string
-  created_at: string,
-  expiration: string,
-  token: string,
-  user_is_admin?: boolean,
-  user_email?: string,
+  created_at: string
+  expiration: string
+  token: string
+  user_is_admin?: boolean
+  user_email?: string
 }
 
 export class HTTPError extends Error {
-  constructor(public status: number, public code: string | null, message: string) {
+  constructor(
+    public status: number,
+    public code: string | null,
+    message: string,
+  ) {
     super(message)
     this.name = 'HTTPError'
   }
@@ -234,14 +257,21 @@ export class HTTPError extends Error {
 
 export const AUTH_ERROR_HTTP_CODES = new Set([401, 403, 407])
 export class AuthenticationError extends HTTPError {
-  constructor(public status: number, public code: string | null, message: string) {
+  constructor(
+    public status: number,
+    public code: string | null,
+    message: string,
+  ) {
     super(status, code, message)
     this.name = 'AuthenticationError'
   }
 }
 
 export class JamsocketApi {
-  constructor(private apiBase: string, private options: https.RequestOptions = {}) {}
+  constructor(
+    private apiBase: string,
+    private options: https.RequestOptions = {},
+  ) {}
 
   public static fromEnvironment(): JamsocketApi {
     const override = process.env.JAMSOCKET_SERVER_API
@@ -257,7 +287,9 @@ export class JamsocketApi {
     let rejectUnauthorized
     if (allowInsecure) {
       if (override === undefined) {
-        console.warn('Insecure connections are only allowed when overriding the Jamsocket server. (Ignoring env var ALLOW_INSECURE)')
+        console.warn(
+          'Insecure connections are only allowed when overriding the Jamsocket server. (Ignoring env var ALLOW_INSECURE)',
+        )
         rejectUnauthorized = true
       } else {
         console.warn('Allowing insecure connections. (Found env var ALLOW_INSECURE)')
@@ -283,7 +315,13 @@ export class JamsocketApi {
     return `${baseUrl}/cli-login/${loginToken}`
   }
 
-  private async makeRequest<T>(endpoint: string, method: HttpMethod, body?: any, headers?: Headers, config?: JamsocketConfig): Promise<T> {
+  private async makeRequest<T>(
+    endpoint: string,
+    method: HttpMethod,
+    body?: any,
+    headers?: Headers,
+    config?: JamsocketConfig,
+  ): Promise<T> {
     const url = `${this.apiBase}${endpoint}`
     const user = config?.getUserEmail() ?? null
     const account = config?.getAccount() ?? null
@@ -305,28 +343,45 @@ export class JamsocketApi {
     if (response.statusCode && response.statusCode >= 400) {
       if (isJSONContentType && isValidJSON) {
         const { message, status, code, id } = responseBody.error
-        throw new HTTPError(response.statusCode, code, `jamsocket: ${status} - ${code}: ${message} (id: ${id})`)
+        throw new HTTPError(
+          response.statusCode,
+          code,
+          `jamsocket: ${status} - ${code}: ${message} (id: ${id})`,
+        )
       }
-      throw new HTTPError(response.statusCode, null, `jamsocket: ${response.statusCode}: ${response.body}`)
+      throw new HTTPError(
+        response.statusCode,
+        null,
+        `jamsocket: ${response.statusCode}: ${response.body}`,
+      )
     }
 
     if (!isJSONContentType) {
-      throw new Error(`Unexpected content-type: ${response.headers['content-type']}. Url was: ${url}.`)
+      throw new Error(
+        `Unexpected content-type: ${response.headers['content-type']}. Url was: ${url}.`,
+      )
     }
 
     if (!isValidJSON) {
-      throw new Error(`jamsocket: error parsing JSON response: "${response.body}". Url was: ${url}. Status was: ${response.statusCode}`)
+      throw new Error(
+        `jamsocket: error parsing JSON response: "${response.body}". Url was: ${url}. Status was: ${response.statusCode}`,
+      )
     }
 
     return responseBody
   }
 
-  private async makeAuthenticatedRequest<T>(endpoint: string, method: HttpMethod, configOrAuthToken: JamsocketConfig | string, body?: any): Promise<T> {
+  private async makeAuthenticatedRequest<T>(
+    endpoint: string,
+    method: HttpMethod,
+    configOrAuthToken: JamsocketConfig | string,
+    body?: any,
+  ): Promise<T> {
     let config: JamsocketConfig | undefined
     let authHeaders: Record<string, string> = {}
     if (typeof configOrAuthToken === 'string') {
       config = undefined
-      authHeaders = { 'Authorization': `Bearer ${configOrAuthToken}` }
+      authHeaders = { Authorization: `Bearer ${configOrAuthToken}` }
     } else {
       config = configOrAuthToken
       authHeaders = config.getAuthHeaders()
@@ -336,12 +391,18 @@ export class JamsocketApi {
       // NOTE: this await here is required so that all the Promise "callback" logic is wrapped in this try/catch
       return await this.makeRequest<T>(endpoint, method, body, authHeaders, config)
     } catch (error) {
-      if (error instanceof HTTPError && AUTH_ERROR_HTTP_CODES.has(error.status)) throw new AuthenticationError(error.status, error.code, error.message)
+      if (error instanceof HTTPError && AUTH_ERROR_HTTP_CODES.has(error.status))
+        throw new AuthenticationError(error.status, error.code, error.message)
       throw error
     }
   }
 
-  private makeStreamRequest(endpoint: string, headers: Headers | null, callback: (line: string) => void, config?: JamsocketConfig): EventStreamReturn {
+  private makeStreamRequest(
+    endpoint: string,
+    headers: Headers | null,
+    callback: (line: string) => void,
+    config?: JamsocketConfig,
+  ): EventStreamReturn {
     const url = `${this.apiBase}${endpoint}`
     const user = config?.getUserEmail() ?? null
     const account = config?.getAccount() ?? null
@@ -351,14 +412,22 @@ export class JamsocketApi {
     if (account) {
       headers = { ...headers, 'X-Jamsocket-Account': account }
     }
-    return eventStream(url, {
-      ...this.options,
-      method: HttpMethod.Get,
-      headers: { ...headers },
-    }, callback)
+    return eventStream(
+      url,
+      {
+        ...this.options,
+        method: HttpMethod.Get,
+        headers: { ...headers },
+      },
+      callback,
+    )
   }
 
-  private makeAuthenticatedStreamRequest(endpoint: string, config: JamsocketConfig, callback: (line: string) => void): EventStreamReturn {
+  private makeAuthenticatedStreamRequest(
+    endpoint: string,
+    config: JamsocketConfig,
+    callback: (line: string) => void,
+  ): EventStreamReturn {
     const authHeaders = config.getAuthHeaders()
     return this.makeStreamRequest(endpoint, authHeaders, callback, config)
   }
@@ -373,24 +442,40 @@ export class JamsocketApi {
     return this.makeAuthenticatedRequest<CheckAuthResult>(url, HttpMethod.Get, config)
   }
 
-  public serviceImage(accountName: string, serviceName: string, config: JamsocketConfig): Promise<ServiceImageResult> {
+  public serviceImage(
+    accountName: string,
+    serviceName: string,
+    config: JamsocketConfig,
+  ): Promise<ServiceImageResult> {
     const url = `/v2/service/${accountName}/${serviceName}/image-name`
     return this.makeAuthenticatedRequest<ServiceImageResult>(url, HttpMethod.Get, config)
   }
 
-  public serviceCreate(accountName: string, name: string, config: JamsocketConfig): Promise<ServiceCreateResult> {
+  public serviceCreate(
+    accountName: string,
+    name: string,
+    config: JamsocketConfig,
+  ): Promise<ServiceCreateResult> {
     const url = `/v2/account/${accountName}/service`
     return this.makeAuthenticatedRequest<ServiceCreateResult>(url, HttpMethod.Post, config, {
       name,
     })
   }
 
-  public serviceDelete(accountName: string, serviceName: string, config: JamsocketConfig): Promise<ServiceDeleteResult> {
+  public serviceDelete(
+    accountName: string,
+    serviceName: string,
+    config: JamsocketConfig,
+  ): Promise<ServiceDeleteResult> {
     const url = `/v2/service/${accountName}/${serviceName}/delete`
     return this.makeAuthenticatedRequest<ServiceDeleteResult>(url, HttpMethod.Post, config)
   }
 
-  public serviceInfo(accountName: string, serviceName: string, config: JamsocketConfig): Promise<ServiceInfoResult> {
+  public serviceInfo(
+    accountName: string,
+    serviceName: string,
+    config: JamsocketConfig,
+  ): Promise<ServiceInfoResult> {
     const url = `/v2/service/${accountName}/${serviceName}`
     return this.makeAuthenticatedRequest<ServiceInfoResult>(url, HttpMethod.Get, config)
   }
@@ -400,43 +485,89 @@ export class JamsocketApi {
     return this.makeAuthenticatedRequest<ServiceListResult>(url, HttpMethod.Get, config)
   }
 
-  public updateEnvironment(accountName: string, service: string, environment: string, config: JamsocketConfig, body: UpdateEnvironmentBody): Promise<EnvironmentUpdateResult> {
+  public updateEnvironment(
+    accountName: string,
+    service: string,
+    environment: string,
+    config: JamsocketConfig,
+    body: UpdateEnvironmentBody,
+  ): Promise<EnvironmentUpdateResult> {
     const url = `/v2/service-env/${accountName}/${service}/${environment}/update`
-    return this.makeAuthenticatedRequest<EnvironmentUpdateResult>(url, HttpMethod.Post, config, body)
+    return this.makeAuthenticatedRequest<EnvironmentUpdateResult>(
+      url,
+      HttpMethod.Post,
+      config,
+      body,
+    )
   }
 
-  public spawn(accountName: string, serviceName: string, config: JamsocketConfig, body: SpawnRequestBody): Promise<SpawnResult> {
+  public spawn(
+    accountName: string,
+    serviceName: string,
+    config: JamsocketConfig,
+    body: SpawnRequestBody,
+  ): Promise<SpawnResult> {
     const url = `/v1/user/${accountName}/service/${serviceName}/spawn`
     return this.makeAuthenticatedRequest<SpawnResult>(url, HttpMethod.Post, config, body)
   }
 
-  public connect(accountName: string, serviceName: string, serviceEnvironment: string | null, config: JamsocketConfig, body?: JamsocketConnectRequestBody): Promise<JamsocketConnectResponse> {
+  public connect(
+    accountName: string,
+    serviceName: string,
+    serviceEnvironment: string | null,
+    config: JamsocketConfig,
+    body?: JamsocketConnectRequestBody,
+  ): Promise<JamsocketConnectResponse> {
     const service = serviceEnvironment ? `${serviceName}/${serviceEnvironment}` : serviceName
     const url = `/v2/service/${accountName}/${service}/connect`
-    return this.makeAuthenticatedRequest<JamsocketConnectResponse>(url, HttpMethod.Post, config, body)
+    return this.makeAuthenticatedRequest<JamsocketConnectResponse>(
+      url,
+      HttpMethod.Post,
+      config,
+      body,
+    )
   }
 
-  public listRunningBackends(accountName: string, config: JamsocketConfig): Promise<RunningBackendsResult> {
+  public listRunningBackends(
+    accountName: string,
+    config: JamsocketConfig,
+  ): Promise<RunningBackendsResult> {
     const url = `/v2/account/${accountName}/backends`
     return this.makeAuthenticatedRequest<RunningBackendsResult>(url, HttpMethod.Get, config)
   }
 
-  public imagesList(accountName: string, serviceName: string, config: JamsocketConfig): Promise<ServiceImagesResult> {
+  public imagesList(
+    accountName: string,
+    serviceName: string,
+    config: JamsocketConfig,
+  ): Promise<ServiceImagesResult> {
     const url = `/v2/service/${accountName}/${serviceName}/images`
     return this.makeAuthenticatedRequest<ServiceImagesResult>(url, HttpMethod.Get, config)
   }
 
-  public streamLogs(backend: string, config: JamsocketConfig, callback: (line: string) => void): EventStreamReturn {
+  public streamLogs(
+    backend: string,
+    config: JamsocketConfig,
+    callback: (line: string) => void,
+  ): EventStreamReturn {
     const url = `/v2/backend/${backend}/logs`
     return this.makeAuthenticatedStreamRequest(url, config, callback)
   }
 
-  public streamMetrics(backend: string, config: JamsocketConfig, callback: (line: string) => void): EventStreamReturn {
+  public streamMetrics(
+    backend: string,
+    config: JamsocketConfig,
+    callback: (line: string) => void,
+  ): EventStreamReturn {
     const url = `/v2/backend/${backend}/metrics/stream`
     return this.makeAuthenticatedStreamRequest(url, config, callback)
   }
 
-  public streamStatus(backend: string, callback: (statusMessage: PlaneV2StatusMessage) => void, config?: JamsocketConfig): EventStreamReturn {
+  public streamStatus(
+    backend: string,
+    callback: (statusMessage: PlaneV2StatusMessage) => void,
+    config?: JamsocketConfig,
+  ): EventStreamReturn {
     const url = `/v2/backend/${backend}/status/stream`
     const wrappedCallback = (line: string) => {
       const val = JSON.parse(line)
@@ -450,7 +581,11 @@ export class JamsocketApi {
     return this.makeRequest<PlaneV2StatusMessage>(url, HttpMethod.Get, undefined, undefined, config)
   }
 
-  public async terminate(backend: string, hard: boolean, config: JamsocketConfig): Promise<TerminateResult> {
+  public async terminate(
+    backend: string,
+    hard: boolean,
+    config: JamsocketConfig,
+  ): Promise<TerminateResult> {
     const url = `/v2/backend/${backend}/terminate`
     return this.makeAuthenticatedRequest<TerminateResult>(url, HttpMethod.Post, config, { hard })
   }
@@ -470,7 +605,10 @@ export class JamsocketApi {
     return this.makeRequest<CompleteCliLoginResult>(url, HttpMethod.Post, { code })
   }
 
-  public async revokeUserSession(userSessionId: string, config: JamsocketConfig): Promise<UserSessionRevokeResult> {
+  public async revokeUserSession(
+    userSessionId: string,
+    config: JamsocketConfig,
+  ): Promise<UserSessionRevokeResult> {
     const url = `/user-session/${userSessionId}/delete`
     return this.makeAuthenticatedRequest<UserSessionRevokeResult>(url, HttpMethod.Post, config)
   }
@@ -479,15 +617,19 @@ export class JamsocketApi {
     const endpoint = `/cli-login/${loginToken}/status/stream`
     const url = `${this.apiBase}${endpoint}`
     // right now, this stream only returns a single message and then closes
-    return new Promise(resolve => {
-      const stream = eventStream(url, {
-        ...this.options,
-        method: HttpMethod.Get,
-      }, (line: string) => {
-        const val = JSON.parse(line)
-        resolve(val.status === 'ok')
-        stream.close()
-      })
+    return new Promise((resolve) => {
+      const stream = eventStream(
+        url,
+        {
+          ...this.options,
+          method: HttpMethod.Get,
+        },
+        (line: string) => {
+          const val = JSON.parse(line)
+          resolve(val.status === 'ok')
+          stream.close()
+        },
+      )
     })
   }
 }

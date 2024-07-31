@@ -312,7 +312,7 @@ Builds and pushes an image to Jamsocket's container registry using the provided 
 
 ```
 USAGE
-  $ jamsocket push [SERVICE] [IMAGE] [-f <value>] [-c <value>] [-t <value>]
+  $ jamsocket push [SERVICE] [IMAGE] [-f <value>] [-c <value>] [-t <value>] [-g]
 
 ARGUMENTS
   SERVICE  Jamsocket service to push the image to
@@ -321,6 +321,8 @@ ARGUMENTS
 FLAGS
   -c, --context=<value>     path to the build context for the Dockerfile (defaults to current working directory)
   -f, --dockerfile=<value>  path to the Dockerfile to build the image from
+  -g, --include-git-commit  optionally include git commit metadata as labels in the image (uses the git repo of the
+                            docker context)
   -t, --tag=<value>         optional tag to apply to the image in the jamsocket registry
 
 DESCRIPTION

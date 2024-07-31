@@ -1,28 +1,28 @@
 import * as https from 'https'
 import * as http from 'http'
-import { HTTPError } from './api'
+import { HTTPError } from '../api'
 import * as os from 'os'
 import WSL from 'is-wsl'
-import { AUTH_ERROR_HTTP_CODES, AuthenticationError } from './api'
+import { AUTH_ERROR_HTTP_CODES, AuthenticationError } from '../api'
 import assert from 'assert'
 
 type Header = string | string[] | undefined
 export type Headers = Record<string, Header>
 
 type RequestReturn = {
-  body: string;
-  statusCode: number | undefined;
-  statusMessage: string | undefined;
-  headers: Headers;
+  body: string
+  statusCode: number | undefined
+  statusMessage: string | undefined
+  headers: Headers
 }
 
 export type EventStreamReturn = {
-  close: () => void;
+  close: () => void
   closed: Promise<void>
 }
 
 // eslint-disable-next-line unicorn/prefer-module
-const version = require('../package.json').version
+const version = require('../../package.json').version
 const platform = WSL ? 'wsl' : os.platform()
 const arch = os.arch() === 'ia32' ? 'x86' : os.arch()
 const userAgent = `jamsocket-cli/${version} ${platform}-${arch} node-${process.version}`
@@ -41,7 +41,9 @@ export async function checkVersion(): Promise<void> {
     const latestVersion = JSON.parse(response.body)['dist-tags'].latest
     const isVersionOld = isVersionLessThan(version, latestVersion)
     if (isVersionOld) {
-      console.error(`    Your Jamsocket CLI version (${version}) is out of date. You may need to update to the latest version (${latestVersion}) with:`)
+      console.error(
+        `    Your Jamsocket CLI version (${version}) is out of date. You may need to update to the latest version (${latestVersion}) with:`,
+      )
       console.error('        npm install jamsocket@latest')
       console.error()
     }
@@ -52,10 +54,12 @@ function isVersionLessThan(version1: string, version2: string): boolean {
   const version1Components = version1.split('.')
   const version2Components = version2.split('.')
   if (version1Components.length !== 3 || version2Components.length !== 3) {
-    throw new Error(`version comparison failed due to invalid versions. Received versions: ${version1} and ${version2}`)
+    throw new Error(
+      `version comparison failed due to invalid versions. Received versions: ${version1} and ${version2}`,
+    )
   }
-  const [major1, minor1, patch1] = version1Components.map(val => Number.parseInt(val, 10))
-  const [major2, minor2, patch2] = version2Components.map(val => Number.parseInt(val, 10))
+  const [major1, minor1, patch1] = version1Components.map((val) => Number.parseInt(val, 10))
+  const [major2, minor2, patch2] = version2Components.map((val) => Number.parseInt(val, 10))
   if (major1 > major2) return false
   if (major1 < major2) return true
   if (minor1 > minor2) return false
@@ -92,26 +96,29 @@ export function request(
     }
 
     let result = ''
-    const req = protocol.request({
-      ...options,
-      hostname: wrappedURL.hostname,
-      path: wrappedURL.pathname,
-      port: wrappedURL.port,
-      headers: headers,
-    }, res => {
-      res.on('data', chunk => {
-        result += chunk
-      })
-      res.on('end', () => {
-        resolve({
-          body: result,
-          statusCode: res.statusCode,
-          statusMessage: res.statusMessage,
-          headers: res.headers,
+    const req = protocol.request(
+      {
+        ...options,
+        hostname: wrappedURL.hostname,
+        path: wrappedURL.pathname,
+        port: wrappedURL.port,
+        headers: headers,
+      },
+      (res) => {
+        res.on('data', (chunk) => {
+          result += chunk
         })
-      })
-    })
-    req.on('error', err => {
+        res.on('end', () => {
+          resolve({
+            body: result,
+            statusCode: res.statusCode,
+            statusMessage: res.statusMessage,
+            headers: res.headers,
+          })
+        })
+      },
+    )
+    req.on('error', (err) => {
       reject(err)
     })
     if (jsonBody !== null) req.write(jsonBody)
@@ -149,35 +156,38 @@ export function eventStream(
       protocol = http as any
     }
 
-    request = protocol.request({
-      ...options,
-      hostname: wrappedURL.hostname,
-      path: wrappedURL.pathname,
-      port: wrappedURL.port,
-      headers: headers,
-    }, res => {
-      response = res
-      if (res.statusCode && res.statusCode >= 400) {
-        responseIntoError(res).catch(reject)
-        return
-      }
-
-      res.on('data', (chunk: Buffer) => {
-        const lines = chunk.toString().trim().split(/\n\n/)
-        for (const line of lines) {
-          // only passes along lines that start with "data:"
-          // otherwise, it will just ignore the line
-          const match = line.match(/data: ?(.*)/)
-          if (match) {
-            callback(match[1])
-          }
+    request = protocol.request(
+      {
+        ...options,
+        hostname: wrappedURL.hostname,
+        path: wrappedURL.pathname,
+        port: wrappedURL.port,
+        headers: headers,
+      },
+      (res) => {
+        response = res
+        if (res.statusCode && res.statusCode >= 400) {
+          responseIntoError(res).catch(reject)
+          return
         }
-      })
-      res.on('close', () => {
-        resolve()
-      })
-    })
-    request.on('error', err => {
+
+        res.on('data', (chunk: Buffer) => {
+          const lines = chunk.toString().trim().split(/\n\n/)
+          for (const line of lines) {
+            // only passes along lines that start with "data:"
+            // otherwise, it will just ignore the line
+            const match = line.match(/data: ?(.*)/)
+            if (match) {
+              callback(match[1])
+            }
+          }
+        })
+        res.on('close', () => {
+          resolve()
+        })
+      },
+    )
+    request.on('error', (err) => {
       reject(err)
     })
     request.end()

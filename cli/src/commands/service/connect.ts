@@ -2,13 +2,14 @@ import { Command, Flags } from '@oclif/core'
 import chalk from 'chalk'
 import { Jamsocket } from '../../jamsocket'
 import * as customFlags from '../../flags'
-import { blue, lightBlue, lightGreen } from '../../formatting'
+import { blue, lightBlue, lightGreen } from '../../lib/formatting'
 import { JamsocketConnectRequestBody } from '../../api'
 
 export default class Spawn extends Command {
   static aliases = ['connect']
 
-  static description = 'Gets a URL that can be used to connect to a session backend. Will spawn a new session backend if no key (aka lock) is provided or if no session backend is currently holding the provided key.'
+  static description =
+    'Gets a URL that can be used to connect to a session backend. Will spawn a new session backend if no key (aka lock) is provided or if no session backend is currently holding the provided key.'
 
   static examples = [
     '<%= config.bin %> <%= command.id %> my-service',
@@ -24,18 +25,43 @@ export default class Spawn extends Command {
   static flags = {
     // passing { multiple: true } here due to a bug: https://github.com/oclif/core/pull/414
     env: customFlags.env({ multiple: true }),
-    tag: Flags.string({ char: 't', description: 'An optional image tag or image digest to use when spawning a backend.' }),
-    'max-idle-seconds': Flags.integer({ char: 'i', description: 'The max time in seconds a session backend should wait after last connection is closed before shutting down container (default is 300)' }),
-    'lifetime-limit-seconds': Flags.integer({ char: 'l', description: 'The max time in seconds the session backend should be allowed to run.' }),
-    key: Flags.string({ char: 'k', description: 'If provided, fetches the session backend currently holding the given key (formerly known as a "lock"). If no session backend holds the key, or if a key is not provided, a new session backend will be spawned.' }),
-    user: Flags.string({ char: 'u', description: 'Optional username to be associated with the URL/connection string returned by the connect command.' }),
-    auth: Flags.string({ char: 'a', description: 'Optional serialized JSON to be passed to a session backend when connecting with the returned URL/connection string.' }),
-    spawn: Flags.boolean({ default: true, allowNo: true, description: 'Whether to spawn a new session backend if no session backend is currently holding the provided key.' }),
+    tag: Flags.string({
+      char: 't',
+      description: 'An optional image tag or image digest to use when spawning a backend.',
+    }),
+    'max-idle-seconds': Flags.integer({
+      char: 'i',
+      description:
+        'The max time in seconds a session backend should wait after last connection is closed before shutting down container (default is 300)',
+    }),
+    'lifetime-limit-seconds': Flags.integer({
+      char: 'l',
+      description: 'The max time in seconds the session backend should be allowed to run.',
+    }),
+    key: Flags.string({
+      char: 'k',
+      description:
+        'If provided, fetches the session backend currently holding the given key (formerly known as a "lock"). If no session backend holds the key, or if a key is not provided, a new session backend will be spawned.',
+    }),
+    user: Flags.string({
+      char: 'u',
+      description:
+        'Optional username to be associated with the URL/connection string returned by the connect command.',
+    }),
+    auth: Flags.string({
+      char: 'a',
+      description:
+        'Optional serialized JSON to be passed to a session backend when connecting with the returned URL/connection string.',
+    }),
+    spawn: Flags.boolean({
+      default: true,
+      allowNo: true,
+      description:
+        'Whether to spawn a new session backend if no session backend is currently holding the provided key.',
+    }),
   }
 
-  static args = [
-    { name: 'service', required: true, description: 'Name of service to spawn.' },
-  ]
+  static args = [{ name: 'service', required: true, description: 'Name of service to spawn.' }]
 
   public async run(): Promise<void> {
     const { args, flags } = await this.parse(Spawn)
@@ -107,6 +133,9 @@ export default class Spawn extends Command {
     if (flags.key) {
       this.log(chalk.bold`spawned:        `, blue(responseBody.spawned.toString()))
     }
-    this.log(chalk.bold`dashboard:      `, lightGreen(`${appBaseUrl}/backend/${responseBody.backend_id}`))
+    this.log(
+      chalk.bold`dashboard:      `,
+      lightGreen(`${appBaseUrl}/backend/${responseBody.backend_id}`),
+    )
   }
 }
