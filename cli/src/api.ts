@@ -550,7 +550,7 @@ export class JamsocketApi {
     config: JamsocketConfig,
     callback: (line: string) => void,
   ): EventStreamReturn {
-    const url = `/v2/backend/${backend}/logs`
+    const url = `/v2/backend/${backend}/logs/stream`
     return this.makeAuthenticatedStreamRequest(url, config, callback)
   }
 
