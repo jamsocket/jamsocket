@@ -102,8 +102,8 @@ export type PlaneV2StatusMessage =
   | {
       status: 'terminated'
       time: number
-      termination_reason?: PlaneTerminationReason
-      termination_kind?: PlaneTerminationKind
+      termination_reason?: PlaneTerminationReason | null
+      termination_kind?: PlaneTerminationKind | null
       exit_error?: boolean
     }
 
@@ -118,8 +118,8 @@ export type PlaneV2State =
   | {
       status: 'terminated'
       last_status: V2Status
-      reason: PlaneTerminationReason
-      termination: PlaneTerminationKind
+      reason: PlaneTerminationReason | null
+      termination: PlaneTerminationKind | null
       exit_code?: number | null
     }
 
