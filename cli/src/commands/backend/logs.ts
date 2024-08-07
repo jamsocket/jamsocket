@@ -11,7 +11,7 @@ export default class Logs extends Command {
     {
       name: 'backend',
       description:
-        'The name of the backend, a random string of letters and numbers returned by the spawn command.',
+        'The backend ID, a random string of letters and numbers returned by the connect command.',
       required: true,
     },
   ]

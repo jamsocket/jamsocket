@@ -7,7 +7,7 @@ import { blue, lightBlue, lightMagenta, lightGreen } from '../../lib/formatting'
 import { PlaneV2State } from '../../api'
 
 export default class Info extends Command {
-  static description = 'Retrieves information about a backend given its name.'
+  static description = 'Retrieves information about a backend given a Backend ID.'
   static examples = ['<%= config.bin %> <%= command.id %> a8m32q']
 
   static args = [{ name: 'backend', required: true }]
@@ -29,7 +29,8 @@ export default class Info extends Command {
     this.log(`cluster:      ${blue(info.cluster_name)}`)
     this.log(`image digest: ${blue(info.image_digest)}`)
     if (info.key) this.log(`key:          ${blue(info.key)}`)
-    if (info.environment_name) this.log(`environment:  ${blue(info.environment_name)}`)
+    if (info.environment_name && info.environment_name !== 'default')
+      this.log(`environment:  ${blue(info.environment_name)}`)
     if (info.max_mem_bytes) this.log(`mem usage:    ${blue(prettyBytes(info.max_mem_bytes))}`)
     this.log(`dashboard:    ${lightGreen(`${appBaseUrl}/backend/${info.name}`)}`)
     this.log()

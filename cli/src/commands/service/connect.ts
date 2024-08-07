@@ -70,7 +70,7 @@ export default class Spawn extends Command {
 
     const parts = args.service.split('/')
     if (parts.length > 2 || parts[0] === '' || parts[1] === '') {
-      this.error(`Invalid service/environment name: ${args.service}`)
+      this.error(`Invalid service name: ${args.service}`)
     }
 
     const service = parts[0]
