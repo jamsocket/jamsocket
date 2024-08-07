@@ -32,26 +32,24 @@ If you want to use the Jamsocket CLI from an automated environment (e.g. a CI/CD
 * [`jamsocket logs BACKEND`](#jamsocket-logs-backend)
 * [`jamsocket push SERVICE [IMAGE]`](#jamsocket-push-service-image)
 * [`jamsocket service connect SERVICE`](#jamsocket-service-connect-service)
-* [`jamsocket service create NAME`](#jamsocket-service-create-name)
-* [`jamsocket service delete NAME`](#jamsocket-service-delete-name)
+* [`jamsocket service create SERVICE`](#jamsocket-service-create-service)
+* [`jamsocket service delete SERVICE`](#jamsocket-service-delete-service)
 * [`jamsocket service images SERVICE`](#jamsocket-service-images-service)
-* [`jamsocket service info NAME`](#jamsocket-service-info-name)
+* [`jamsocket service info SERVICE`](#jamsocket-service-info-service)
 * [`jamsocket service list`](#jamsocket-service-list)
-* [`jamsocket service spawn SERVICE`](#jamsocket-service-spawn-service)
 * [`jamsocket service use-image SERVICE`](#jamsocket-service-use-image-service)
-* [`jamsocket spawn SERVICE`](#jamsocket-spawn-service)
 * [`jamsocket terminate BACKENDS`](#jamsocket-terminate-backends)
 
 ## `jamsocket backend info BACKEND`
 
-Retrieves information about a backend given its name.
+Retrieves information about a backend given a Backend ID.
 
 ```
 USAGE
   $ jamsocket backend info [BACKEND]
 
 DESCRIPTION
-  Retrieves information about a backend given its name.
+  Retrieves information about a backend given a Backend ID.
 
 EXAMPLES
   $ jamsocket backend info a8m32q
@@ -81,7 +79,7 @@ USAGE
   $ jamsocket backend logs [BACKEND]
 
 ARGUMENTS
-  BACKEND  The name of the backend, a random string of letters and numbers returned by the spawn command.
+  BACKEND  The backend ID, a random string of letters and numbers returned by the connect command.
 
 DESCRIPTION
   Stream logs from a running backend.
@@ -102,7 +100,7 @@ USAGE
   $ jamsocket backend metrics [BACKEND]
 
 ARGUMENTS
-  BACKEND  The name of the backend, a random string of letters and numbers returned by the spawn command.
+  BACKEND  The backend ID, a random string of letters and numbers returned by the connect command.
 
 DESCRIPTION
   Stream metrics from a running backend
@@ -113,7 +111,7 @@ EXAMPLES
 
 ## `jamsocket backend terminate BACKENDS`
 
-Terminates one or more backends given the backend name(s).
+Terminates one or more backends given the backend ID(s).
 
 ```
 USAGE
@@ -123,7 +121,7 @@ FLAGS
   -f, --force  whether to force the backend to hard terminate (defaults to false)
 
 DESCRIPTION
-  Terminates one or more backends given the backend name(s).
+  Terminates one or more backends given the backend ID(s).
 
 ALIASES
   $ jamsocket terminate
@@ -294,7 +292,7 @@ USAGE
   $ jamsocket logs [BACKEND]
 
 ARGUMENTS
-  BACKEND  The name of the backend, a random string of letters and numbers returned by the spawn command.
+  BACKEND  The backend ID, a random string of letters and numbers returned by the connect command.
 
 DESCRIPTION
   Stream logs from a running backend.
@@ -389,13 +387,13 @@ EXAMPLES
   $ jamsocket service connect my-service -u my-user -a '{"foo":"my-json-data"}'
 ```
 
-## `jamsocket service create NAME`
+## `jamsocket service create SERVICE`
 
 Creates a service
 
 ```
 USAGE
-  $ jamsocket service create [NAME]
+  $ jamsocket service create [SERVICE]
 
 DESCRIPTION
   Creates a service
@@ -404,13 +402,13 @@ EXAMPLES
   $ jamsocket service create my-service
 ```
 
-## `jamsocket service delete NAME`
+## `jamsocket service delete SERVICE`
 
 Deletes a service
 
 ```
 USAGE
-  $ jamsocket service delete [NAME]
+  $ jamsocket service delete [SERVICE]
 
 DESCRIPTION
   Deletes a service
@@ -437,13 +435,13 @@ EXAMPLES
   $ jamsocket service images my-service
 ```
 
-## `jamsocket service info NAME`
+## `jamsocket service info SERVICE`
 
 Gets some information about a service
 
 ```
 USAGE
-  $ jamsocket service info [NAME]
+  $ jamsocket service info [SERVICE]
 
 DESCRIPTION
   Gets some information about a service
@@ -467,102 +465,31 @@ EXAMPLES
   $ jamsocket service list
 ```
 
-## `jamsocket service spawn SERVICE`
-
-Spawns a session backend with the provided service/environment's docker image.
-
-```
-USAGE
-  $ jamsocket service spawn [SERVICE] [-e <value>] [-g <value>] [-l <value>]
-
-ARGUMENTS
-  SERVICE  Name of service/environment to spawn. (Providing the environment is optional if service only has one
-           environment, otherwise it is required)
-
-FLAGS
-  -e, --env=<value>...  optional environment variables to pass to the container
-  -g, --grace=<value>   optional grace period (in seconds) to wait after last connection is closed before shutting down
-                        container (default is 300)
-  -l, --lock=<value>    optional lock to spawn the service with
-
-DESCRIPTION
-  Spawns a session backend with the provided service/environment's docker image.
-
-ALIASES
-  $ jamsocket spawn
-
-EXAMPLES
-  $ jamsocket service spawn my-service
-
-  $ jamsocket service spawn my-service/prod
-
-  $ jamsocket service spawn my-service -e SOME_ENV_VAR=foo -e ANOTHER_ENV_VAR=bar
-
-  $ jamsocket service spawn my-service -g 60
-```
-
 ## `jamsocket service use-image SERVICE`
 
-Sets the image tag or digest to use when spawning a service/environment
+Sets the image tag or digest to use when spawning a service
 
 ```
 USAGE
   $ jamsocket service use-image [SERVICE] -i <value>
 
 ARGUMENTS
-  SERVICE  Name of service/environment whose image should be updated. If only a service is provided, the "default"
-           environment is used.
+  SERVICE  Name of service whose spawning image should be updated.
 
 FLAGS
-  -i, --image=<value>  (required) image tag or digest for the service/environment to use (Run `jamsocket images` for a
-                       list of images you can use.)
+  -i, --image=<value>  (required) image tag or digest for the service to use (Run `jamsocket images` for a list of
+                       images you can use.)
 
 DESCRIPTION
-  Sets the image tag or digest to use when spawning a service/environment
+  Sets the image tag or digest to use when spawning a service
 
 EXAMPLES
   $ jamsocket service use-image my-service -i latest
-
-  $ jamsocket service use-image my-service/prod -i sha256:1234abcd
-```
-
-## `jamsocket spawn SERVICE`
-
-Spawns a session backend with the provided service/environment's docker image.
-
-```
-USAGE
-  $ jamsocket spawn [SERVICE] [-e <value>] [-g <value>] [-l <value>]
-
-ARGUMENTS
-  SERVICE  Name of service/environment to spawn. (Providing the environment is optional if service only has one
-           environment, otherwise it is required)
-
-FLAGS
-  -e, --env=<value>...  optional environment variables to pass to the container
-  -g, --grace=<value>   optional grace period (in seconds) to wait after last connection is closed before shutting down
-                        container (default is 300)
-  -l, --lock=<value>    optional lock to spawn the service with
-
-DESCRIPTION
-  Spawns a session backend with the provided service/environment's docker image.
-
-ALIASES
-  $ jamsocket spawn
-
-EXAMPLES
-  $ jamsocket spawn my-service
-
-  $ jamsocket spawn my-service/prod
-
-  $ jamsocket spawn my-service -e SOME_ENV_VAR=foo -e ANOTHER_ENV_VAR=bar
-
-  $ jamsocket spawn my-service -g 60
 ```
 
 ## `jamsocket terminate BACKENDS`
 
-Terminates one or more backends given the backend name(s).
+Terminates one or more backends given the backend ID(s).
 
 ```
 USAGE
@@ -572,7 +499,7 @@ FLAGS
   -f, --force  whether to force the backend to hard terminate (defaults to false)
 
 DESCRIPTION
-  Terminates one or more backends given the backend name(s).
+  Terminates one or more backends given the backend ID(s).
 
 ALIASES
   $ jamsocket terminate

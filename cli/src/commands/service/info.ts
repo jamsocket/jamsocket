@@ -9,13 +9,13 @@ export default class Create extends Command {
 
   static examples = ['<%= config.bin %> <%= command.id %> my-service']
 
-  static args = [{ name: 'name', required: true }]
+  static args = [{ name: 'service', required: true }]
 
   public async run(): Promise<void> {
     const { args } = await this.parse(Create)
 
     const jamsocket = Jamsocket.fromEnvironment()
-    const info = await jamsocket.serviceInfo(args.name)
+    const info = await jamsocket.serviceInfo(args.service)
 
     const appBaseUrl = jamsocket.api.getAppBaseUrl()
 
