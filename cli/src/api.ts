@@ -83,43 +83,47 @@ export type JamsocketConnectResponse = {
   ready_url: string
 }
 
-// these are public messages that come over the status and status/stream endpoints
+export type PlaneTerminationKind = 'soft' | 'hard'
 export type PlaneTerminationReason =
   | 'swept'
   | 'external'
   | 'key_expired'
   | 'lost'
   | 'startup_timeout'
-export type PlaneTerminationKind = 'soft' | 'hard'
-export type PlaneV2StatusMessage =
-  | { status: 'scheduled'; time: number }
-  | { status: 'loading'; time: number }
-  | { status: 'starting'; time: number }
-  | { status: 'waiting'; time: number }
-  | { status: 'ready'; time: number }
-  | { status: 'terminating'; time: number; termination_reason: PlaneTerminationReason }
-  | { status: 'hard-terminating'; time: number; termination_reason: PlaneTerminationReason }
+
+// these are public messages that come over the status and status/stream endpoints
+export type PublicV2State =
+  | { status: 'scheduled'; time: string }
+  | { status: 'loading'; time: string }
+  | { status: 'starting'; time: string }
+  | { status: 'waiting'; time: string }
+  | { status: 'ready'; time: string }
+  | { status: 'terminating'; time: string; termination_reason: PlaneTerminationReason }
+  | { status: 'hard-terminating'; time: string; termination_reason: PlaneTerminationReason }
   | {
       status: 'terminated'
-      time: number
-      termination_reason?: PlaneTerminationReason
-      termination_kind?: PlaneTerminationKind
-      exit_error?: boolean
+      time: string
+      termination_reason?: PlaneTerminationReason | null
+      termination_kind?: PlaneTerminationKind | null
+      exit_error?: boolean | null
     }
 
-export type PlaneV2State =
-  | { status: 'scheduled' }
-  | { status: 'loading' }
-  | { status: 'starting' }
-  | { status: 'waiting'; address?: string }
-  | { status: 'ready'; address?: string }
-  | { status: 'terminating'; last_status: V2Status; reason: PlaneTerminationReason }
-  | { status: 'hard-terminating'; last_status: V2Status; reason: PlaneTerminationReason }
+// these are v2 states that are returned from authenticated endpoints
+// they are the same as the public v2 statuses except they include the
+// exit_code field instead of exit_error
+export type V2State =
+  | { status: 'scheduled'; time: string }
+  | { status: 'loading'; time: string }
+  | { status: 'starting'; time: string }
+  | { status: 'waiting'; time: string }
+  | { status: 'ready'; time: string }
+  | { status: 'terminating'; time: string; termination_reason: PlaneTerminationReason }
+  | { status: 'hard-terminating'; time: string; termination_reason: PlaneTerminationReason }
   | {
       status: 'terminated'
-      last_status: V2Status
-      reason: PlaneTerminationReason
-      termination: PlaneTerminationKind
+      time: string
+      termination_reason?: PlaneTerminationReason | null
+      termination_kind?: PlaneTerminationKind | null
       exit_code?: number | null
     }
 
@@ -188,13 +192,12 @@ export interface SpawnResult {
 }
 
 export type BackendWithStatus = {
-  name: string
+  id: string
   created_at: string
   service_name: string
   cluster_name: string
   account_name: string
-  status?: V2Status
-  status_timestamp?: string
+  status?: V2State
   key?: string
 }
 
@@ -206,18 +209,13 @@ export interface TerminateResult {
   status: 'ok'
 }
 
-export interface BackendV2Status {
-  value: PlaneV2State
-  timestamp: string
-}
-
 export interface BackendInfoResult {
-  name: string
+  id: string
   created_at: string
   service_name: string
   cluster_name: string
   account_name: string
-  statuses: BackendV2Status[]
+  statuses: V2State[]
   image_digest: string
   key?: string | null
   environment_name?: string | null
@@ -569,7 +567,7 @@ export class JamsocketApi {
 
   public streamStatus(
     backend: string,
-    callback: (statusMessage: PlaneV2StatusMessage) => void,
+    callback: (statusMessage: PublicV2State) => void,
     config?: JamsocketConfig,
   ): EventStreamReturn {
     const url = `/v2/backend/${backend}/status/stream`
@@ -580,9 +578,9 @@ export class JamsocketApi {
     return this.makeStreamRequest(url, null, wrappedCallback, config)
   }
 
-  public async status(backend: string, config?: JamsocketConfig): Promise<PlaneV2StatusMessage> {
+  public async status(backend: string, config?: JamsocketConfig): Promise<PublicV2State> {
     const url = `/v2/backend/${backend}/status`
-    return this.makeRequest<PlaneV2StatusMessage>(url, HttpMethod.Get, undefined, undefined, config)
+    return this.makeRequest<PublicV2State>(url, HttpMethod.Get, undefined, undefined, config)
   }
 
   public async terminate(

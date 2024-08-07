@@ -4,7 +4,7 @@ import { Jamsocket } from '../../jamsocket'
 import { formatDistanceToNow } from 'date-fns'
 import prettyBytes from '../../lib/pretty-bytes'
 import { blue, lightBlue, lightMagenta, lightGreen } from '../../lib/formatting'
-import { PlaneV2State } from '../../api'
+import { V2State } from '../../api'
 
 export default class Info extends Command {
   static description = 'Retrieves information about a backend given a Backend ID.'
@@ -20,7 +20,7 @@ export default class Info extends Command {
 
     const appBaseUrl = jamsocket.api.getAppBaseUrl()
 
-    this.log(chalk.bold`Info for backend: ${lightMagenta(info.name)}`)
+    this.log(chalk.bold`Info for backend: ${lightMagenta(info.id)}`)
     this.log(
       `created:      ${blue(info.created_at)} (${formatDistanceToNow(new Date(info.created_at))} ago)`,
     )
@@ -32,23 +32,21 @@ export default class Info extends Command {
     if (info.environment_name && info.environment_name !== 'default')
       this.log(`environment:  ${blue(info.environment_name)}`)
     if (info.max_mem_bytes) this.log(`mem usage:    ${blue(prettyBytes(info.max_mem_bytes))}`)
-    this.log(`dashboard:    ${lightGreen(`${appBaseUrl}/backend/${info.name}`)}`)
+    this.log(`dashboard:    ${lightGreen(`${appBaseUrl}/backend/${info.id}`)}`)
     this.log()
     this.log(chalk.bold`Statuses:`)
     if (info.statuses.length === 0) {
       this.log('backend has no statuses')
     } else {
-      info.statuses.sort((a, b) => (a.timestamp > b.timestamp ? 1 : -1))
+      info.statuses.sort((a, b) => (a.time > b.time ? 1 : -1))
       for (const status of info.statuses) {
-        this.log(
-          `${status.timestamp}  ${lightBlue(status.value.status)} ${formatStatusMeta(status.value)}`,
-        )
+        this.log(`${status.time}  ${lightBlue(status.status)} ${formatStatusMeta(status)}`)
       }
     }
   }
 }
 
-function formatStatusMeta(value: PlaneV2State): string {
+function formatStatusMeta(value: V2State): string {
   const meta: string[] = []
   if (
     value.status === 'scheduled' ||
@@ -60,10 +58,10 @@ function formatStatusMeta(value: PlaneV2State): string {
     return ''
   }
 
-  meta.push(`reason: ${value.reason}`)
+  meta.push(`reason: ${value.termination_reason}`)
 
   if (value.status === 'terminated') {
-    meta.push(`kind: ${value.termination}`, `exit code: ${value.exit_code ?? '-'}`)
+    meta.push(`kind: ${value.termination_kind}`, `exit code: ${value.exit_code ?? '-'}`)
   }
 
   return `(${meta.join(', ')})`

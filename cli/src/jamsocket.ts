@@ -1,12 +1,4 @@
-import {
-  JamsocketApi,
-  BackendInfoResult,
-  RunningBackendsResult,
-  SpawnRequestBody,
-  SpawnResult,
-  PlaneV2StatusMessage,
-  TerminateResult,
-} from './api'
+import { JamsocketApi } from './api'
 import type {
   ServiceCreateResult,
   ServiceListResult,
@@ -16,6 +8,12 @@ import type {
   EnvironmentUpdateResult,
   JamsocketConnectRequestBody,
   JamsocketConnectResponse,
+  BackendInfoResult,
+  RunningBackendsResult,
+  SpawnRequestBody,
+  SpawnResult,
+  TerminateResult,
+  PublicV2State,
 } from './api'
 import { JamsocketConfig } from './jamsocket-config'
 import { tag as dockerTag, push as dockerPush } from './lib/docker'
@@ -156,13 +154,13 @@ export class Jamsocket {
 
   public streamStatus(
     backend: string,
-    callback: (v: PlaneV2StatusMessage) => void,
+    callback: (v: PublicV2State) => void,
     config?: JamsocketConfig,
   ): EventStreamReturn {
     return this.api.streamStatus(backend, callback, config)
   }
 
-  public status(backend: string, config?: JamsocketConfig): Promise<PlaneV2StatusMessage> {
+  public status(backend: string, config?: JamsocketConfig): Promise<PublicV2State> {
     return this.api.status(backend, config)
   }
 }

@@ -10,14 +10,13 @@ import {
   JamsocketConnectRequestBody,
   V1Status,
   JamsocketConnectResponse,
-  PlaneV2StatusMessage,
   HTTPError,
   V2Status,
   SpawnRequestBody,
 } from '../api'
 import { readRequestBody, createColorGetter, sleep, type Color } from './util'
 import { Logger } from './logger'
-import type { StreamHandle, PlaneConnectResponse } from './plane'
+import type { StreamHandle, PlaneConnectResponse, PlaneV2StatusMessage } from './plane'
 import {
   LocalPlane,
   runPlane,
