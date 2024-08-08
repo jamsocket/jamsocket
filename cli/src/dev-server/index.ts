@@ -13,6 +13,9 @@ import {
   HTTPError,
   V2Status,
   SpawnRequestBody,
+  PublicV2State,
+  PlaneTerminationReason,
+  PlaneTerminationKind,
 } from '../api'
 import { readRequestBody, createColorGetter, sleep, type Color } from './util'
 import { Logger } from './logger'
@@ -474,7 +477,7 @@ class DevServer {
     res.setHeader('Content-Type', 'text/event-stream')
     res.writeHead(200)
     const stream = this.plane.streamStatus(backend, (status) => {
-      const data: PlaneV2StatusMessage = status
+      const data: PublicV2State = getPublicV2State(status)
       res.write(`data:${JSON.stringify(data)}\n\n`)
     })
     await stream.closed
@@ -554,7 +557,7 @@ class DevServer {
       return
     }
 
-    const data: PlaneV2StatusMessage = b.lastStatus
+    const data: PublicV2State = getPublicV2State(b.lastStatus)
     res.setHeader('Access-Control-Allow-Origin', '*')
     res.setHeader('Content-Type', 'application/json')
     res.writeHead(200)
@@ -808,4 +811,37 @@ function translateStatusToV1(
 
 function isPreterminatingStatus(status: V2Status): boolean {
   return !['terminating', 'hard-terminating', 'terminated'].includes(status)
+}
+
+// NOTE: this function's implementation is a little funny because it's
+// trying to get TypeScript to correctly infer types
+type TerminatedV2State = {
+  status: 'terminated'
+  time: string
+  exit_error?: boolean
+  termination_reason?: PlaneTerminationReason
+  termination_kind?: PlaneTerminationKind
+}
+function getPublicV2State(msg: PlaneV2StatusMessage): PublicV2State {
+  const time = new Date(msg.time).toISOString()
+
+  if (msg.status === 'scheduled') return { status: msg.status, time }
+  if (msg.status === 'loading') return { status: msg.status, time }
+  if (msg.status === 'starting') return { status: msg.status, time }
+  if (msg.status === 'waiting') return { status: msg.status, time }
+  if (msg.status === 'ready') return { status: msg.status, time }
+  if (msg.status === 'terminating')
+    return { status: msg.status, time, termination_reason: msg.termination_reason }
+  if (msg.status === 'hard-terminating')
+    return { status: msg.status, time, termination_reason: msg.termination_reason }
+
+  // only "terminated" is left
+  const exit_error = msg.exit_error
+  const termination_kind = msg.termination_kind
+  const termination_reason = msg.termination_reason
+  const v2State: TerminatedV2State = { status: msg.status, time }
+  if (exit_error) v2State.exit_error = exit_error
+  if (termination_kind) v2State.termination_kind = termination_kind
+  if (termination_reason) v2State.termination_reason = termination_reason
+  return v2State
 }

@@ -110,7 +110,7 @@ export type PublicV2State =
 
 // these are v2 states that are returned from authenticated endpoints
 // they are the same as the public v2 statuses except they include the
-// exit_code field instead of exit_error
+// exit_code field instead of exit_error and a last_status field
 export type V2State =
   | { status: 'scheduled'; time: string }
   | { status: 'loading'; time: string }
@@ -125,6 +125,7 @@ export type V2State =
       termination_reason?: PlaneTerminationReason | null
       termination_kind?: PlaneTerminationKind | null
       exit_code?: number | null
+      last_status: V2Status
     }
 
 export type UpdateEnvironmentBody = {
