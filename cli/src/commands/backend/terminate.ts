@@ -1,6 +1,7 @@
 import { Command, Flags } from '@oclif/core'
 import { Jamsocket } from '../../jamsocket'
 import { lightMagenta } from '../../lib/formatting'
+import { HTTPError } from '../../api'
 
 export default class Terminate extends Command {
   static description = 'Terminates one or more backends given the backend ID(s).'
@@ -26,8 +27,13 @@ export default class Terminate extends Command {
     for (const backend of backends) {
       try {
         await jamsocket.terminate(backend, flags.force)
-      } catch {
-        this.warn(
+      } catch (e) {
+        if (e instanceof HTTPError && e.code === 'BackendNotRunning') {
+          this.warn(`Backend ${lightMagenta(backend)} has already terminated. Skipping...`)
+          continue
+        }
+
+        this.error(
           `Failed to request termination for backend: ${lightMagenta(backend)}. Skipping...`,
         )
         continue
