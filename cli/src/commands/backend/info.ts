@@ -58,10 +58,13 @@ function formatStatusMeta(value: V2State): string {
     return ''
   }
 
-  meta.push(`reason: ${value.termination_reason}`)
+  meta.push(`reason: ${value.termination_reason ?? 'none'}`)
 
   if (value.status === 'terminated') {
-    meta.push(`kind: ${value.termination_kind}`, `exit code: ${value.exit_code ?? '-'}`)
+    meta.push(
+      `kind: ${value.termination_kind ?? 'none'}`,
+      `exit code: ${value.exit_code ?? 'none'}`,
+    )
   }
 
   return `(${meta.join(', ')})`
