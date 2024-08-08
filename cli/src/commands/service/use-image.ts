@@ -3,19 +3,16 @@ import { Jamsocket } from '../../jamsocket'
 import { blue, lightBlue, lightMagenta } from '../../lib/formatting'
 
 export default class UseImage extends Command {
-  static description = 'Sets the image tag or digest to use when spawning a service/environment'
+  static description = 'Sets the image tag or digest to use when spawning a service'
 
-  static examples = [
-    '<%= config.bin %> <%= command.id %> my-service -i latest',
-    '<%= config.bin %> <%= command.id %> my-service/prod -i sha256:1234abcd',
-  ]
+  static examples = ['<%= config.bin %> <%= command.id %> my-service -i latest']
 
   static flags = {
     image: Flags.string({
       char: 'i',
       required: true,
       description:
-        'image tag or digest for the service/environment to use (Run `jamsocket images` for a list of images you can use.)',
+        'image tag or digest for the service to use (Run `jamsocket images` for a list of images you can use.)',
     }),
   }
 
@@ -23,8 +20,7 @@ export default class UseImage extends Command {
     {
       name: 'service',
       required: true,
-      description:
-        'Name of service/environment whose image should be updated. If only a service is provided, the "default" environment is used.',
+      description: 'Name of service whose spawning image should be updated.',
     },
   ]
 
@@ -35,19 +31,18 @@ export default class UseImage extends Command {
 
     const parts = args.service.split('/')
     if (parts.length > 2 || parts[0] === '' || parts[1] === '') {
-      this.error(`Invalid service/environment name: ${args.service}`)
+      this.error(`Invalid service name: ${args.service}`)
     }
 
     const service = parts[0]
-    const environment = parts[1] ?? 'default'
+    const environment = parts[1] ?? null
 
     await jamsocket.updateEnvironment(service, environment, flags.image)
 
+    const fullServiceName = environment ? `${service}/${environment}` : service
+    this.log(`Updated ${lightMagenta(fullServiceName)} to use image ${blue(flags.image)}`)
     this.log(
-      `Updated ${lightMagenta(`${service}/${environment}`)} to use image ${blue(flags.image)}`,
-    )
-    this.log(
-      `Run ${lightBlue(`jamsocket service info ${service}`)} for more information about your service and its environments.`,
+      `Run ${lightBlue(`jamsocket service info ${service}`)} for more information about your service.`,
     )
   }
 }

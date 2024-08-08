@@ -2,12 +2,13 @@ import { spawn, type ChildProcessWithoutNullStreams, spawnSync } from 'child_pro
 import readline from 'readline'
 import chalk from 'chalk'
 import EventSource from 'eventsource'
-import {
-  HTTPError,
+import { HTTPError } from '../api'
+import type {
+  PlaneTerminationKind,
+  PlaneTerminationReason,
   V2Status,
   JamsocketConnectRequestBody,
   ConnectResourceLimits,
-  PlaneV2StatusMessage,
 } from '../api'
 import { sleep } from './util'
 import { spawnDockerSync } from '../lib/docker'
@@ -50,6 +51,22 @@ export type PlaneConnectResponse = {
   status_url: string
   status: V2Status
 }
+
+export type PlaneV2StatusMessage =
+  | { status: 'scheduled'; time: number }
+  | { status: 'loading'; time: number }
+  | { status: 'starting'; time: number }
+  | { status: 'waiting'; time: number }
+  | { status: 'ready'; time: number }
+  | { status: 'terminating'; time: number; termination_reason: PlaneTerminationReason }
+  | { status: 'hard-terminating'; time: number; termination_reason: PlaneTerminationReason }
+  | {
+      status: 'terminated'
+      time: number
+      termination_reason?: PlaneTerminationReason | null
+      termination_kind?: PlaneTerminationKind | null
+      exit_error?: boolean
+    }
 
 export type StreamHandle = {
   closed: Promise<void>

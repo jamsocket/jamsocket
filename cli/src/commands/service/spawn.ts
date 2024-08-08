@@ -6,9 +6,10 @@ import { blue, lightBlue, lightGreen } from '../../lib/formatting'
 
 export default class Spawn extends Command {
   static aliases = ['spawn']
+  static hidden = true
 
   static description =
-    "Spawns a session backend with the provided service/environment's docker image."
+    "Spawns a session backend for the provided service. (NOTE: this command is deprecated, please use the 'connect' command instead.)"
 
   static examples = [
     '<%= config.bin %> <%= command.id %> my-service',
@@ -25,15 +26,14 @@ export default class Spawn extends Command {
       description:
         'optional grace period (in seconds) to wait after last connection is closed before shutting down container (default is 300)',
     }),
-    lock: Flags.string({ char: 'l', description: 'optional lock to spawn the service with' }),
+    lock: Flags.string({ char: 'l', description: 'optional lock/key to spawn the service with' }),
   }
 
   static args = [
     {
       name: 'service',
       required: true,
-      description:
-        'Name of service/environment to spawn. (Providing the environment is optional if service only has one environment, otherwise it is required)',
+      description: 'Name of service to spawn.',
     },
   ]
 
@@ -44,7 +44,7 @@ export default class Spawn extends Command {
 
     const parts = args.service.split('/')
     if (parts.length > 2 || parts[0] === '' || parts[1] === '') {
-      this.error(`Invalid service/environment name: ${args.service}`)
+      this.error(`Invalid service name: ${args.service}`)
     }
 
     const service = parts[0]
@@ -56,7 +56,7 @@ export default class Spawn extends Command {
     const appBaseUrl = jamsocket.api.getAppBaseUrl()
 
     this.log(lightBlue('Backend spawned!'))
-    this.log(chalk.bold`backend name:   `, blue(responseBody.name))
+    this.log(chalk.bold`backend ID:     `, blue(responseBody.name))
     this.log(chalk.bold`backend status: `, blue(responseBody.status ?? '-'))
     this.log(chalk.bold`backend url:    `, blue(responseBody.url))
     this.log(chalk.bold`status url:     `, blue(responseBody.status_url))

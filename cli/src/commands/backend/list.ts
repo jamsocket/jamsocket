@@ -22,7 +22,7 @@ export default class List extends Command {
     CliUx.ux.table<BackendWithStatus>(
       responseBody.running_backends,
       {
-        name: { header: 'Name' },
+        id: { header: 'ID' },
         created_at: {
           header: 'Created',
           get: (row) => `${formatDistanceToNow(new Date(row.created_at))} ago`,
@@ -33,7 +33,7 @@ export default class List extends Command {
           header: 'Status',
           get: (row) => {
             return row.status
-              ? `${row.status} (${formatDistanceToNow(new Date(row.status_timestamp!))})`
+              ? `${row.status.status} (${formatDistanceToNow(new Date(row.status.time))})`
               : '-'
           },
         },

@@ -9,13 +9,13 @@ export default class Create extends Command {
 
   static examples = ['<%= config.bin %> <%= command.id %> my-service']
 
-  static args = [{ name: 'name', required: true }]
+  static args = [{ name: 'service', required: true }]
 
   public async run(): Promise<void> {
     const { args } = await this.parse(Create)
 
     const jamsocket = Jamsocket.fromEnvironment()
-    const serviceInfo = await jamsocket.serviceInfo(args.name)
+    const serviceInfo = await jamsocket.serviceInfo(args.service)
 
     const lastImgUpload = serviceInfo.last_image_upload_time
       ? formatDistanceToNow(new Date(serviceInfo.last_image_upload_time))
@@ -67,8 +67,8 @@ export default class Create extends Command {
       return
     }
 
-    await jamsocket.serviceDelete(args.name)
+    await jamsocket.serviceDelete(args.service)
 
-    this.log(`Deleted service: ${args.name}`)
+    this.log(`Deleted service: ${args.service}`)
   }
 }
