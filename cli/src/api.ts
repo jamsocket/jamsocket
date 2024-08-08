@@ -447,7 +447,7 @@ export class JamsocketApi {
     serviceName: string,
     config: JamsocketConfig,
   ): Promise<ServiceImageResult> {
-    const url = `/v2/service/${accountName}/${serviceName}/image-name`
+    const url = `/service/${accountName}/${serviceName}/image-name`
     return this.makeAuthenticatedRequest<ServiceImageResult>(url, HttpMethod.Get, config)
   }
 
