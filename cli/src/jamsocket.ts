@@ -130,14 +130,12 @@ export class Jamsocket {
 
   public updateEnvironment(
     service: string,
-    environment: string,
-    imageTag?: string,
-    newName?: string,
+    environment: string | null,
+    imageTag: string,
   ): Promise<EnvironmentUpdateResult> {
     const config = this.expectAuthorized()
     return this.api.updateEnvironment(config.getAccount(), service, environment, config, {
       image_tag: imageTag,
-      name: newName,
     })
   }
 

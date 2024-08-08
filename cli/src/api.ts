@@ -124,8 +124,7 @@ export type PlaneV2State =
     }
 
 export type UpdateEnvironmentBody = {
-  name?: string
-  image_tag?: string
+  image_tag: string
 }
 
 export interface ServiceImageResult {
@@ -488,11 +487,16 @@ export class JamsocketApi {
   public updateEnvironment(
     accountName: string,
     service: string,
-    environment: string,
+    environment: string | null,
     config: JamsocketConfig,
     body: UpdateEnvironmentBody,
   ): Promise<EnvironmentUpdateResult> {
-    const url = `/v2/service-env/${accountName}/${service}/${environment}/update`
+    let url = `/v2/service/${accountName}/${service}`
+    if (environment) {
+      url += `/${environment}`
+    }
+    url += '/update'
+
     return this.makeAuthenticatedRequest<EnvironmentUpdateResult>(
       url,
       HttpMethod.Post,

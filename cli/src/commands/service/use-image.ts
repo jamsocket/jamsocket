@@ -35,11 +35,11 @@ export default class UseImage extends Command {
     }
 
     const service = parts[0]
-    const environment = parts[1] ?? 'default'
+    const environment = parts[1] ?? null
 
     await jamsocket.updateEnvironment(service, environment, flags.image)
 
-    const fullServiceName = environment === 'default' ? service : `${service}/${environment}`
+    const fullServiceName = environment ? `${service}/${environment}` : service
     this.log(`Updated ${lightMagenta(fullServiceName)} to use image ${blue(flags.image)}`)
     this.log(
       `Run ${lightBlue(`jamsocket service info ${service}`)} for more information about your service.`,
