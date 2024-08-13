@@ -18,16 +18,16 @@ npm install @jamsocket/types
 Here's an example of how different parts of Jamsocket's client libraries work together.
 
 ```tsx filename="server.tsx"
-import Jamsocket from '@jamsocket/server'
+import { Jamsocket } from '@jamsocket/server'
 
-const jamsocket = Jamsocket.init({
+const jamsocket = new Jamsocket({
    account: '[YOUR ACCOUNT]',
    token: '[YOUR TOKEN]',
    service: '[YOUR SERVICE]',
    // during development, you can simply pass { dev: true }
 })
 
-const spawnResult = await jamsocket.spawn() // returns an instance of SpawnResult
+const connectResponse = await jamsocket.connect() // returns an instance of ConnectResponse
 ```
 
 ```tsx filename="client.tsx"
@@ -38,8 +38,8 @@ import {
 
 function Root() {
   return(
-    <SessionBackendProvider spawnResult={spawnResult}>
-      <SocketIOProvider url={spawnResult.url}>
+    <SessionBackendProvider connectResponse={connectResponse}>
+      <SocketIOProvider url={connectResponse.url}>
         <MyComponent />
       </SocketIOProvider>
     </SessionBackendProvider>

@@ -18,29 +18,28 @@ npm install @jamsocket/socketio
 Here's an example of how different parts of Jamsocket's client libraries work together.
 
 ```tsx filename="server.tsx"
-import Jamsocket from '@jamsocket/server'
+import { Jamsocket } from '@jamsocket/server'
 
-const jamsocket = Jamsocket.init({
+const jamsocket = new Jamsocket({
    account: '[YOUR ACCOUNT]',
    token: '[YOUR TOKEN]',
    service: '[YOUR SERVICE]',
    // during development, you can simply pass { dev: true }
 })
 
-const spawnResult = await jamsocket.spawn() // returns an instance of SpawnResult
+const connectResponse = await jamsocket.connect() // returns an instance of ConnectResponse
 ```
 
 ```tsx filename="client.tsx"
 import {
-  type SpawnResult,
   SessionBackendProvider, SocketIOProvider,
   useEventListener, useSend, useReady
 } from '@jamsocket/socketio'
 
 function Root() {
   return(
-    <SessionBackendProvider spawnResult={spawnResult}>
-      <SocketIOProvider url={spawnResult.url}>
+    <SessionBackendProvider connectResponse={connectResponse}>
+      <SocketIOProvider url={connectResponse.url}>
         <MyComponent />
       </SocketIOProvider>
     </SessionBackendProvider>
@@ -69,7 +68,7 @@ function MyComponent() {
 
 ### `SocketIOProvider`
 
-The `SocketIOProvider` uses the url returned from the `spawn` function to connect to a SocketIO server running in your session backend.
+The `SocketIOProvider` uses the url returned from the `connect` function to connect to a SocketIO server running in your session backend.
 
 Using the `SocketIOProvider` lets you use the React hooks in `@jamsocket/socketio`. It must be used in conjunction with `@jamsocket/server` and `@jamsocket/react` in order to properly access the session backend.
 
@@ -79,10 +78,10 @@ The `SocketIOProvider` must be a child of the `SessionBackendProvider` because i
 import { SessionBackendProvider, type SpawnResult } from '@jamsocket/react'
 import { SocketIOProvider } from '@jamsocket/socketio'
 
-export default function HomeContainer({ spawnResult }: { spawnResult: SpawnResult }) {
+export default function HomeContainer({ connectResponse }: { connectResponse: ConnectResponse }) {
   return (
-    <SessionBackendProvider spawnResult={spawnResult}>
-      <SocketIOProvider url={spawnResult.url}>
+    <SessionBackendProvider connectResponse={connectResponse}>
+      <SocketIOProvider url={connectResponse.url}>
           <Home />
       </SocketIOProvider>
     </SessionBackendProvider>

@@ -18,25 +18,25 @@ npm install @jamsocket/react
 Here's an example of how different parts of Jamsocket's client libraries work together.
 
 ```tsx filename="server.tsx"
-import Jamsocket from '@jamsocket/server'
+import { Jamsocket } from '@jamsocket/server'
 
-const jamsocket = Jamsocket.init({
+const jamsocket = new Jamsocket({
    account: '[YOUR ACCOUNT]',
    token: '[YOUR TOKEN]',
    service: '[YOUR SERVICE]',
    // during development, you can simply pass { dev: true }
 })
 
-const spawnResult = await jamsocket.spawn() // returns an instance of SpawnResult
+const connectResponse = await jamsocket.connect() // returns an instance of ConnectResponse
 ```
 
 ```tsx filename="client.tsx"
-import { type SpawnResult, SessionBackendProvider, useReady } from '@jamsocket/react'
+import { type ConnectResponse, SessionBackendProvider, useReady } from '@jamsocket/react'
 
 function Root() {
   return(
-    <SessionBackendProvider spawnResult={spawnResult}>
-      <MyComponent sessionBackendUrl={spawnResult.url} />
+    <SessionBackendProvider connectResponse={connectResponse}>
+      <MyComponent sessionBackendUrl={connectResponse.url} />
     </SessionBackendProvider>
   )
 }
@@ -61,14 +61,14 @@ function MyComponent({ sessionBackendUrl }) {
 ### `SessionBackendProvider`
 Wrap the root of your project with the `SessionBackendProvider` so that the children components can utilize the React hooks.
 
-The `SessionBackendProvider` must be used in conjunction with `@jamsocket/server` in order to access the spawn result returned by the `spawn` function.
+The `SessionBackendProvider` must be used in conjunction with `@jamsocket/server` in order to access the connect response returned by the `connect` function.
 
 ```tsx
-import { SessionBackendProvider, type SpawnResult } from '@jamsocket/react'
+import { SessionBackendProvider, type ConnectResponse } from '@jamsocket/react'
 
-export default function HomeContainer({ spawnResult }: { spawnResult: SpawnResult }) {
+export default function HomeContainer({ connectResponse }: { connectResponse: ConnectResponse }) {
   return (
-    <SessionBackendProvider spawnResult={spawnResult}>
+    <SessionBackendProvider connectResponse={connectResponse}>
         <Home />
     </SessionBackendProvider>
   )
