@@ -8,13 +8,14 @@
     "packages/typescript/client",
     "packages/typescript/server",
     "packages/typescript/react",
-    "packages/typescript/socketio"
+    "packages/typescript/socketio",
+    "packages/typescript/types"
   ],
   "scripts": {
-    "clean": "npm run clean -w packages/typescript/client -w packages/typescript/server -w packages/typescript/react -w packages/typescript/socketio",
+    "clean": "npm run clean -w packages/typescript/types -w packages/typescript/client -w packages/typescript/server -w packages/typescript/react -w packages/typescript/socketio",
     "postinstall": "npm run build",
-    "build": "npm run build -w packages/typescript/client -w packages/typescript/server -w packages/typescript/react -w packages/typescript/socketio",
-    "format": "npm run format -w packages/typescript/client -w packages/typescript/server -w packages/typescript/react -w packages/typescript/socketio",
+    "build": "npm run build -w packages/typescript/types -w packages/typescript/client -w packages/typescript/server -w packages/typescript/react -w packages/typescript/socketio",
+    "format": "npm run format -w packages/typescript/types -w packages/typescript/client -w packages/typescript/server -w packages/typescript/react -w packages/typescript/socketio",
     "set-js-versions": "ts-node packages/scripts/set-js-versions.ts"
   },
   "license": "MIT",

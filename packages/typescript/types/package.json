@@ -1,5 +1,5 @@
 {
-  "name": "@jamsocket/server",
+  "name": "@jamsocket/types",
   "scripts": {
     "build": "tsup",
     "clean": "rm -rf dist",
@@ -13,13 +13,10 @@
   "exports": {
     ".": {
       "import": {
-        "types": "./dist/main.d.mts",
-        "default": "./dist/main.mjs"
+        "types": "./dist/main.d.mts"
       },
       "require": {
-        "types": "./dist/main.d.ts",
-        "module": "./dist/main.mjs",
-        "default": "./dist/main.js"
+        "types": "./dist/main.d.ts"
       }
     }
   },
@@ -31,14 +28,10 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/jamsocket/jamsocket.git",
-    "directory": "packages/typescript/server"
+    "directory": "packages/typescript/types"
   },
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/jamsocket/jamsocket/issues"
-  },
-  "dependencies": {
-    "@jamsocket/types": "^0.2.5",
-    "isomorphic-fetch": "^3.0.0"
   }
 }

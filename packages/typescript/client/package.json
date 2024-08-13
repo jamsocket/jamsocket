@@ -36,5 +36,8 @@
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/jamsocket/jamsocket/issues"
+  },
+  "dependencies": {
+    "@jamsocket/types": "^0.2.5"
   }
 }

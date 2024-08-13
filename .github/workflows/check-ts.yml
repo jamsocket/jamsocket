@@ -33,3 +33,7 @@ jobs:
     - name: Check Formatting of Socket.io lib
       run: npx prettier --check "src/**/*.{ts,tsx}"
       working-directory: packages/typescript/socketio/
+
+    - name: Check Formatting of types lib
+      run: npx prettier --check "src/**/*.{ts,tsx}"
+      working-directory: packages/typescript/types/
