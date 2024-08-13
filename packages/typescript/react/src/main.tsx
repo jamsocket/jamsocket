@@ -1,25 +1,24 @@
 import { createContext, useContext, useEffect, useState } from 'react'
-import { type SpawnResult, SessionBackend } from '@jamsocket/client'
+import { type ConnectResponse, SessionBackend } from '@jamsocket/client'
 export * from '@jamsocket/client'
 
 export const SessionBackendContext = createContext<SessionBackend | null>(null)
 
-export function SessionBackendProvider({
-  spawnResult,
-  children,
-}: {
-  spawnResult: SpawnResult
+type SessionBackendProviderProps = {
+  connectResponse: ConnectResponse
   children: React.ReactNode
-}) {
-  const { url, statusUrl } = spawnResult
+}
+
+export function SessionBackendProvider({ connectResponse, children }: SessionBackendProviderProps) {
   const [backend, setBackend] = useState<SessionBackend | null>(null)
 
   useEffect(() => {
-    setBackend(new SessionBackend(url, statusUrl))
+    setBackend(new SessionBackend(connectResponse))
     return () => {
       backend?.destroy()
     }
-  }, [url, statusUrl])
+    // the two pieces of state that, together, uniquely identify a SessionBackend connection
+  }, [connectResponse.url, connectResponse.backend_id])
   return (
     <SessionBackendContext.Provider value={backend}>
       {backend ? children : null}
