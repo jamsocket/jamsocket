@@ -9,8 +9,8 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@jamsocket/server": "0.2.5",
-    "@jamsocket/socketio": "0.2.5",
+    "@jamsocket/server": "1.0.0",
+    "@jamsocket/socketio": "1.0.0",
     "@types/node": "20.1.4",
     "@types/react": "18.2.6",
     "@types/react-dom": "18.2.4",
