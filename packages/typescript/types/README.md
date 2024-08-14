@@ -115,7 +115,7 @@ type BackendStatus =
   | 'terminated'
 
 type TerminationKind = 'soft' | 'hard'
-type TerminationReason = 'swept' | 'external' | 'key_expired' | 'lost' | 'startup_timeout'
+type TerminationReason = 'swept' | 'external' | 'key_expired' | 'lost' | 'startup_timeout' | 'internal-error'
 
 type BackendState =
   | { status: 'scheduled'; time: string }

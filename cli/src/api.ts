@@ -33,6 +33,7 @@ export type V1Status =
   | 'ErrorLoading'
   | 'ErrorStarting'
   | 'TimedOutBeforeReady'
+  | 'Lost'
 
 export type V2Status =
   | 'scheduled'
@@ -90,6 +91,7 @@ export type PlaneTerminationReason =
   | 'key_expired'
   | 'lost'
   | 'startup_timeout'
+  | 'internal-error'
 
 // these are public messages that come over the status and status/stream endpoints
 export type PublicV2State =

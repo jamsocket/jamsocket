@@ -786,6 +786,9 @@ function translateStatusToV1(
       if (plane2StatusMsg.termination_reason === 'external') {
         return 'Terminated'
       }
+      if (plane2StatusMsg.termination_reason === 'internal-error') {
+        return 'Lost'
+      }
       if (
         plane2StatusMsg.termination_reason &&
         ['swept', 'key_expired'].includes(plane2StatusMsg.termination_reason)

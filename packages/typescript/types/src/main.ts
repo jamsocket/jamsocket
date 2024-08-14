@@ -9,7 +9,7 @@ export type BackendStatus =
   | 'terminated'
 
 export type TerminationKind = 'soft' | 'hard'
-export type TerminationReason = 'swept' | 'external' | 'key_expired' | 'lost' | 'startup_timeout'
+export type TerminationReason = 'swept' | 'external' | 'key_expired' | 'lost' | 'startup_timeout' | 'internal-error'
 
 export type BackendState =
   | { status: 'scheduled'; time: string }
