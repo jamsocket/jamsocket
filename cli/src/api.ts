@@ -91,7 +91,7 @@ export type PlaneTerminationReason =
   | 'key_expired'
   | 'lost'
   | 'startup_timeout'
-  | 'internal-error'
+  | 'internal_error'
 
 // these are public messages that come over the status and status/stream endpoints
 export type PublicV2State =

@@ -15,7 +15,7 @@ export type TerminationReason =
   | 'key_expired'
   | 'lost'
   | 'startup_timeout'
-  | 'internal-error'
+  | 'internal_error'
 
 export type BackendState =
   | { status: 'scheduled'; time: string }

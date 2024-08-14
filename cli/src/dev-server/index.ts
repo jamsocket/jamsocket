@@ -786,7 +786,7 @@ function translateStatusToV1(
       if (plane2StatusMsg.termination_reason === 'external') {
         return 'Terminated'
       }
-      if (plane2StatusMsg.termination_reason === 'internal-error') {
+      if (plane2StatusMsg.termination_reason === 'internal_error') {
         return 'Lost'
       }
       if (
