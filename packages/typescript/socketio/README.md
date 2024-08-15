@@ -72,7 +72,7 @@ The `SocketIOProvider` uses the url returned from the `connect` function to conn
 
 Using the `SocketIOProvider` lets you use the React hooks in `@jamsocket/socketio`. It must be used in conjunction with `@jamsocket/server` and `@jamsocket/react` in order to properly access the session backend.
 
-The `SocketIOProvider` must be a child of the `SessionBackendProvider` because it depends on the SessionBackendProvider's context.
+<Callout>The `SocketIOProvider` must be a child of the `SessionBackendProvider` because it depends on the SessionBackendProvider's context.</Callout>
 
 ```tsx
 import { SessionBackendProvider, type SpawnResult } from '@jamsocket/react'
@@ -111,4 +111,4 @@ useEventListener<T>('event', (data: T) => {
 
 ### Other exports
 
-The `@jamsocket/socketio` package also re-exports all of the `@jamsocket/client` and `@jamsocket/react` packages' exports, including their React providers, hooks, classes, and types.
+The `@jamsocket/socketio` package also re-exports all of the `@jamsocket/client`, `@jamsocket/react`, and `@jamsocket/types` packages' exports, including their React providers, hooks, classes, and types.

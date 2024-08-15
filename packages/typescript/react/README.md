@@ -61,7 +61,7 @@ function MyComponent({ sessionBackendUrl }) {
 ### `SessionBackendProvider`
 Wrap the root of your project with the `SessionBackendProvider` so that the children components can utilize the React hooks.
 
-The `SessionBackendProvider` must be used in conjunction with `@jamsocket/server` in order to access the connect response returned by the `connect` function.
+<Callout>The `SessionBackendProvider` must be used in conjunction with `@jamsocket/server` in order to access the connect response returned by the `connect` function.</Callout>
 
 ```tsx
 import { SessionBackendProvider, type ConnectResponse } from '@jamsocket/react'
@@ -85,4 +85,4 @@ const isReady = useReady()
 
 ### Other exports
 
-The `@jamsocket/react` package also re-exports all of the `@jamsocket/client` package's exports, including classes and types.
+The `@jamsocket/react` package also re-exports all of the `@jamsocket/client` and `@jamsocket/types` packages' exports, including classes and types.
