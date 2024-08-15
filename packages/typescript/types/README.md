@@ -2,9 +2,9 @@
 
 [![GitHub Repo stars](https://img.shields.io/github/stars/jamsocket/jamsocket?style=social)](https://github.com/jamsocket/jamsocket)
 [![Chat on Discord](https://img.shields.io/discord/939641163265232947)](https://discord.gg/N5sEpsuhh9)
-[![npm](https://img.shields.io/npm/v/@jamsocket/server)](https://www.npmjs.com/package/@jamsocket/server)
+[![npm](https://img.shields.io/npm/v/@jamsocket/types)](https://www.npmjs.com/package/@jamsocket/types)
 
-JavaScript/TypeScript library for spawning session backends server-side.
+Types for the Jamsocket JavaScript/TypeScript client libraries. Normally this package doesn't need to be included as a dependency as these types are re-exported by `@jamsocket/server`, `@jamsocket/client`, `@jamsocket/react` and `@jamsocket/socketio`.
 
 Read the [docs here](https://docs.jamsocket.com)
 
