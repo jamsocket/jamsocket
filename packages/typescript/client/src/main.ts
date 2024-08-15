@@ -1,19 +1,19 @@
-export type Status = string
-export type StatusStreamEvent = { state: Status; time: string }
-export type SpawnResult = {
-  url: string
-  name: string
-  readyUrl: string
-  statusUrl: string
-  spawned: boolean
-  bearerToken?: string
-}
-
-const ALIVE_STATUSES = ['Loading', 'Starting', 'Ready']
+import { BackendStatus, BackendState, ConnectResponse } from '@jamsocket/types'
+export type {
+  BackendStatus,
+  TerminationKind,
+  TerminationReason,
+  BackendState,
+  ConnectResponse,
+  ConnectRequest,
+} from '@jamsocket/types'
 
 export class SessionBackend {
+  readonly url: string
+  readonly statusUrl: string
+
   private streamReader: ReadableStreamDefaultReader | null = null
-  private statusesSeen: Set<Status> = new Set()
+  private statusesSeen: Set<BackendStatus> = new Set()
 
   private fetchingStatusStream: boolean = false
 
@@ -26,12 +26,12 @@ export class SessionBackend {
   public onTerminatedPromise: Promise<void>
   private _onTerminatedResolve!: () => void
 
-  private _onStatus: ((msg: StatusStreamEvent) => void)[] = []
+  private _onStatus: ((msg: BackendState) => void)[] = []
 
-  constructor(
-    readonly url: string,
-    readonly statusUrl: string,
-  ) {
+  constructor(connectResponse: ConnectResponse) {
+    this.url = connectResponse.url
+    this.statusUrl = connectResponse.status_url
+
     this.onReadyPromise = new Promise((resolve) => {
       this._onReadyResolve = resolve
     })
@@ -58,8 +58,8 @@ export class SessionBackend {
   private subscribeToStatusStream = async () => {
     const msg = await this.status()
 
-    if (!ALIVE_STATUSES.includes(msg.state)) {
-      console.warn(`Jamsocket status is a Terminal state: ${msg.state}`)
+    if (msg.status === 'terminated') {
+      console.warn('Session backend is terminated')
       this._setTerminated()
       this._onStatus.forEach((cb) => cb(msg))
       return
@@ -98,7 +98,7 @@ export class SessionBackend {
           // remove the 'data: ' prefix
           const text = line.slice(5).trim()
           try {
-            return JSON.parse(text) as StatusStreamEvent
+            return JSON.parse(text) as BackendState
           } catch (e) {
             console.error(`Error parsing status stream message as JSON: "${text}"`, e)
             return null
@@ -109,12 +109,12 @@ export class SessionBackend {
       for (const msg of messages) {
         // keep track of the statuses we've seen since we might have just resubscribed
         // to the status stream and are seeing some of the statuses we've already seen again
-        if (this.statusesSeen.has(msg.state)) continue
-        this.statusesSeen.add(msg.state)
+        if (this.statusesSeen.has(msg.status)) continue
+        this.statusesSeen.add(msg.status)
 
-        console.log(`Jamsocket session backend status is ${msg.state}`)
-        if (msg.state === 'Ready') this._setReady()
-        if (!ALIVE_STATUSES.includes(msg.state)) this._setTerminated()
+        console.log(`Jamsocket session backend status is ${msg.status}`)
+        if (msg.status === 'ready') this._setReady()
+        if (msg.status === 'terminated') this._setTerminated()
         this._onStatus.forEach((cb) => cb(msg))
       }
       if (this.isTerminated()) this.destroyStatusStream()
@@ -127,7 +127,7 @@ export class SessionBackend {
     }
   }
 
-  public async status(): Promise<StatusStreamEvent> {
+  public async status(): Promise<BackendState> {
     let res = await fetch(this.statusUrl, { mode: 'cors', cache: 'no-store' })
     // if the first request fails, retry once
     if (!res.ok) {
@@ -140,11 +140,11 @@ export class SessionBackend {
       )
     }
     const text = await res.text()
-    const msg = JSON.parse(text) as StatusStreamEvent
+    const msg = JSON.parse(text) as BackendState
     return msg
   }
 
-  public onStatus(cb: (msg: StatusStreamEvent) => void): () => void {
+  public onStatus(cb: (msg: BackendState) => void): () => void {
     this._onStatus.push(cb)
     return () => {
       this._onStatus = this._onStatus.filter((c) => c !== cb)

@@ -5,12 +5,12 @@ import Header from './Header'
 import Content from './Content'
 import { AvatarList, Spinner, Whiteboard } from './Whiteboard'
 import type { Shape, User } from '../types'
-import { SocketIOProvider, useEventListener, useSend, SessionBackendProvider, useReady, type SpawnResult } from "@jamsocket/socketio"
+import { SocketIOProvider, useEventListener, useSend, SessionBackendProvider, useReady, type ConnectResponse } from "@jamsocket/socketio"
 
-export default function HomeContainer({ spawnResult }: { spawnResult: SpawnResult }) {
+export default function HomeContainer({ connectResponse }: { connectResponse: ConnectResponse }) {
   return (
-    <SessionBackendProvider spawnResult={spawnResult}>
-      <SocketIOProvider url={spawnResult.url}>
+    <SessionBackendProvider connectResponse={connectResponse}>
+      <SocketIOProvider url={connectResponse.url}>
         <Home />
       </SocketIOProvider>
     </SessionBackendProvider>
