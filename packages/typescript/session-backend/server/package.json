@@ -1,0 +1,40 @@
+{
+  "name": "@jamsocket/session-backend",
+  "scripts": {
+    "build": "tsup",
+    "clean": "rm -rf dist",
+    "dev": "tsup --watch",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx}\""
+  },
+  "version": "0.0.5",
+  "description": "A preview of the upcoming Jamsocket Session Backend SDK.",
+  "main": "./dist/main.js",
+  "types": "./dist/main.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/main.d.mts",
+        "default": "./dist/main.mjs"
+      },
+      "require": {
+        "types": "./dist/main.d.ts",
+        "module": "./dist/main.mjs",
+        "default": "./dist/main.js"
+      }
+    }
+  },
+  "files": [
+    "dist/**/*"
+  ],
+  "author": "Taylor Baldwin <taylor@driftingin.space>",
+  "homepage": "https://github.com/jamsocket/jamsocket",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jamsocket/jamsocket.git",
+    "directory": "packages/typescript/session-backend"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jamsocket/jamsocket/issues"
+  }
+}
