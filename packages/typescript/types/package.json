@@ -13,10 +13,13 @@
   "exports": {
     ".": {
       "import": {
-        "types": "./dist/main.d.mts"
+        "types": "./dist/main.d.mts",
+        "default": "./dist/main.mjs"
       },
       "require": {
-        "types": "./dist/main.d.ts"
+        "types": "./dist/main.d.ts",
+        "module": "./dist/main.mjs",
+        "default": "./dist/main.js"
       }
     }
   },

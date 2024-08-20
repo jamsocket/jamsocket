@@ -38,7 +38,6 @@
     "url": "https://github.com/jamsocket/jamsocket/issues"
   },
   "dependencies": {
-    "@jamsocket/types": "1.0.0",
-    "isomorphic-fetch": "^3.0.0"
+    "@jamsocket/types": "1.0.0"
   }
 }

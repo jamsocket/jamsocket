@@ -92,6 +92,8 @@ const jamsocket = new Jamsocket({
 
 The Jamsocket instance includes a `connect` function that you can use to get a connection URL for a session backend. If you provide a `key`, the connect function will either spawn a new backend or return the running backend that holds the provided key if one exists. When generating a connection URL for a backend, you can provide an optional `ConnectRequest` object. It returns a promise, which resolves with a `ConnectResponse`.
 
+If the underlying connect request fails with a non-200 status code, the returned Promise will `reject` with an `HTTPError`.
+
 Learn more about the various options you can pass in a `ConnectRequest` in [our API docs](https://docs.jamsocket.com/platform/reference/v2#get-a-connection-url-for-a-backend).
 
 <Callout>A Jamsocket class should only be instantiated on the server since it takes a Jamsocket Auth Token which must be kept secret.</Callout>
@@ -122,6 +124,50 @@ const connectResponse = await jamsocket.connect({
   user: 'my-user-id', // optional user identifier to be included in request headers to session backend
   auth: { 'my_user_metadata': 'bar' } // optional values to be JSON-serialized and included in request headers to session backend
 })
+```
+
+### `status(backendId)`
+
+The Jamsocket instance includes a `status` function that you can use to get the current status of a backend. It takes a backend ID and returns a `Promise<BackendState>`.
+
+If the underlying status request fails with a non-200 code, the returned Promise will `reject` with an `HTTPError`. This includes if no backend is found with the given ID.
+
+Learn more about the various statuses backends can have in [our API docs](https://docs.jamsocket.com/platform/reference/v2#get-a-backends-current-status).
+
+```ts {8}
+import { Jamsocket } from '@jamsocket/server'
+const jamsocket = new Jamsocket({
+  account: '[YOUR ACCOUNT]',
+  token: '[YOUR TOKEN]',
+  service: '[YOUR SERVICE]',
+})
+
+const backendState = await jamsocket.status(backendId)
+```
+
+### `statusStream(backendId, onStatusCallback)`
+
+The Jamsocket instance includes a `statusStream` function that you can use to stream a backend's status updates. It takes a backend ID and an onStatusCallback (`(backendState: BackendState) => void`), which will be called on each status as it is received. The `statusStream()` function returns a `Promise<UnsubscribeFn>`. The underlying stream is closed when either the backend reaches a `terminated` state or the `UnsubscribeFn` is called. If the underlying stream closes but the backend has not terminated and the `UnsubscribeFn` has not been called, this function will automatically reconnect.
+
+If the underlying status request fails with a non-200 code, the returned Promise will `reject` with an `HTTPError`. This includes if no backend is found with the given ID.
+
+<Callout>The `onStatusCallback` function will be called exactly once for every status the backend has encountered, including statuses from before `statusStream()` was called.</Callout>
+
+Learn more about the various statuses backends can have in [our API docs](https://docs.jamsocket.com/platform/reference/v2#get-a-backends-current-status).
+
+```ts {8-12}
+import { Jamsocket } from '@jamsocket/server'
+const jamsocket = new Jamsocket({
+  account: '[YOUR ACCOUNT]',
+  token: '[YOUR TOKEN]',
+  service: '[YOUR SERVICE]',
+})
+
+const unsubscribe = await jamsocket.statusStream(backendId, (backendState) => {
+  console.log(backendState.status, backendState.time)
+})
+
+unsubscribe()
 ```
 
 ## Types
@@ -185,4 +231,29 @@ type BackendStatus =
   | 'terminating'
   | 'hard-terminating'
   | 'terminated'
+
+type TerminationKind = 'soft' | 'hard'
+type TerminationReason =
+  | 'swept'
+  | 'external'
+  | 'key_expired'
+  | 'lost'
+  | 'startup_timeout'
+  | 'internal_error'
+
+type BackendState =
+  | { status: 'scheduled'; time: string }
+  | { status: 'loading'; time: string }
+  | { status: 'starting'; time: string }
+  | { status: 'waiting'; time: string }
+  | { status: 'ready'; time: string }
+  | { status: 'terminating'; time: string; termination_reason: TerminationReason }
+  | { status: 'hard-terminating'; time: string; termination_reason: TerminationReason }
+  | {
+      status: 'terminated'
+      time: string
+      termination_reason?: TerminationReason | null
+      termination_kind?: TerminationKind | null
+      exit_error?: boolean | null
+    }
 ```
