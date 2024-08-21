@@ -17,8 +17,8 @@ npm install @jamsocket/socketio
 
 Here's an example of how different parts of Jamsocket's client libraries work together.
 
-```tsx filename="server.tsx"
-import { Jamsocket } from '@jamsocket/server'
+```ts filename="server.ts"
+import { Jamsocket } from '@jamsocket/node'
 
 const jamsocket = new Jamsocket({
    account: '[YOUR ACCOUNT]',
@@ -70,7 +70,7 @@ function MyComponent() {
 
 The `SocketIOProvider` uses the url returned from the `connect` function to connect to a SocketIO server running in your session backend.
 
-Using the `SocketIOProvider` lets you use the React hooks in `@jamsocket/socketio`. It must be used in conjunction with `@jamsocket/server` and `@jamsocket/react` in order to properly access the session backend.
+Using the `SocketIOProvider` lets you use the React hooks in `@jamsocket/socketio`. It must be used in conjunction with `@jamsocket/node` and `@jamsocket/react` in order to properly access the session backend.
 
 <Callout>The `SocketIOProvider` must be a child of the `SessionBackendProvider` because it depends on the SessionBackendProvider's context.</Callout>
 

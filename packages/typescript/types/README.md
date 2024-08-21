@@ -4,7 +4,7 @@
 [![Chat on Discord](https://img.shields.io/discord/939641163265232947)](https://discord.gg/N5sEpsuhh9)
 [![npm](https://img.shields.io/npm/v/@jamsocket/types)](https://www.npmjs.com/package/@jamsocket/types)
 
-Types for the Jamsocket JavaScript/TypeScript client libraries. Normally this package doesn't need to be included as a dependency as these types are re-exported by `@jamsocket/server`, `@jamsocket/client`, `@jamsocket/react` and `@jamsocket/socketio`.
+Types for the Jamsocket JavaScript/TypeScript client libraries. Normally this package doesn't need to be included as a dependency as these types are re-exported by `@jamsocket/node`, `@jamsocket/client`, `@jamsocket/react` and `@jamsocket/socketio`.
 
 Read the [docs here](https://docs.jamsocket.com)
 
@@ -17,8 +17,8 @@ npm install @jamsocket/types
 
 Here's an example of how different parts of Jamsocket's client libraries work together.
 
-```tsx filename="server.tsx"
-import { Jamsocket } from '@jamsocket/server'
+```ts filename="server.ts"
+import { Jamsocket } from '@jamsocket/node'
 
 const jamsocket = new Jamsocket({
    account: '[YOUR ACCOUNT]',

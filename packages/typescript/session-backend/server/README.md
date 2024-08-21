@@ -2,7 +2,7 @@
 
 [![GitHub Repo stars](https://img.shields.io/github/stars/jamsocket/jamsocket?style=social)](https://github.com/jamsocket/jamsocket)
 [![Chat on Discord](https://img.shields.io/discord/939641163265232947)](https://discord.gg/N5sEpsuhh9)
-[![npm](https://img.shields.io/npm/v/@jamsocket/server)](https://www.npmjs.com/package/@jamsocket/session-backend)
+[![npm](https://img.shields.io/npm/v/@jamsocket/session-backend)](https://www.npmjs.com/package/@jamsocket/session-backend)
 
 JavaScript/TypeScript library to be used inside a session backend.
 

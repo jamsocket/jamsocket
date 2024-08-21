@@ -1,8 +1,8 @@
-# @jamsocket/server
+# @jamsocket/node
 
 [![GitHub Repo stars](https://img.shields.io/github/stars/jamsocket/jamsocket?style=social)](https://github.com/jamsocket/jamsocket)
 [![Chat on Discord](https://img.shields.io/discord/939641163265232947)](https://discord.gg/N5sEpsuhh9)
-[![npm](https://img.shields.io/npm/v/@jamsocket/server)](https://www.npmjs.com/package/@jamsocket/server)
+[![npm](https://img.shields.io/npm/v/@jamsocket/node)](https://www.npmjs.com/package/@jamsocket/node)
 
 JavaScript/TypeScript library for spawning session backends server-side.
 
@@ -10,15 +10,15 @@ Read the [docs here](https://docs.jamsocket.com)
 
 ## Installation
 ```bash copy
-npm install @jamsocket/server
+npm install @jamsocket/node
 ```
 
 ## Example
 
 Here's an example of how different parts of Jamsocket's client libraries work together.
 
-```tsx filename="server.tsx"
-import { Jamsocket } from '@jamsocket/server'
+```ts filename="server.ts"
+import { Jamsocket } from '@jamsocket/node'
 
 const jamsocket = new Jamsocket({
    account: '[YOUR ACCOUNT]',
@@ -64,23 +64,23 @@ function MyComponent() {
 
 # Library Reference
 
-## @jamsocket/server
+## @jamsocket/node
 
 ### `Jamsocket`
 
-Create a Jamsocket instance with the `Jamsocket` class from `@jamsocket/server` folder.
+Create a Jamsocket instance with the `Jamsocket` class from `@jamsocket/node` folder.
 
 In local development, you can simply set `dev` to `true`.
 
 ```ts
-import { Jamsocket } from '@jamsocket/server'
+import { Jamsocket } from '@jamsocket/node'
 const jamsocket = new Jamsocket({ dev: true })
 ```
 
 In production, provide your `account`, `token`, and `service` information.
 
 ```ts
-import { Jamsocket } from '@jamsocket/server'
+import { Jamsocket } from '@jamsocket/node'
 const jamsocket = new Jamsocket({
   account: '[YOUR ACCOUNT]',
   token: '[YOUR TOKEN]',
@@ -99,7 +99,7 @@ Learn more about the various options you can pass in a `ConnectRequest` in [our 
 <Callout>A Jamsocket class should only be instantiated on the server since it takes a Jamsocket Auth Token which must be kept secret.</Callout>
 
 ```ts {8-12}
-import { Jamsocket } from '@jamsocket/server'
+import { Jamsocket } from '@jamsocket/node'
 const jamsocket = new Jamsocket({
   account: '[YOUR ACCOUNT]',
   token: '[YOUR TOKEN]',
@@ -135,7 +135,7 @@ If the underlying status request fails with a non-200 code, the returned Promise
 Learn more about the various statuses backends can have in [our API docs](https://docs.jamsocket.com/platform/reference/v2#get-a-backends-current-status).
 
 ```ts {8}
-import { Jamsocket } from '@jamsocket/server'
+import { Jamsocket } from '@jamsocket/node'
 const jamsocket = new Jamsocket({
   account: '[YOUR ACCOUNT]',
   token: '[YOUR TOKEN]',
@@ -156,7 +156,7 @@ If the underlying status request fails with a non-200 code, the returned Promise
 Learn more about the various statuses backends can have in [our API docs](https://docs.jamsocket.com/platform/reference/v2#get-a-backends-current-status).
 
 ```ts {8-12}
-import { Jamsocket } from '@jamsocket/server'
+import { Jamsocket } from '@jamsocket/node'
 const jamsocket = new Jamsocket({
   account: '[YOUR ACCOUNT]',
   token: '[YOUR TOKEN]',

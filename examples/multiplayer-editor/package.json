@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@jamsocket/server": "1.1.0",
+    "@jamsocket/node": "1.1.0",
     "@jamsocket/socketio": "1.1.0",
     "next": "13.4.9",
     "react": "18.2.0",

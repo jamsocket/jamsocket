@@ -1,6 +1,6 @@
 import 'server-only';
 import HomeContainer from '../components/Home'
-import { Jamsocket } from '@jamsocket/server'
+import { Jamsocket } from '@jamsocket/node'
 
 const WHITEBOARD_NAME = 'my-whiteboard-room'
 

@@ -17,8 +17,8 @@ npm install @jamsocket/react
 
 Here's an example of how different parts of Jamsocket's client libraries work together.
 
-```tsx filename="server.tsx"
-import { Jamsocket } from '@jamsocket/server'
+```ts filename="server.ts"
+import { Jamsocket } from '@jamsocket/node'
 
 const jamsocket = new Jamsocket({
    account: '[YOUR ACCOUNT]',
@@ -61,7 +61,7 @@ function MyComponent({ sessionBackendUrl }) {
 ### `SessionBackendProvider`
 Wrap the root of your project with the `SessionBackendProvider` so that the children components can utilize the React hooks.
 
-<Callout>The `SessionBackendProvider` must be used in conjunction with `@jamsocket/server` in order to access the connect response returned by the `connect` function.</Callout>
+<Callout>The `SessionBackendProvider` must be used in conjunction with `@jamsocket/node` in order to access the connect response returned by the `connect` function.</Callout>
 
 ```tsx
 import { SessionBackendProvider, type ConnectResponse } from '@jamsocket/react'

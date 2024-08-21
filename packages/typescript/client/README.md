@@ -17,8 +17,8 @@ npm install @jamsocket/client
 
 Here's an example of how different parts of Jamsocket's client libraries work together.
 
-```tsx filename="server.tsx"
-import { Jamsocket } from '@jamsocket/server'
+```ts filename="server.ts"
+import { Jamsocket } from '@jamsocket/node'
 
 const jamsocket = new Jamsocket({
    account: '[YOUR ACCOUNT]',
