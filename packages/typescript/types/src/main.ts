@@ -69,3 +69,40 @@ export type ConnectRequest = {
   user?: string
   auth?: Record<string, any>
 }
+
+export function isConnectResponse(msg: any): msg is ConnectResponse {
+  if (typeof msg !== 'object') return false
+  if (typeof msg.backend_id !== 'string') return false
+  if (typeof msg.spawned !== 'boolean') return false
+  if (typeof msg.status !== 'string') return false
+  if (typeof msg.token !== 'string') return false
+  if (typeof msg.url !== 'string') return false
+  if (typeof msg.status_url !== 'string') return false
+  return true
+}
+
+export function isBackendState(msg: any): msg is BackendState {
+  if (typeof msg !== 'object') return false
+  if (typeof msg.status !== 'string') return false
+  if (typeof msg.time !== 'string') return false
+  if (
+    msg.status === 'terminating' ||
+    msg.status === 'hard-terminating' ||
+    msg.termination_reason !== undefined
+  ) {
+    if (typeof msg.termination_reason !== 'string') return false
+  }
+  if (msg.termination_kind !== undefined && typeof msg.termination_kind !== 'string') return false
+  if (msg.exit_error !== undefined && typeof msg.exit_error !== 'boolean') return false
+  return true
+}
+
+export class HTTPError extends Error {
+  constructor(
+    public code: number,
+    message: string,
+  ) {
+    super(message)
+    this.name = 'HTTPError'
+  }
+}

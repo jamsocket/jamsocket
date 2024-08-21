@@ -1,13 +1,13 @@
 {
-  "name": "@jamsocket/types",
+  "name": "@jamsocket/session-backend",
   "scripts": {
     "build": "tsup",
     "clean": "rm -rf dist",
     "dev": "tsup --watch",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx}\""
   },
-  "version": "1.1.0",
-  "description": "JavaScript/TypeScript libraries for spawning session backends server-side.",
+  "version": "0.0.5",
+  "description": "A preview of the upcoming Jamsocket Session Backend SDK.",
   "main": "./dist/main.js",
   "types": "./dist/main.d.ts",
   "exports": {
@@ -31,7 +31,7 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/jamsocket/jamsocket.git",
-    "directory": "packages/typescript/types"
+    "directory": "packages/typescript/session-backend"
   },
   "license": "MIT",
   "bugs": {
