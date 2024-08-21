@@ -63,7 +63,6 @@ export class Jamsocket {
         method: 'POST',
         headers: { Authorization: `Bearer ${this.token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify(connectRequest || {}),
-        cache: 'no-store',
       }),
     )
     return parseAs<ConnectResponse>(isConnectResponse, await response.text())
@@ -71,7 +70,7 @@ export class Jamsocket {
 
   async status(backendId: string): Promise<BackendState> {
     const url = `${this.apiUrl}/v2/backend/${backendId}/status`
-    const response = checkResponse('status()', await fetch(url, { cache: 'no-store' }))
+    const response = checkResponse('status()', await fetch(url))
     return parseAs<BackendState>(isBackendState, await response.text())
   }
 
@@ -92,7 +91,7 @@ export class Jamsocket {
 
     async function startStatusStream() {
       try {
-        const response = checkResponse('statusStream()', await fetch(url, { cache: 'no-store' }))
+        const response = checkResponse('statusStream()', await fetch(url))
         // make sure only one streamReader is running at a time
         if (streamReader !== null) streamReader.cancel()
         streamReader = response.body.pipeThrough(new TextDecoderStream()).getReader()

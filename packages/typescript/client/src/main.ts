@@ -71,7 +71,7 @@ export class SessionBackend {
   private fetchStatusStream = async () => {
     if (this.isTerminated() || this.fetchingStatusStream) return
     this.fetchingStatusStream = true
-    const response = await fetch(`${this.statusUrl}/stream`, { cache: 'no-store' })
+    const response = await fetch(`${this.statusUrl}/stream`)
     if (!response.body) {
       this.fetchingStatusStream = false
       throw new Error('response to Jamsocket backend status stream did not include body')
@@ -128,11 +128,11 @@ export class SessionBackend {
   }
 
   public async status(): Promise<BackendState> {
-    let res = await fetch(this.statusUrl, { mode: 'cors', cache: 'no-store' })
+    let res = await fetch(this.statusUrl, { mode: 'cors' })
     // if the first request fails, retry once
     if (!res.ok) {
       await new Promise((resolve) => setTimeout(resolve, 500))
-      res = await fetch(this.statusUrl, { mode: 'cors', cache: 'no-store' })
+      res = await fetch(this.statusUrl, { mode: 'cors' })
     }
     if (!res.ok) {
       throw new Error(
