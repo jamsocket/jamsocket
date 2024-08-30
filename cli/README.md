@@ -145,8 +145,8 @@ ARGUMENTS
 FLAGS
   -a, --auth=<value>                    Optional serialized JSON to be passed to a session backend when connecting with
                                         the returned URL/connection string.
-  -c, --cluster=<value>                 The cluster to to spawn the backend in (only relevant if you are running
-                                        multiple clusters with Jamsocket).
+  -c, --cluster=<value>                 The cluster to spawn the backend in (only relevant if you are running multiple
+                                        clusters with Jamsocket).
   -e, --env=<value>...                  optional environment variables to pass to the container
   -i, --max-idle-seconds=<value>        The max time in seconds a session backend should wait after last connection is
                                         closed before shutting down container (default is 300)
@@ -353,8 +353,8 @@ ARGUMENTS
 FLAGS
   -a, --auth=<value>                    Optional serialized JSON to be passed to a session backend when connecting with
                                         the returned URL/connection string.
-  -c, --cluster=<value>                 The cluster to to spawn the backend in (only relevant if you are running
-                                        multiple clusters with Jamsocket).
+  -c, --cluster=<value>                 The cluster to spawn the backend in (only relevant if you are running multiple
+                                        clusters with Jamsocket).
   -e, --env=<value>...                  optional environment variables to pass to the container
   -i, --max-idle-seconds=<value>        The max time in seconds a session backend should wait after last connection is
                                         closed before shutting down container (default is 300)

@@ -32,7 +32,7 @@ export default class Spawn extends Command {
     cluster: Flags.string({
       char: 'c',
       description:
-        'The cluster to to spawn the backend in (only relevant if you are running multiple clusters with Jamsocket).',
+        'The cluster to spawn the backend in (only relevant if you are running multiple clusters with Jamsocket).',
     }),
     'max-idle-seconds': Flags.integer({
       char: 'i',
