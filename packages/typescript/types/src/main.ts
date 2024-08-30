@@ -50,6 +50,7 @@ export type ConnectRequest = {
     | boolean
     | {
         tag?: string
+        cluster?: string
         lifetime_limit_seconds?: number
         max_idle_seconds?: number
         executable?: {
