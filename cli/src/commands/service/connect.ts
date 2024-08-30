@@ -29,6 +29,11 @@ export default class Spawn extends Command {
       char: 't',
       description: 'An optional image tag or image digest to use when spawning a backend.',
     }),
+    cluster: Flags.string({
+      char: 'c',
+      description:
+        'The cluster to to spawn the backend in (only relevant if you are running multiple clusters with Jamsocket).',
+    }),
     'max-idle-seconds': Flags.integer({
       char: 'i',
       description:
@@ -98,6 +103,9 @@ export default class Spawn extends Command {
       if (flags.tag) {
         this.warn('Ignoring --tag flag because --no-spawn flag was provided.')
       }
+      if (flags.cluster) {
+        this.warn('Ignoring --cluster flag because --no-spawn flag was provided.')
+      }
       if (flags['max-idle-seconds']) {
         this.warn('Ignoring --max-idle-seconds flag because --no-spawn flag was provided.')
       }
@@ -111,6 +119,7 @@ export default class Spawn extends Command {
     } else {
       connectReqBody.spawn = {
         tag: flags.tag,
+        cluster: flags.cluster,
         executable: {
           env,
         },
