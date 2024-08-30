@@ -136,8 +136,8 @@ Gets a URL that can be used to connect to a session backend. Will spawn a new se
 
 ```
 USAGE
-  $ jamsocket connect [SERVICE] [-e <value>] [-t <value>] [-i <value>] [-l <value>] [-k <value>] [-u <value>]
-    [-a <value>] [--spawn]
+  $ jamsocket connect [SERVICE] [-e <value>] [-t <value>] [-c <value>] [-i <value>] [-l <value>] [-k <value>]
+    [-u <value>] [-a <value>] [--spawn]
 
 ARGUMENTS
   SERVICE  Name of service to spawn.
@@ -145,6 +145,8 @@ ARGUMENTS
 FLAGS
   -a, --auth=<value>                    Optional serialized JSON to be passed to a session backend when connecting with
                                         the returned URL/connection string.
+  -c, --cluster=<value>                 The cluster to to spawn the backend in (only relevant if you are running
+                                        multiple clusters with Jamsocket).
   -e, --env=<value>...                  optional environment variables to pass to the container
   -i, --max-idle-seconds=<value>        The max time in seconds a session backend should wait after last connection is
                                         closed before shutting down container (default is 300)
@@ -310,18 +312,20 @@ Builds and pushes an image to Jamsocket's container registry using the provided 
 
 ```
 USAGE
-  $ jamsocket push [SERVICE] [IMAGE] [-f <value>] [-c <value>] [-t <value>] [-g]
+  $ jamsocket push [SERVICE] [IMAGE] [-f <value>] [-c <value>] [-b <value>] [-t <value>] [-g]
 
 ARGUMENTS
   SERVICE  Jamsocket service to push the image to
   IMAGE    Optionally, provide an image to push instead of a Dockerfile
 
 FLAGS
-  -c, --context=<value>     path to the build context for the Dockerfile (defaults to current working directory)
-  -f, --dockerfile=<value>  path to the Dockerfile to build the image from
-  -g, --include-git-commit  optionally include git commit metadata as labels in the image (uses the git repo of the
-                            docker context)
-  -t, --tag=<value>         optional tag to apply to the image in the jamsocket registry
+  -b, --build-context=<value>...  Additional named build contexts to be used when building the image (e.g.
+                                  --build-context alpine=docker-image://alpine@sha256:0123456789)
+  -c, --context=<value>           path to the build context for the Dockerfile (defaults to current working directory)
+  -f, --dockerfile=<value>        path to the Dockerfile to build the image from
+  -g, --include-git-commit        optionally include git commit metadata as labels in the image (uses the git repo of
+                                  the docker context)
+  -t, --tag=<value>               optional tag to apply to the image in the jamsocket registry
 
 DESCRIPTION
   Builds and pushes an image to Jamsocket's container registry using the provided Dockerfile.
@@ -340,8 +344,8 @@ Gets a URL that can be used to connect to a session backend. Will spawn a new se
 
 ```
 USAGE
-  $ jamsocket service connect [SERVICE] [-e <value>] [-t <value>] [-i <value>] [-l <value>] [-k <value>] [-u <value>]
-    [-a <value>] [--spawn]
+  $ jamsocket service connect [SERVICE] [-e <value>] [-t <value>] [-c <value>] [-i <value>] [-l <value>] [-k <value>]
+    [-u <value>] [-a <value>] [--spawn]
 
 ARGUMENTS
   SERVICE  Name of service to spawn.
@@ -349,6 +353,8 @@ ARGUMENTS
 FLAGS
   -a, --auth=<value>                    Optional serialized JSON to be passed to a session backend when connecting with
                                         the returned URL/connection string.
+  -c, --cluster=<value>                 The cluster to to spawn the backend in (only relevant if you are running
+                                        multiple clusters with Jamsocket).
   -e, --env=<value>...                  optional environment variables to pass to the container
   -i, --max-idle-seconds=<value>        The max time in seconds a session backend should wait after last connection is
                                         closed before shutting down container (default is 300)

@@ -27,6 +27,7 @@ export function getImagePlatform(imageName: string): { os: string; arch: string 
 export type BuildImageOptions = {
   path?: string
   labels?: Record<string, string>
+  buildContexts?: string[]
 }
 
 type StdioWriteFn = (val: string) => void
@@ -41,6 +42,7 @@ export async function buildImage(
   const optionsWithDefaults: Required<BuildImageOptions> = {
     path: '.',
     labels: {},
+    buildContexts: [],
     ...options,
   }
 
@@ -49,6 +51,10 @@ export async function buildImage(
   for (const [key, value] of labels) {
     args.push('--label')
     args.push(`${key}=${value}`)
+  }
+  for (const buildContext of optionsWithDefaults.buildContexts) {
+    args.push('--build-context')
+    args.push(buildContext)
   }
   args.push(optionsWithDefaults.path)
 

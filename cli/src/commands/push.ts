@@ -27,6 +27,12 @@ export default class Push extends Command {
       description:
         'path to the build context for the Dockerfile (defaults to current working directory)',
     }),
+    ['build-context']: Flags.string({
+      char: 'b',
+      multiple: true,
+      description:
+        'Additional named build contexts to be used when building the image (e.g. --build-context alpine=docker-image://alpine@sha256:0123456789)',
+    }),
     tag: Flags.string({
       char: 't',
       description: 'optional tag to apply to the image in the jamsocket registry',
@@ -63,6 +69,9 @@ export default class Push extends Command {
     if (args.image) {
       if (flags.context !== undefined) {
         throw new Error('--context flag should only be used with the --dockerfile flag')
+      }
+      if (flags['build-context']) {
+        throw new Error('--build-context flag should only be used with the --dockerfile flag')
       }
       if (flags['include-git-commit']) {
         throw new Error(
@@ -148,6 +157,9 @@ export default class Push extends Command {
       const options: BuildImageOptions = { labels }
       if (flags.context) {
         options.path = resolve(process.cwd(), flags.context)
+      }
+      if (flags['build-context']) {
+        options.buildContexts = flags['build-context']
       }
       this.log(blue(`Building image from Dockerfile: ${flags.dockerfile}`))
       image = await buildImage(flags.dockerfile, options)

@@ -344,8 +344,13 @@ class DevServer {
       }
 
       backend.lastStatus = status
+      let statusText = status.status
+      if (status.status === 'terminated') {
+        if (status.termination_reason) statusText += ` (${status.termination_reason})`
+        if (status.exit_error) statusText += ` (exited with error)`
+      }
       this.logger.log([
-        `Status for ${this.applyBackendStyle(backend, backend.name)}: ${status.status}`,
+        `Status for ${this.applyBackendStyle(backend, backend.name)}: ${statusText}`,
       ])
       if (!isV2StatusAlive(status.status)) {
         backend.statusStream?.close()

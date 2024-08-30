@@ -41,6 +41,27 @@ export class Jamsocket {
   token: string
   apiUrl: string
 
+  static fromEnv(env: Record<string, string | undefined>): Jamsocket {
+    if (env.JAMSOCKET_DEV === 'true') {
+      let port = JAMSOCKET_DEV_PORT
+      if (typeof env.JAMSOCKET_DEV_PORT === 'string') {
+        port = validatePort(parseInt(env.JAMSOCKET_DEV_PORT, 10))
+      }
+      return new Jamsocket({ dev: true, port })
+    }
+    if (!env.JAMSOCKET_ACCOUNT || !env.JAMSOCKET_TOKEN || !env.JAMSOCKET_SERVICE) {
+      throw new Error(
+        'Jamsocket.fromEnv(): JAMSOCKET_ACCOUNT, JAMSOCKET_TOKEN, and JAMSOCKET_SERVICE must be provided in the environment',
+      )
+    }
+    return new Jamsocket({
+      account: env.JAMSOCKET_ACCOUNT,
+      token: env.JAMSOCKET_TOKEN,
+      service: env.JAMSOCKET_SERVICE,
+      apiUrl: env.JAMSOCKET_API_URL,
+    })
+  }
+
   constructor(opts: JamsocketInitOptions) {
     if (isJamsocketDevInitOptions(opts)) {
       this.account = '-'

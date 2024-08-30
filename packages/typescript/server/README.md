@@ -88,6 +88,17 @@ const jamsocket = new Jamsocket({
 })
 ```
 
+### `fromEnv(env)`
+
+The `Jamsocket` class comes with a static method that returns an instance of `Jamsocket` configured by the provided environment. The `fromEnv()` method expects to find either `JAMSOCKET_TOKEN`, `JAMSOCKET_ACCOUNT`, and `JAMSOCKET_SERVICE` values _or_ a `JAMSOCKET_DEV: true` value. If running in dev mode, the function will also accept an optional `JAMSOCKET_DEV_PORT` which tells the `Jamsocket` instance where to find the dev server. (This is only needed if you're running `npx jamsocket dev` with a custom port.)
+
+Example:
+
+```ts
+import { Jamsocket } from '@jamsocket/server'
+const jamsocket = Jamsocket.fromEnv(process.env)
+```
+
 ### `connect()`
 
 The Jamsocket instance includes a `connect` function that you can use to get a connection URL for a session backend. If you provide a `key`, the connect function will either spawn a new backend or return the running backend that holds the provided key if one exists. When generating a connection URL for a backend, you can provide an optional `ConnectRequest` object. It returns a promise, which resolves with a `ConnectResponse`.
@@ -191,14 +202,16 @@ type ConnectRequest = {
     | boolean
     | {
         tag?: string
+        cluster?: string
         lifetime_limit_seconds?: number
         max_idle_seconds?: number
         executable?: {
           mount?: string | boolean
           env?: Record<string, string>
           resource_limits?: {
+            // The CPU period (in microseconds), defaults to 100_000 (100ms)
             cpu_period?: number
-            // Proportion of period used by container (in microseconds)
+            // Proportion of period the container is allowed to use (in percent, e.g. 100 = 100%)
             cpu_period_percent?: number
             // Total cpu time allocated to container (in seconds)
             cpu_time_limit?: number

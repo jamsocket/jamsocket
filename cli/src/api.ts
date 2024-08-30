@@ -46,8 +46,9 @@ export type V2Status =
   | 'terminated'
 
 export type ConnectResourceLimits = {
+  // The CPU period (in microseconds), defaults to 100_000 (100ms)
   cpu_period?: number
-  // Proportion of period used by container (in microseconds)
+  // Proportion of period the container is allowed to use (in percent, e.g. 100 = 100%)
   cpu_period_percent?: number
   // Total cpu time allocated to container (in seconds)
   cpu_time_limit?: number
@@ -61,6 +62,7 @@ export type JamsocketConnectRequestBody = {
     | boolean
     | {
         tag?: string
+        cluster?: string
         lifetime_limit_seconds?: number
         max_idle_seconds?: number
         executable?: {
