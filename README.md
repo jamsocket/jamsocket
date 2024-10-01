@@ -8,7 +8,7 @@
 </div>
 
 ![Version](https://img.shields.io/npm/v/jamsocket)
-[![Discord](https://img.shields.io/discord/939641163265232947)](https://discord.gg/N5sEpsuhh9)
+[![Chat on Discord](https://img.shields.io/discord/939641163265232947?color=404eed&label=discord)](https://discord.gg/N5sEpsuhh9)
 ![License](https://img.shields.io/github/license/jamsocket/jamsocket)
 
 [Jamsocket](https://jamsocket.com/) is the painless session backend platform.
