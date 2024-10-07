@@ -44,3 +44,7 @@ export function parseAs<T>(isFn: (msg: any) => msg is T, text: string): T {
   }
   return msg
 }
+
+export function noCacheQueryParam() {
+  return Math.random().toString(36).substring(2, 15)
+}
