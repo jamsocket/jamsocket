@@ -11,7 +11,7 @@
   "dependencies": {
     "@jamsocket/server": "1.1.1",
     "@jamsocket/socketio": "1.1.1",
-    "next": "13.4.9",
+    "next": "^14.2.14",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "server-only": "^0.0.1",
@@ -27,7 +27,7 @@
     "@types/react-dom": "18.2.4",
     "autoprefixer": "10.4.14",
     "eslint": "8.40.0",
-    "eslint-config-next": "13.4.3",
+    "eslint-config-next": "^14.2.14",
     "postcss": "8.4.23",
     "rollup": "^4.21.0",
     "tailwindcss": "3.3.2",

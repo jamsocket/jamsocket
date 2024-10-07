@@ -1,6 +1,6 @@
 import type { ConnectRequest, ConnectResponse, BackendState, BackendStatus } from '@jamsocket/types'
 import { isConnectResponse, isBackendState } from '@jamsocket/types'
-import { validatePort, checkResponse, parseAs } from './utils'
+import { validatePort, checkResponse, parseAs, noCacheQueryParam } from './utils'
 export { isConnectResponse, isBackendState, HTTPError } from '@jamsocket/types'
 export type {
   BackendStatus,
@@ -80,23 +80,26 @@ export class Jamsocket {
   async connect(connectRequest?: ConnectRequest): Promise<ConnectResponse> {
     const response = checkResponse(
       'connect()',
-      await fetch(`${this.apiUrl}/v2/service/${this.account}/${this.service}/connect`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${this.token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify(connectRequest || {}),
-      }),
+      await fetch(
+        `${this.apiUrl}/v2/service/${this.account}/${this.service}/connect?${noCacheQueryParam()}`,
+        {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${this.token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify(connectRequest || {}),
+        },
+      ),
     )
     return parseAs<ConnectResponse>(isConnectResponse, await response.text())
   }
 
   async status(backendId: string): Promise<BackendState> {
-    const url = `${this.apiUrl}/v2/backend/${backendId}/status`
+    const url = `${this.apiUrl}/v2/backend/${backendId}/status?${noCacheQueryParam()}`
     const response = checkResponse('status()', await fetch(url))
     return parseAs<BackendState>(isBackendState, await response.text())
   }
 
   async statusStream(backendId: string, onStatus: OnStatusCallback): Promise<UnsubscribeFn> {
-    const url = `${this.apiUrl}/v2/backend/${backendId}/status/stream`
+    const url = `${this.apiUrl}/v2/backend/${backendId}/status/stream?${noCacheQueryParam()}`
 
     // keep track of the statuses we've seen since we might have just resubscribed
     // to the status stream and are seeing some of the statuses we've already seen again
