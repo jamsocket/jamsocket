@@ -414,7 +414,10 @@ Deletes a service
 
 ```
 USAGE
-  $ jamsocket service delete [SERVICE]
+  $ jamsocket service delete [SERVICE] [-y]
+
+FLAGS
+  -y, --yes  Skip confirmation prompt
 
 DESCRIPTION
   Deletes a service
