@@ -5,7 +5,7 @@ import { formatDistanceToNow } from 'date-fns'
 import { lightBlue, lightMagenta } from '../../lib/formatting'
 import { Flags } from '@oclif/core'
 
-export default class Create extends Command {
+export default class Delete extends Command {
   static description = 'Deletes a service'
 
   static examples = ['<%= config.bin %> <%= command.id %> my-service']
@@ -20,7 +20,7 @@ export default class Create extends Command {
   }
 
   public async run(): Promise<void> {
-    const { args, flags } = await this.parse(Create)
+    const { args, flags } = await this.parse(Delete)
 
     const jamsocket = Jamsocket.fromEnvironment()
     const serviceInfo = await jamsocket.serviceInfo(args.service)
