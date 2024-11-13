@@ -5,6 +5,7 @@ import {
   spawn,
   spawnSync,
 } from 'child_process'
+import crypto from 'crypto'
 import { mkdirSync, writeFileSync } from 'fs'
 import { join } from 'path'
 import { JAMSOCKET_CONFIG_DIR } from '../jamsocket-config'
@@ -30,13 +31,21 @@ export type BuildImageOptions = {
   buildContexts?: string[]
 }
 
+function getImageId(tag: string): string {
+  const result = spawnDockerSync(['images', '--no-trunc', '--format', '{{.ID}}', tag])
+  return result.stdout.trim()
+}
+
 type StdioWriteFn = (val: string) => void
-export async function buildImage(
+export function buildImage(
   dockerfilePath: string,
   options?: BuildImageOptions,
   stdoutWrite?: StdioWriteFn,
   stderrWrite?: StdioWriteFn,
 ): Promise<string> {
+  // Using a temporary tag is the best way to reliably get the image id.
+  const tempTag = `temp-${crypto.randomUUID()}`
+
   const outWrite = stdoutWrite ?? process.stdout.write.bind(process.stdout)
   const errWrite = stderrWrite ?? process.stderr.write.bind(process.stderr)
   const optionsWithDefaults: Required<BuildImageOptions> = {
@@ -46,7 +55,7 @@ export async function buildImage(
     ...options,
   }
 
-  const args = ['build', '--platform', 'linux/amd64', '-f', dockerfilePath]
+  const args = ['build', '--platform', 'linux/amd64', '--tag', tempTag, '-f', dockerfilePath]
   const labels = Object.entries(optionsWithDefaults.labels)
   for (const [key, value] of labels) {
     args.push('--label')
@@ -61,15 +70,12 @@ export async function buildImage(
   return new Promise<string>((resolve, reject) => {
     const buildProcess = spawn('docker', args, { stdio: ['inherit', 'pipe', 'pipe'] })
 
-    let output = ''
     buildProcess.stdout.on('data', (data) => {
       outWrite(data.toString())
-      output += data.toString()
     })
 
     buildProcess.stderr.on('data', (data) => {
       errWrite(data.toString())
-      output += data.toString()
     })
 
     buildProcess.on('error', (err) => {
@@ -79,12 +85,7 @@ export async function buildImage(
 
     buildProcess.on('close', (code) => {
       if (code === 0) {
-        // eslint-disable-next-line unicorn/better-regex
-        const match = /writing image sha256:([a-f0-9]+)/.exec(output)
-        const imageId = match?.[1] || null
-        if (imageId === null) {
-          throw new Error("Docker exited without errors but couldn't extract image id from output.")
-        }
+        let imageId = getImageId(tempTag)
         resolve(imageId)
       } else {
         reject(new Error('Error building image'))
