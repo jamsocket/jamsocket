@@ -5,6 +5,7 @@ import {
   spawn,
   spawnSync,
 } from 'child_process'
+import crypto from 'crypto'
 import { mkdirSync, writeFileSync } from 'fs'
 import { join } from 'path'
 import { JAMSOCKET_CONFIG_DIR } from '../jamsocket-config'
