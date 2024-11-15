@@ -249,10 +249,10 @@ type TerminationKind = 'soft' | 'hard'
 type TerminationReason =
   | 'swept'
   | 'external'
-  | 'key_expired'
+  | 'keyexpired'
   | 'lost'
-  | 'startup_timeout'
-  | 'internal_error'
+  | 'startuptimeout'
+  | 'internalerror'
 
 type BackendState =
   | { status: 'scheduled'; time: string }

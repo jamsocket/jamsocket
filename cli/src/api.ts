@@ -90,10 +90,10 @@ export type PlaneTerminationKind = 'soft' | 'hard'
 export type PlaneTerminationReason =
   | 'swept'
   | 'external'
-  | 'key_expired'
+  | 'keyexpired'
   | 'lost'
-  | 'startup_timeout'
-  | 'internal_error'
+  | 'startuptimeout'
+  | 'internalerror'
 
 // these are public messages that come over the status and status/stream endpoints
 export type PublicV2State =
