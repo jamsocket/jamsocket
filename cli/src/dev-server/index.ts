@@ -791,12 +791,15 @@ function translateStatusToV1(
       if (plane2StatusMsg.termination_reason === 'external') {
         return 'Terminated'
       }
-      if (plane2StatusMsg.termination_reason === 'internal_error') {
+      if (
+        plane2StatusMsg.termination_reason === 'internalerror' ||
+        plane2StatusMsg.termination_reason === 'lost'
+      ) {
         return 'Lost'
       }
       if (
         plane2StatusMsg.termination_reason &&
-        ['swept', 'key_expired'].includes(plane2StatusMsg.termination_reason)
+        ['swept', 'keyexpired'].includes(plane2StatusMsg.termination_reason)
       ) {
         return 'Swept'
       }
@@ -807,7 +810,7 @@ function translateStatusToV1(
         return 'ErrorStarting'
       }
       if (lastAliveStatusMsg.status === 'waiting') {
-        if (plane2StatusMsg.termination_reason === 'startup_timeout') return 'TimedOutBeforeReady'
+        if (plane2StatusMsg.termination_reason === 'startuptimeout') return 'TimedOutBeforeReady'
         return 'ErrorStarting'
       }
       // if we've gotten here, the last alive status was 'ready'
