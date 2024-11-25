@@ -42,7 +42,7 @@
     "socket.io-client": "^4.7.4"
   },
   "peerDependencies": {
-    "react": "^16.8.0 || ^17.0.0 || ^18.0.0"
+    "react": "^16.8 || ^17 || ^18 || ^19 || ^19.0.0-rc"
   },
   "devDependencies": {
     "@types/react": "^18.2.59"
