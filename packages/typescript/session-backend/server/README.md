@@ -6,7 +6,7 @@
 
 JavaScript/TypeScript library to be used inside a session backend.
 
-Read the [docs here](https://docs.jamsocket.com)
+Read the [docs here](https://docs.jamsocket.com/platform)
 
 ## Installation
 ```bash copy

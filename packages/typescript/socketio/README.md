@@ -6,7 +6,7 @@
 
 React hooks for interacting with socket.io servers in Jamsocket session backends.
 
-Read the [docs here](https://docs.jamsocket.com)
+Read the [docs here](https://docs.jamsocket.com/platform)
 
 ## Installation
 ```bash copy

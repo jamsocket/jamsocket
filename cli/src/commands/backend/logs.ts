@@ -22,7 +22,7 @@ export default class Logs extends Command {
 
     console.log(
       blue(
-        'Reminder: you can find help troubleshooting common issues at https://docs.jamsocket.com/platform/troubleshooting',
+        'Reminder: you can find help troubleshooting common issues at https://docs.jamsocket.com/platform/advanced/troubleshooting',
       ),
     )
     console.log()

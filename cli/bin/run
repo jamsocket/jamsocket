@@ -8,7 +8,7 @@ const CODE_TO_ERROR_MESSAGE = {
   InvalidAuth: 'Your credentials may have expired. Please try logging in again.',
   EmailNotVerified: 'The email for this account has not been verified. Please log in to https://app.jamsocket.com to finish setting up your account.',
   NoAccountFoundForUser: 'No account found for this user. Please log in to https://app.jamsocket.com to finish setting up your account.',
-  UsageLimit: 'You have exceeded the usage limit for this account. See https://https://docs.jamsocket.com for more information on account limits.',
+  UsageLimit: 'You have exceeded the usage limit for this account. See https://docs.jamsocket.com/platform for more information on account limits.',
   UserNotEnabled: 'This user account has been disabled. Please contact us for more information.',
 }
 

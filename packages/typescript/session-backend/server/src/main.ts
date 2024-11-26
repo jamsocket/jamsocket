@@ -15,7 +15,7 @@ export class BackendAssignment {
   key: string
 
   /** A "fencing token" that the backend can use as a fencing token. (You probably don't need this; see
-   * https://docs.jamsocket.com/platform/reference#backend-containers for more info.) */
+   * https://docs.jamsocket.com/platform/reference/rest-api#backend-containers for more info.) */
   fencingToken?: number | null
 
   staticToken?: string | null
