@@ -6,7 +6,7 @@
 
 Types for the Jamsocket JavaScript/TypeScript client libraries. Normally this package doesn't need to be included as a dependency as these types are re-exported by `@jamsocket/server`, `@jamsocket/client`, `@jamsocket/react` and `@jamsocket/socketio`.
 
-Read the [docs here](https://docs.jamsocket.com)
+Read the [docs here](https://docs.jamsocket.com/platform)
 
 ## Installation
 ```bash copy

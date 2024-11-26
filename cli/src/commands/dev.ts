@@ -51,7 +51,7 @@ function getProjectConfig(): ProjectConfig | null {
     const projectConfig = JSON.parse(readFileSync(PROJECT_CONFIG_PATH_JSON, 'utf8'))
     if (!isProjectConfig(projectConfig)) {
       throw new Error(
-        'Invalid jamsocket.config.json file. Please see https://docs.jamsocket.com/platform/dev-cli for more information.',
+        'Invalid jamsocket.config.json file. Please see https://docs.jamsocket.com/platform/advanced/dev-cli for more information.',
       )
     }
     return projectConfig
@@ -63,7 +63,7 @@ function getProjectConfig(): ProjectConfig | null {
     const projectConfig = require(PROJECT_CONFIG_PATH_JS)
     if (!isProjectConfig(projectConfig)) {
       throw new Error(
-        'Invalid jamsocket.config.js file. Please see https://docs.jamsocket.com/platform/dev-cli for more information.',
+        'Invalid jamsocket.config.js file. Please see https://docs.jamsocket.com/platform/advanced/dev-cli for more information.',
       )
     }
     return projectConfig

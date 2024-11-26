@@ -16,7 +16,7 @@ export function checkResponse(description: string, response: Response): Successf
   if (!response.ok) {
     if (response.status === 429) {
       console.warn(
-        "You've hit a rate limit with the Jamsocket API. If you are on the free tier, you may have hit our free tier limits. Learn more at https://docs.jamsocket.com/pricing/free-tier-limits",
+        "You've hit a rate limit with the Jamsocket API. If you are on the free tier, you may have hit our free tier limits. Learn more at https://docs.jamsocket.com/platform/pricing/free-tier-limits",
       )
     }
     throw new HTTPError(

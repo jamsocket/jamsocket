@@ -6,7 +6,7 @@
 
 JavaScript/TypeScript library for spawning session backends server-side.
 
-Read the [docs here](https://docs.jamsocket.com)
+Read the [docs here](https://docs.jamsocket.com/platform)
 
 ## Installation
 ```bash copy
@@ -105,7 +105,7 @@ The Jamsocket instance includes a `connect` function that you can use to get a c
 
 If the underlying connect request fails with a non-200 status code, the returned Promise will `reject` with an `HTTPError`.
 
-Learn more about the various options you can pass in a `ConnectRequest` in [our API docs](https://docs.jamsocket.com/platform/reference/v2#get-a-connection-url-for-a-backend).
+Learn more about the various options you can pass in a `ConnectRequest` in [our API docs](https://docs.jamsocket.com/platform/reference/rest-api/v2#get-a-connection-url-for-a-backend).
 
 <Callout>A Jamsocket class should only be instantiated on the server since it takes a Jamsocket Auth Token which must be kept secret.</Callout>
 
@@ -143,7 +143,7 @@ The Jamsocket instance includes a `status` function that you can use to get the 
 
 If the underlying status request fails with a non-200 code, the returned Promise will `reject` with an `HTTPError`. This includes if no backend is found with the given ID.
 
-Learn more about the various statuses backends can have in [our API docs](https://docs.jamsocket.com/platform/reference/v2#get-a-backends-current-status).
+Learn more about the various statuses backends can have in [our API docs](https://docs.jamsocket.com/platform/reference/rest-api/v2#get-a-backends-current-status).
 
 ```ts {8}
 import { Jamsocket } from '@jamsocket/server'
@@ -164,7 +164,7 @@ If the underlying status request fails with a non-200 code, the returned Promise
 
 <Callout>The `onStatusCallback` function will be called exactly once for every status the backend has encountered, including statuses from before `statusStream()` was called.</Callout>
 
-Learn more about the various statuses backends can have in [our API docs](https://docs.jamsocket.com/platform/reference/v2#get-a-backends-current-status).
+Learn more about the various statuses backends can have in [our API docs](https://docs.jamsocket.com/platform/reference/rest-api/v2#get-a-backends-current-status).
 
 ```ts {8-12}
 import { Jamsocket } from '@jamsocket/server'

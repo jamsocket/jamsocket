@@ -358,7 +358,7 @@ class DevServer {
         this.devBackends.delete(backend.name)
         if (isV2ErrorStatus(status)) {
           this.logger.log([
-            chalk.yellow`See https://docs.jamsocket.com/platform/troubleshooting for help on troubleshooting unexpected terminated statuses.`,
+            chalk.yellow`See https://docs.jamsocket.com/platform/advanced/troubleshooting for help on troubleshooting unexpected terminated statuses.`,
           ])
         }
       }
