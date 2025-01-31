@@ -6,7 +6,7 @@
     "dev": "tsup --watch",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx}\""
   },
-  "version": "1.1.4",
+  "version": "1.1.5",
   "description": "JavaScript/TypeScript libraries for spawning session backends server-side.",
   "main": "./dist/main.js",
   "types": "./dist/main.d.ts",
