@@ -26,6 +26,8 @@ export class SessionBackend {
   public onTerminatedPromise: Promise<void>
   private _onTerminatedResolve!: () => void
 
+  private _isDestroyed: boolean = false
+
   private _onStatus: ((msg: BackendState) => void)[] = []
 
   constructor(connectResponse: ConnectResponse) {
@@ -120,7 +122,7 @@ export class SessionBackend {
       if (this.isTerminated()) this.destroyStatusStream()
     }
 
-    if (!this.isTerminated()) {
+    if (!this.isTerminated() && !this._isDestroyed) {
       console.error('Jamsocket status stream ended unexpectedly')
       this.destroyStatusStream() // make sure we don't have a dangling stream
       this.subscribeToStatusStream()
@@ -161,6 +163,7 @@ export class SessionBackend {
   }
 
   public destroy() {
+    this._isDestroyed = true
     this.destroyStatusStream()
   }
 
