@@ -83,7 +83,6 @@ export class SessionBackend {
       const result = await this.streamReader.read()
       const value = result.value as string
       if (result.done) {
-        console.log('Jamsocket status stream closed by API')
         this.destroyStatusStream()
         break
       }
@@ -114,7 +113,6 @@ export class SessionBackend {
         if (this.statusesSeen.has(msg.status)) continue
         this.statusesSeen.add(msg.status)
 
-        console.log(`Jamsocket session backend status is ${msg.status}`)
         if (msg.status === 'ready') this._setReady()
         if (msg.status === 'terminated') this._setTerminated()
         this._onStatus.forEach((cb) => cb(msg))
