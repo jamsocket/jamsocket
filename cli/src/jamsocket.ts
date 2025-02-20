@@ -14,6 +14,7 @@ import type {
   SpawnResult,
   TerminateResult,
   PublicV2State,
+  TerminateAllBackendsResult,
 } from './api'
 import { JamsocketConfig } from './jamsocket-config'
 import { tag as dockerTag, push as dockerPush } from './lib/docker'
@@ -94,6 +95,16 @@ export class Jamsocket {
   public terminate(backend: string, hard: boolean): Promise<TerminateResult> {
     const config = this.expectAuthorized()
     return this.api.terminate(backend, hard, config)
+  }
+
+  public terminateAllBackends(
+    serviceName: string,
+    before: Date,
+    dryRun: boolean,
+    hard: boolean,
+  ): Promise<TerminateAllBackendsResult> {
+    const config = this.expectAuthorized()
+    return this.api.terminateAllBackends(config.getAccount(), serviceName, before, dryRun, hard, config)
   }
 
   public backendInfo(backend: string): Promise<BackendInfoResult> {
