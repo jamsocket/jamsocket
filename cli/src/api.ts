@@ -214,6 +214,18 @@ export interface TerminateResult {
   status: 'ok'
 }
 
+export interface TerminateAllBackendsBody {
+  before: string
+  hard: boolean
+  dry_run: boolean
+}
+
+export interface TerminateAllBackendsResult {
+  backend_count: number
+  terminated_count: number
+  is_complete: boolean
+}
+
 export interface BackendInfoResult {
   id: string
   created_at: string
@@ -595,6 +607,21 @@ export class JamsocketApi {
   ): Promise<TerminateResult> {
     const url = `/v2/backend/${backend}/terminate`
     return this.makeAuthenticatedRequest<TerminateResult>(url, HttpMethod.Post, config, { hard })
+  }
+
+  public async terminateAllBackends(
+    accountName: string,
+    serviceName: string,
+    body: TerminateAllBackendsBody,
+    config: JamsocketConfig,
+  ): Promise<TerminateAllBackendsResult> {
+    const url = `/service/${accountName}/${serviceName}/terminate-backends`
+    return this.makeAuthenticatedRequest<TerminateAllBackendsResult>(
+      url,
+      HttpMethod.Post,
+      config,
+      body,
+    )
   }
 
   public async backendInfo(backend: string, config: JamsocketConfig): Promise<BackendInfoResult> {
