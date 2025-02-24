@@ -111,7 +111,7 @@ EXAMPLES
 
 ## `jamsocket backend terminate BACKENDS`
 
-Terminates one or more backends given the backend ID(s).
+Terminates one or more backends given the backend ID(s). To terminate all backends for a service, use the "terminate-all-backends" command.
 
 ```
 USAGE
@@ -121,7 +121,8 @@ FLAGS
   -f, --force  whether to force the backend to hard terminate (defaults to false)
 
 DESCRIPTION
-  Terminates one or more backends given the backend ID(s).
+  Terminates one or more backends given the backend ID(s). To terminate all backends for a service, use the
+  "terminate-all-backends" command.
 
 ALIASES
   $ jamsocket terminate
@@ -498,7 +499,7 @@ EXAMPLES
 
 ## `jamsocket terminate BACKENDS`
 
-Terminates one or more backends given the backend ID(s).
+Terminates one or more backends given the backend ID(s). To terminate all backends for a service, use the "terminate-all-backends" command.
 
 ```
 USAGE
@@ -508,7 +509,8 @@ FLAGS
   -f, --force  whether to force the backend to hard terminate (defaults to false)
 
 DESCRIPTION
-  Terminates one or more backends given the backend ID(s).
+  Terminates one or more backends given the backend ID(s). To terminate all backends for a service, use the
+  "terminate-all-backends" command.
 
 ALIASES
   $ jamsocket terminate
