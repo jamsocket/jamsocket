@@ -612,17 +612,10 @@ export class JamsocketApi {
   public async terminateAllBackends(
     accountName: string,
     serviceName: string,
-    before: Date,
-    dryRun: boolean,
-    hard: boolean,
+    body: TerminateAllBackendsBody,
     config: JamsocketConfig,
   ): Promise<TerminateAllBackendsResult> {
     const url = `/service/${accountName}/${serviceName}/terminate-backends`
-    const body: TerminateAllBackendsBody = {
-      before: before.toISOString(),
-      hard,
-      dry_run: dryRun,
-    }
     return this.makeAuthenticatedRequest<TerminateAllBackendsResult>(
       url,
       HttpMethod.Post,
